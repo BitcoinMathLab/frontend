@@ -5,6 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "postbuild": "node scripts/write-runtime-config.mjs",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "test:ci": "ng test --watch=false",
@@ -12,6 +13,10 @@
     "format:check": "prettier --check ."
   },
   "private": true,
+  "engines": {
+    "node": "24.14.1",
+    "npm": "11.11.0"
+  },
   "packageManager": "npm@11.11.0",
   "dependencies": {
     "@angular/common": "^21.2.0",
@@ -20,6 +25,7 @@
     "@angular/forms": "^21.2.0",
     "@angular/platform-browser": "^21.2.0",
     "@angular/router": "^21.2.0",
+    "@sentry/browser": "^10.70.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },
