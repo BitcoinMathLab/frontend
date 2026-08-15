@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">Bitcoin Math Lab — See Bitcoin execute</title>
+  <desc id="desc">Bitcoin Math Lab social preview on a dark background.</desc>
+  <defs>
+    <radialGradient id="glow" cx="75%" cy="20%" r="70%">
+      <stop offset="0" stop-color="#65A7FF" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#080B12" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="630" fill="#080B12"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+  <g transform="translate(104 154) scale(2.5)">
+    <rect width="64" height="64" rx="15" fill="#10151F" stroke="#273142"/>
+    <path d="M14 46V18L32 38L50 18V46" fill="none" stroke="#F5A524" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="14" cy="18" r="3.5" fill="#F6F3EA"/>
+    <circle cx="32" cy="38" r="3.5" fill="#F6F3EA"/>
+    <circle cx="50" cy="18" r="3.5" fill="#F6F3EA"/>
+  </g>
+  <text x="104" y="402" fill="#F6F3EA" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="74" font-weight="700" letter-spacing="-2">Bitcoin Math Lab</text>
+  <text x="108" y="462" fill="#F5A524" font-family="IBM Plex Mono, ui-monospace, monospace" font-size="24" font-weight="700" letter-spacing="4">SEE BITCOIN EXECUTE.</text>
+  <text x="108" y="527" fill="#AAB3C1" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="26">Interactive tools for understanding how Bitcoin actually works.</text>
+</svg>

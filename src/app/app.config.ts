@@ -1,11 +1,12 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { ApplicationConfig, ErrorHandler } from '@angular/core';
 import { provideRouter, withInMemoryScrolling } from '@angular/router';
 
+import { MonitoringErrorHandler } from './core/monitoring';
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideBrowserGlobalErrorListeners(),
+    { provide: ErrorHandler, useClass: MonitoringErrorHandler },
     provideRouter(
       routes,
       withInMemoryScrolling({
