@@ -1,0 +1,84 @@
+.contact,
+aside {
+  width: min(100% - 2rem, 72rem);
+  margin-inline: auto;
+}
+
+.contact {
+  display: grid;
+  min-height: calc(100dvh - 8rem);
+  align-items: center;
+  gap: clamp(3rem, 8vw, 7rem);
+  grid-template-columns: 1fr 1fr;
+  padding-block: clamp(5rem, 12vw, 9rem);
+}
+
+h1 {
+  max-width: 12ch;
+  margin: 0.75rem 0 1.5rem;
+  font-size: clamp(3.2rem, 7vw, 6rem);
+  letter-spacing: -0.065em;
+  line-height: 0.94;
+}
+
+.lede {
+  max-width: 38rem;
+  color: var(--color-text-muted);
+  font-size: 1.1rem;
+  line-height: 1.7;
+}
+
+.contact-list {
+  display: grid;
+}
+
+.contact-list a {
+  display: grid;
+  border-top: 1px solid var(--color-graphite);
+  gap: 0.45rem;
+  padding-block: 1.5rem;
+  text-decoration: none;
+}
+
+.contact-list a:last-child {
+  border-bottom: 1px solid var(--color-graphite);
+}
+
+.contact-list span {
+  color: var(--color-text-subtle);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.contact-list strong {
+  color: var(--color-paper);
+  overflow-wrap: anywhere;
+}
+
+.contact-list a:hover strong {
+  color: var(--color-blue);
+}
+
+aside {
+  border-top: 1px solid var(--color-graphite);
+  padding-block: 2rem 5rem;
+}
+
+aside strong {
+  color: var(--color-amber);
+}
+
+aside p {
+  max-width: 44rem;
+  color: var(--color-text-muted);
+  line-height: 1.65;
+}
+
+@media (max-width: 48rem) {
+  .contact {
+    min-height: auto;
+    grid-template-columns: 1fr;
+  }
+}

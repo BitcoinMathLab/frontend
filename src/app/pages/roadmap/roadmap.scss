@@ -1,0 +1,88 @@
+.launch-date {
+  display: inline-grid;
+  gap: 0.25rem;
+  border-left: 2px solid var(--color-amber);
+  margin-top: 2rem;
+  padding-left: 1rem;
+}
+
+.launch-date span,
+li > span {
+  color: var(--color-text-subtle);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+}
+
+.launch-date strong {
+  font-family: var(--font-mono);
+}
+
+.timeline,
+.after-launch {
+  width: min(100% - 2rem, 72rem);
+  margin-inline: auto;
+  border-top: 1px solid var(--color-graphite);
+  padding-block: 6rem;
+}
+
+.timeline {
+  display: grid;
+  gap: clamp(2.5rem, 7vw, 6rem);
+  grid-template-columns: 0.8fr 1.2fr;
+}
+
+.timeline h2,
+.after-launch h2 {
+  margin: 0.8rem 0;
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  letter-spacing: -0.05em;
+  line-height: 1;
+}
+
+ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+li {
+  display: grid;
+  position: relative;
+  border-top: 1px solid var(--color-graphite);
+  gap: 1.5rem;
+  grid-template-columns: 7rem 1fr;
+  padding-block: 1.4rem;
+}
+
+li:last-child {
+  border-bottom: 1px solid var(--color-graphite);
+}
+
+li p,
+.after-launch p:last-child {
+  margin: 0.4rem 0 0;
+  color: var(--color-text-muted);
+  line-height: 1.65;
+}
+
+li.complete::before {
+  position: absolute;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--color-valid);
+  content: '';
+  inset: 1.65rem auto auto -0.8rem;
+}
+
+.after-launch p:last-child {
+  max-width: 48rem;
+}
+
+@media (max-width: 46rem) {
+  .timeline,
+  li {
+    grid-template-columns: 1fr;
+  }
+}

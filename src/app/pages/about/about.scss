@@ -1,0 +1,85 @@
+.content-grid,
+.architecture {
+  width: min(100% - 2rem, 72rem);
+  margin-inline: auto;
+}
+
+.content-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, 1fr);
+  padding-bottom: 6rem;
+}
+
+.content-grid article {
+  border: 1px solid var(--color-graphite);
+  border-radius: 1rem;
+  background: var(--color-surface);
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+}
+
+.content-grid span {
+  color: var(--color-amber);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  text-transform: uppercase;
+}
+
+.content-grid h2,
+.architecture h2 {
+  margin-block: 0.8rem 1rem;
+  font-size: clamp(1.7rem, 3.5vw, 2.6rem);
+  letter-spacing: -0.04em;
+}
+
+.content-grid p {
+  margin: 0;
+  color: var(--color-text-muted);
+  line-height: 1.75;
+}
+
+.architecture {
+  display: grid;
+  border-top: 1px solid var(--color-graphite);
+  gap: 4rem;
+  grid-template-columns: 0.8fr 1.2fr;
+  padding-block: 6rem;
+}
+
+.architecture ol {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.architecture li {
+  display: grid;
+  border-top: 1px solid var(--color-graphite);
+  gap: 1rem;
+  grid-template-columns: 9rem 1fr;
+  padding-block: 1.2rem;
+}
+
+.architecture li:last-child {
+  border-bottom: 1px solid var(--color-graphite);
+}
+
+.architecture span {
+  color: var(--color-text-muted);
+}
+
+@media (max-width: 46rem) {
+  .content-grid,
+  .architecture {
+    grid-template-columns: 1fr;
+  }
+
+  .architecture {
+    gap: 2rem;
+  }
+
+  .architecture li {
+    grid-template-columns: 1fr;
+  }
+}

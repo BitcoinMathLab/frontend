@@ -1,0 +1,99 @@
+<section class="hero">
+  <div class="hero__copy">
+    <p class="eyebrow">Interactive Bitcoin education</p>
+    <h1>See Bitcoin <span>execute.</span></h1>
+    <p class="hero__lede">
+      Trace scripts step by step. Watch the stack change. Understand the rules that make every
+      Bitcoin transaction work.
+    </p>
+    <div class="hero__actions">
+      <a class="button button--primary" routerLink="/roadmap">Explore the roadmap</a>
+      <a class="button button--secondary" href="https://github.com/BitcoinMathLab"
+        >View on GitHub</a
+      >
+    </div>
+    <div class="launch-note">
+      <span class="status-dot" aria-hidden="true"></span>
+      Interactive Script Visualizer launching October 12, 2026
+    </div>
+  </div>
+
+  <div class="trace-card" aria-label="Preview of a Bitcoin script execution trace">
+    <div class="trace-card__header">
+      <span>P2PKH execution</span>
+      <span class="status">Step 3 of 5</span>
+    </div>
+    <div class="opcode-row">
+      <span class="step-number">03</span>
+      <div>
+        <strong>OP_EQUALVERIFY</strong>
+        <p>Confirm the public key matches the locking script.</p>
+      </div>
+      <span class="valid">Valid</span>
+    </div>
+    <div class="stack">
+      <div class="stack__label">Main stack</div>
+      <code>76a914…88ac</code>
+      <code>03b2f1…9a42</code>
+      <code class="stack__active">TRUE</code>
+    </div>
+    <div class="timeline" aria-hidden="true">
+      <span class="complete"></span>
+      <span class="complete"></span>
+      <span class="current"></span>
+      <span></span>
+      <span></span>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-heading">
+    <p class="eyebrow">Learn by inspection</p>
+    <h2>Bitcoin is easier when you can see it.</h2>
+    <p>
+      Move beyond diagrams and definitions. Explore the actual values and decisions involved in
+      execution.
+    </p>
+  </div>
+  <div class="feature-grid">
+    <article>
+      <span class="feature-number">01</span>
+      <h3>Trace every opcode</h3>
+      <p>
+        Step forward and backward through execution without losing the state that explains each
+        result.
+      </p>
+    </article>
+    <article>
+      <span class="feature-number">02</span>
+      <h3>Inspect the stack</h3>
+      <p>See values enter, change, and leave the main and alternate stacks as the script runs.</p>
+    </article>
+    <article>
+      <span class="feature-number">03</span>
+      <h3>Understand failures</h3>
+      <p>
+        Compare valid and invalid spends with diagnostics written for learners, not only
+        implementers.
+      </p>
+    </article>
+  </div>
+</section>
+
+<section class="section product-callout">
+  <div>
+    <p class="eyebrow">Built on real engineering</p>
+    <h2>BitClone makes the machinery reusable.</h2>
+  </div>
+  <div>
+    <p>
+      The open-source BitClone engine supplies Bitcoin serialization, script execution, consensus
+      behavior, tracing, and analysis. Bitcoin Core remains the production blockchain source of
+      truth.
+    </p>
+    <a class="text-link" routerLink="/about"
+      >How the project fits together <span aria-hidden="true">→</span></a
+    >
+  </div>
+</section>
