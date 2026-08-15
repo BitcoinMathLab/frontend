@@ -1,0 +1,36 @@
+import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import { Home } from './home';
+
+describe('Home', () => {
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [Home],
+      providers: [provideRouter([])],
+    }).compileComponents();
+  });
+
+  it('shows the launch roadmap milestones', () => {
+    const fixture = TestBed.createComponent(Home);
+    fixture.detectChanges();
+    const compiled = fixture.nativeElement as HTMLElement;
+    const milestones = compiled.querySelectorAll('.roadmap-preview .feature-grid article');
+
+    expect(milestones).toHaveLength(3);
+    expect(compiled.textContent).toContain('October 12');
+    expect(compiled.querySelector('a[routerlink="/roadmap"]')).toBeTruthy();
+  });
+
+  it('provides a prefilled email signup action', () => {
+    const fixture = TestBed.createComponent(Home);
+    fixture.detectChanges();
+    const compiled = fixture.nativeElement as HTMLElement;
+    const signup = compiled.querySelector<HTMLAnchorElement>('.launch-signup__action a');
+
+    expect(signup?.getAttribute('href')).toContain('mailto:bitcoinmathlab@gmail.com');
+    expect(signup?.getAttribute('href')).toContain(
+      'subject=Bitcoin%20Math%20Lab%20launch%20updates',
+    );
+    expect(signup?.getAttribute('href')).toContain('early-access%20list');
+  });
+});
