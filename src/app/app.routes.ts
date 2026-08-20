@@ -18,6 +18,11 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/about/about').then((page) => page.About),
   },
   {
+    path: 'docs',
+    title: 'Documentation — Bitcoin Math Lab',
+    loadComponent: () => import('./pages/docs/docs').then((page) => page.Docs),
+  },
+  {
     path: 'roadmap',
     title: 'Roadmap — Bitcoin Math Lab',
     loadComponent: () => import('./pages/roadmap/roadmap').then((page) => page.Roadmap),

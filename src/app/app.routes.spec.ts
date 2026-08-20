@@ -6,6 +6,7 @@ describe('application routes', () => {
       '',
       'labs/script-visualizer',
       'about',
+      'docs',
       'roadmap',
       'blog',
       'contact',
