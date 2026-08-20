@@ -9,7 +9,7 @@
       <p class="eyebrow">Execution player</p>
       <p class="step-label" aria-live="polite">{{ stepLabel() }}</p>
     </div>
-    <span class="outcome" [class.outcome--valid]="trace().success">
+    <span class="outcome" role="status" aria-live="polite" [class.outcome--valid]="trace().success">
       {{ trace().success ? 'Valid spend' : 'Invalid spend' }}
     </span>
   </header>
@@ -76,7 +76,7 @@
     }
   </nav>
 
-  <div class="controls" aria-label="Playback controls">
+  <div class="controls" role="group" aria-label="Playback controls">
     <button type="button" (click)="reset()" [disabled]="atStart()">Reset</button>
     <button type="button" (click)="previous()" [disabled]="atStart()">Previous</button>
     <button class="controls__primary" type="button" (click)="togglePlay()">

@@ -83,6 +83,7 @@ test('steps through the successful lesson with controls and keyboard', async ({ 
   await page.goto('/labs/script-visualizer');
 
   const player = page.getByLabel('Script trace player');
+  await expect(page.locator('main')).toHaveCount(1);
   await expect(player).toBeVisible();
   await expect(page.getByText('Valid spend', { exact: true })).toBeVisible();
   await expect(page.getByText('Step 1 of 2')).toBeVisible();
