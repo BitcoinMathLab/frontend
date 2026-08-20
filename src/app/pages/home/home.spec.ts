@@ -18,7 +18,9 @@ describe('Home', () => {
 
     expect(milestones).toHaveLength(3);
     expect(compiled.textContent).toContain('October 12');
+    expect(compiled.textContent).toContain('Integrated visualizer');
     expect(compiled.querySelector('a[routerlink="/roadmap"]')).toBeTruthy();
+    expect(compiled.querySelector('a[routerlink="/blog/mvp-trace-to-browser"]')).toBeTruthy();
   });
 
   it('provides a prefilled email signup action', () => {

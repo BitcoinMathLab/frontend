@@ -15,11 +15,11 @@ describe('Blog', () => {
     fixture.detectChanges();
   });
 
-  it('links all four published articles', () => {
+  it('links all published articles', () => {
     const compiled = fixture.nativeElement as HTMLElement;
 
-    expect(compiled.querySelectorAll('.posts article')).toHaveLength(4);
-    expect(compiled.querySelectorAll('.posts h2 a')).toHaveLength(4);
+    expect(compiled.querySelectorAll('.posts article')).toHaveLength(5);
+    expect(compiled.querySelectorAll('.posts h2 a')).toHaveLength(5);
     expect(compiled.textContent).toContain('Why Bitcoin Math Lab?');
     expect(compiled.textContent).not.toContain('Coming soon');
   });
