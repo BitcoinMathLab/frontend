@@ -1,0 +1,188 @@
+<section class="page-hero">
+  <p class="eyebrow">Project documentation</p>
+  <h1>How Bitcoin Math Lab fits together.</h1>
+  <p>
+    A practical guide to the product, its open-source engine, the boundaries between repositories,
+    and the decisions that shape development.
+  </p>
+  <div class="hero-actions">
+    <a class="button button--primary" routerLink="/labs/script-visualizer">Open the visualizer</a>
+    <a class="button button--secondary" href="https://github.com/BitcoinMathLab"
+      >Browse the source</a
+    >
+  </div>
+</section>
+
+<div class="docs-layout">
+  <nav class="contents" aria-label="Documentation contents">
+    <p class="eyebrow">On this page</p>
+    <a href="#overview">Overview</a>
+    <a href="#architecture">Architecture</a>
+    <a href="#principles">Development principles</a>
+    <a href="#scope">MVP scope</a>
+    <a href="#faq">Frequently asked questions</a>
+  </nav>
+
+  <div class="docs-content">
+    <section id="overview" aria-labelledby="overview-heading">
+      <p class="eyebrow">Overview</p>
+      <h2 id="overview-heading">An inspection layer for Bitcoin.</h2>
+      <p>
+        Bitcoin Math Lab turns serialized data, Script execution, stack transitions, and validation
+        outcomes into experiences that can be inspected one decision at a time. The product is
+        educational software: it does not hold keys, move funds, provide financial advice, or
+        replace a fully validating Bitcoin node.
+      </p>
+      <p>
+        The first release follows one historical pay-to-public-key-hash spend. It includes a valid
+        example, a deliberately altered signature, and a conceptual bridge from P2PK to P2PKH.
+      </p>
+    </section>
+
+    <section id="architecture" aria-labelledby="architecture-heading">
+      <p class="eyebrow">Architecture</p>
+      <h2 id="architecture-heading">Three repositories, explicit responsibilities.</h2>
+      <div class="repository-grid">
+        <article>
+          <span>Browser product</span>
+          <h3>Frontend</h3>
+          <p>
+            The Angular application owns lessons, playback, visualization, accessibility, public
+            pages, and browser monitoring. It consumes versioned product APIs; it does not
+            reimplement Bitcoin rules.
+          </p>
+          <a href="https://github.com/BitcoinMathLab/frontend">View frontend repository</a>
+        </article>
+        <article>
+          <span>Product boundary</span>
+          <h3>Backend</h3>
+          <p>
+            The FastAPI service validates HTTP requests and orchestrates product use cases. It
+            converts safe, versioned requests into engine calls and returns stable responses without
+            exposing internal exceptions.
+          </p>
+          <a href="https://github.com/BitcoinMathLab/backend">View backend repository</a>
+        </article>
+        <article>
+          <span>Reusable engine</span>
+          <h3>Bitclone</h3>
+          <p>
+            The Python engine owns serialization, Script execution, consensus-oriented behavior,
+            immutable traces, stack snapshots, and diagnostics. It remains usable without the web
+            product.
+          </p>
+          <a href="https://github.com/BitcoinMathLab/bitclone">View Bitclone repository</a>
+        </article>
+      </div>
+      <div class="flow" aria-label="Trace request data flow">
+        <span>Angular lesson</span><i aria-hidden="true">→</i><span>Versioned API</span
+        ><i aria-hidden="true">→</i><span>Bitclone execution</span><i aria-hidden="true">→</i
+        ><span>Immutable trace</span>
+      </div>
+    </section>
+
+    <section id="principles" aria-labelledby="principles-heading">
+      <p class="eyebrow">Development principles</p>
+      <h2 id="principles-heading">Correctness before spectacle.</h2>
+      <ol class="principles">
+        <li>
+          <strong>Show the mechanism.</strong>
+          <span
+            >Prefer actual bytes, opcodes, and state changes over an analogy that hides them.</span
+          >
+        </li>
+        <li>
+          <strong>Keep boundaries testable.</strong>
+          <span>Engine, API, and browser contracts are verified independently and together.</span>
+        </li>
+        <li>
+          <strong>Make failure educational.</strong>
+          <span
+            >Invalid spends return inspectable traces and safe diagnostics, not raw
+            exceptions.</span
+          >
+        </li>
+        <li>
+          <strong>Stay honest about authority.</strong>
+          <span>Bitcoin Core remains the production source of truth for network validation.</span>
+        </li>
+        <li>
+          <strong>Ship narrow, complete increments.</strong>
+          <span>One polished P2PKH lesson comes before broad script or transaction coverage.</span>
+        </li>
+      </ol>
+    </section>
+
+    <section id="scope" aria-labelledby="scope-heading">
+      <p class="eyebrow">MVP scope</p>
+      <h2 id="scope-heading">What the first release does—and does not do.</h2>
+      <div class="scope-grid">
+        <div>
+          <h3>Included</h3>
+          <ul>
+            <li>A curated legacy P2PKH transaction input</li>
+            <li>Successful and failing execution traces</li>
+            <li>Main and alternate stack snapshots</li>
+            <li>Opcode explanations and serialized-byte highlighting</li>
+            <li>Keyboard and supported mobile playback</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Later releases</h3>
+          <ul>
+            <li>Arbitrary transaction lookup</li>
+            <li>SegWit, Taproot, P2SH, and additional standard templates</li>
+            <li>An editable professional Script workspace</li>
+            <li>Accounts, saved work, and commercial features</li>
+            <li>Bitcoin node or wallet functionality</li>
+          </ul>
+        </div>
+      </div>
+      <a class="text-link" routerLink="/roadmap"
+        >See the release sequence <span aria-hidden="true">→</span></a
+      >
+    </section>
+
+    <section id="faq" aria-labelledby="faq-heading">
+      <p class="eyebrow">FAQ</p>
+      <h2 id="faq-heading">Common questions.</h2>
+      <div class="faq-list">
+        <details>
+          <summary>Is Bitcoin Math Lab a wallet or node?</summary>
+          <p>
+            No. It is educational and developer software. The MVP uses curated transaction data and
+            does not manage keys, broadcast transactions, or participate in the Bitcoin network.
+          </p>
+        </details>
+        <details>
+          <summary>Does Bitclone replace Bitcoin Core?</summary>
+          <p>
+            No. Bitclone makes selected mechanisms reusable and inspectable, while Bitcoin Core
+            remains the production reference and network source of truth.
+          </p>
+        </details>
+        <details>
+          <summary>Why begin with P2PKH?</summary>
+          <p>
+            P2PKH is compact enough to follow in one sitting while still demonstrating stack data,
+            hashing, equality verification, and signature checking.
+          </p>
+        </details>
+        <details>
+          <summary>Is the code open source?</summary>
+          <p>
+            Yes. The frontend, backend, and Bitclone repositories are public under the Bitcoin Math
+            Lab GitHub organization.
+          </p>
+        </details>
+        <details>
+          <summary>Can I analyze any transaction?</summary>
+          <p>
+            Not in the first release. Real transaction lookup and broader script classification are
+            planned after the curated visualizer is reliable in production.
+          </p>
+        </details>
+      </div>
+    </section>
+  </div>
+</div>
