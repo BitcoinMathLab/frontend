@@ -76,6 +76,14 @@ describe('TracePlayer', () => {
     player.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Step 1 of 3');
+
+    player.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+    fixture.detectChanges();
+    expect(button('Pause')).toBeTruthy();
+
+    player.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+    fixture.detectChanges();
+    expect(button('Play')).toBeTruthy();
   });
 
   it('selects an opcode from the timeline and highlights its bytes and stacks', () => {
