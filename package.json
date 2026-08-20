@@ -11,6 +11,7 @@
     "test:ci": "ng test --watch=false",
     "test:config": "node --test scripts/runtime-config-lib.test.mjs",
     "test:e2e": "playwright test",
+    "test:smoke:production": "playwright test e2e/production-smoke.spec.ts e2e/live-api.spec.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
