@@ -12,6 +12,14 @@ test('publishes navigable project documentation on desktop and mobile', async ({
     page.getByRole('heading', { name: 'Three repositories, explicit responsibilities.' }),
   ).toBeVisible();
   await expect(page.locator('#faq details')).toHaveCount(5);
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+    'href',
+    'https://bitcoinmathlab.com/docs',
+  );
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+    'content',
+    /architecture.*repository responsibilities/i,
+  );
 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.reload();
