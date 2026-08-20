@@ -14,6 +14,20 @@
     </span>
   </header>
 
+  @if (!trace().success && trace().diagnostic; as diagnostic) {
+    <article class="instruction" aria-label="Failure explanation">
+      <span class="instruction__number" aria-hidden="true">!</span>
+      <div>
+        <code>Why execution failed</code>
+        <p>{{ diagnostic.message }}</p>
+        <p>Diagnostic: {{ diagnostic.code }}</p>
+      </div>
+      @if (diagnostic.step_index !== null) {
+        <span class="instruction__offset">step {{ diagnostic.step_index + 1 }}</span>
+      }
+    </article>
+  }
+
   @if (currentStep(); as step) {
     <article class="instruction" aria-live="polite">
       <span class="instruction__number">{{ (step.index + 1).toString().padStart(2, '0') }}</span>

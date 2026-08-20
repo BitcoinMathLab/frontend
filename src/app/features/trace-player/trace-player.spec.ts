@@ -98,4 +98,26 @@ describe('TracePlayer', () => {
     expect(fixture.nativeElement.textContent).toContain('Main stack before');
     expect(fixture.nativeElement.textContent).toContain('Main stack after');
   });
+
+  it('explains the safe diagnostic for a failed trace', () => {
+    fixture.componentRef.setInput('trace', {
+      ...TRACE_FIXTURE,
+      success: false,
+      diagnostic: {
+        code: 'false-final-value',
+        message: 'The final stack value is false.',
+        step_index: 2,
+        opcode_name: 'OP_ADD',
+      },
+    });
+    fixture.detectChanges();
+
+    const explanation = fixture.nativeElement.querySelector(
+      '[aria-label="Failure explanation"]',
+    ) as HTMLElement;
+    expect(explanation.textContent).toContain('Why execution failed');
+    expect(explanation.textContent).toContain('The final stack value is false.');
+    expect(explanation.textContent).toContain('Diagnostic: false-final-value');
+    expect(explanation.textContent).toContain('step 3');
+  });
 });
