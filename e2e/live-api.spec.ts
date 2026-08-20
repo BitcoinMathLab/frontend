@@ -13,5 +13,6 @@ test('runs successful and failing lessons through the real API and engine', asyn
 
   await page.getByRole('button', { name: /03 · P2PKH One changed signature byte Invalid/ }).click();
   await expect(page.getByText('Invalid spend', { exact: true })).toBeVisible();
+  await expect(page.getByLabel('Failure explanation')).toContainText('false-final-value');
   await expect(page.getByLabel('Execution timeline').getByRole('button')).toHaveCount(7);
 });

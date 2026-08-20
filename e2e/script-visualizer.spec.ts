@@ -109,6 +109,9 @@ test('explains concept and failing lessons without stale player state', async ({
 
   await page.getByRole('button', { name: /03 · P2PKH One changed signature byte Invalid/ }).click();
   await expect(page.getByText('Invalid spend', { exact: true })).toBeVisible();
+  await expect(page.getByLabel('Failure explanation')).toContainText(
+    'The final stack value is false.',
+  );
   await expect(page.getByText('Step 1 of 2')).toBeVisible();
 });
 
