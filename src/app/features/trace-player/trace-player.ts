@@ -8,9 +8,12 @@ import {
 } from '@angular/core';
 
 import { ExecutionTrace } from '../../core/trace-api.models';
+import { ScriptBytes } from '../script-bytes/script-bytes';
+import { StackView } from '../stack-view/stack-view';
 
 @Component({
   selector: 'app-trace-player',
+  imports: [ScriptBytes, StackView],
   templateUrl: './trace-player.html',
   styleUrl: './trace-player.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -43,6 +46,11 @@ export class TracePlayer implements OnDestroy {
   protected reset(): void {
     this.pause();
     this.currentIndex.set(0);
+  }
+
+  protected goTo(index: number): void {
+    this.pause();
+    this.currentIndex.set(index);
   }
 
   protected togglePlay(): void {

@@ -77,4 +77,17 @@ describe('TracePlayer', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Step 1 of 3');
   });
+
+  it('selects an opcode from the timeline and highlights its bytes and stacks', () => {
+    const timelineButtons = fixture.nativeElement.querySelectorAll('.timeline button');
+
+    timelineButtons[2].click();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Step 3 of 3');
+    expect(timelineButtons[2].getAttribute('aria-current')).toBe('step');
+    expect(fixture.nativeElement.querySelectorAll('.bytes__active')).toHaveLength(1);
+    expect(fixture.nativeElement.textContent).toContain('Main stack before');
+    expect(fixture.nativeElement.textContent).toContain('Main stack after');
+  });
 });

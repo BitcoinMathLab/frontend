@@ -82,24 +82,79 @@
   line-height: 1.65;
 }
 
-.progress {
+.execution-state {
   display: grid;
-  gap: 0.4rem;
-  grid-template-columns: repeat(auto-fit, minmax(1rem, 1fr));
+  margin-top: 1rem;
+  align-items: center;
+  gap: 0.75rem;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
 }
 
-.progress span {
-  height: 0.28rem;
-  border-radius: 999px;
-  background: var(--color-graphite);
+.stack-column {
+  display: grid;
+  min-width: 0;
+  gap: 0.6rem;
 }
 
-.progress .progress__complete {
-  background: var(--color-valid);
+.stack-column > p {
+  margin: 0;
+  color: var(--color-text-subtle);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-align: center;
+  text-transform: uppercase;
 }
 
-.progress .progress__current {
-  background: var(--color-amber);
+.state-arrow {
+  color: var(--color-amber);
+  font-size: 1.4rem;
+}
+
+.timeline {
+  display: flex;
+  overflow-x: auto;
+  gap: 0.45rem;
+  margin-top: 1.4rem;
+  padding-bottom: 0.6rem;
+  scrollbar-color: var(--color-graphite) transparent;
+}
+
+.timeline button {
+  display: grid;
+  min-width: 8.5rem;
+  border: 1px solid var(--color-graphite);
+  border-radius: 0.55rem;
+  background: var(--color-canvas);
+  cursor: pointer;
+  gap: 0.35rem;
+  padding: 0.65rem;
+  text-align: left;
+}
+
+.timeline button span {
+  color: var(--color-text-subtle);
+  font-size: 0.62rem;
+}
+
+.timeline button code {
+  overflow: hidden;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  text-overflow: ellipsis;
+}
+
+.timeline button.timeline__complete {
+  border-color: rgba(67, 209, 139, 0.32);
+}
+
+.timeline button.timeline__current {
+  border-color: var(--color-amber);
+  background: rgba(245, 165, 36, 0.09);
+}
+
+.timeline button.timeline__current code {
+  color: var(--color-amber);
 }
 
 .controls {
@@ -155,5 +210,14 @@
   .controls button {
     min-width: calc(50% - 0.35rem);
     flex: 1 1 auto;
+  }
+
+  .execution-state {
+    grid-template-columns: 1fr;
+  }
+
+  .state-arrow {
+    transform: rotate(90deg);
+    text-align: center;
   }
 }
