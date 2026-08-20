@@ -84,6 +84,10 @@ Monitoring uses the framework-independent Sentry browser SDK because the current
 officially support Angular 21. It sends no default PII, enables neither tracing nor session replay, and removes request
 headers, cookies, form data, and query strings before sending events.
 
+The post-build step validates `BML_API_BASE_URL` and adds its origin to the deployed Content Security Policy. Production
+API URLs must use HTTPS; HTTP is accepted only for loopback development addresses. Configuration tests run with
+`npm run test:config` and in CI.
+
 ## Related repositories
 
 - BitClone engine: https://github.com/BitcoinMathLab/bitclone

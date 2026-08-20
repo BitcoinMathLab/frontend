@@ -37,6 +37,9 @@ jobs:
       - name: Run unit tests
         run: npm run test:ci
 
+      - name: Run deployment configuration tests
+        run: npm run test:config
+
   browser-smoke:
     name: Browser smoke tests
     runs-on: ubuntu-latest
