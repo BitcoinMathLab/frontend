@@ -1,0 +1,16 @@
+<section class="stack-view" [attr.aria-label]="label()">
+  <header>
+    <span>{{ label() }}</span>
+    <span>{{ snapshot().depth }} {{ snapshot().depth === 1 ? 'item' : 'items' }}</span>
+  </header>
+  <div class="stack-view__items">
+    @for (item of items(); track item.key) {
+      <div class="stack-item">
+        <span>{{ item.position }}</span>
+        <code [title]="item.value">{{ item.value }}</code>
+      </div>
+    } @empty {
+      <p>Empty stack</p>
+    }
+  </div>
+</section>

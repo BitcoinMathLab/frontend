@@ -1,0 +1,16 @@
+<section class="bytes" aria-label="Serialized script bytes">
+  <header>
+    <span>Serialized script</span>
+    <span>{{ bytes().length }} bytes</span>
+  </header>
+  <div class="bytes__strip">
+    @for (byte of bytes(); track $index) {
+      <code
+        [class.bytes__active]="isActive($index)"
+        [attr.aria-current]="isActive($index) ? 'true' : null"
+        [title]="'Byte ' + $index"
+        >{{ byte }}</code
+      >
+    }
+  </div>
+</section>

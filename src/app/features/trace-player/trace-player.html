@@ -23,16 +23,58 @@
       </div>
       <span class="instruction__offset">byte {{ step.opcode.byte_offset }}</span>
     </article>
+
+    <app-script-bytes
+      [script]="trace().script"
+      [activeOffset]="step.opcode.byte_offset"
+      [activeLength]="step.opcode.byte_length"
+    />
+
+    <div class="execution-state">
+      <div class="stack-column">
+        <p>Before</p>
+        <app-stack-view
+          label="Main stack before"
+          [snapshot]="step.stacks.before.main"
+          [stepIndex]="step.index"
+        />
+        <app-stack-view
+          label="Alt stack before"
+          [snapshot]="step.stacks.before.alt"
+          [stepIndex]="step.index"
+        />
+      </div>
+      <div class="state-arrow" aria-hidden="true">→</div>
+      <div class="stack-column">
+        <p>After</p>
+        <app-stack-view
+          label="Main stack after"
+          [snapshot]="step.stacks.after.main"
+          [stepIndex]="step.index"
+        />
+        <app-stack-view
+          label="Alt stack after"
+          [snapshot]="step.stacks.after.alt"
+          [stepIndex]="step.index"
+        />
+      </div>
+    </div>
   }
 
-  <div class="progress" aria-hidden="true">
+  <nav class="timeline" aria-label="Execution timeline">
     @for (step of trace().steps; track step.index) {
-      <span
-        [class.progress__complete]="step.index < currentIndex()"
-        [class.progress__current]="step.index === currentIndex()"
-      ></span>
+      <button
+        type="button"
+        (click)="goTo(step.index)"
+        [class.timeline__complete]="step.index < currentIndex()"
+        [class.timeline__current]="step.index === currentIndex()"
+        [attr.aria-current]="step.index === currentIndex() ? 'step' : null"
+      >
+        <span>{{ (step.index + 1).toString().padStart(2, '0') }}</span>
+        <code>{{ step.opcode.name }}</code>
+      </button>
     }
-  </div>
+  </nav>
 
   <div class="controls" aria-label="Playback controls">
     <button type="button" (click)="reset()" [disabled]="atStart()">Reset</button>
