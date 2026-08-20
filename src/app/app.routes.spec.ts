@@ -4,6 +4,7 @@ describe('application routes', () => {
   it('defines each public page and a fallback route', () => {
     expect(routes.map((route) => route.path)).toEqual([
       '',
+      'labs/script-visualizer',
       'about',
       'roadmap',
       'blog',

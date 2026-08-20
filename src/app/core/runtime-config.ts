@@ -1,4 +1,5 @@
 export interface BmlRuntimeConfig {
+  readonly apiBaseUrl: string;
   readonly sentryDsn: string;
   readonly environment: string;
   readonly release: string;
@@ -9,6 +10,7 @@ declare global {
 }
 
 const defaultConfig: BmlRuntimeConfig = Object.freeze({
+  apiBaseUrl: '',
   sentryDsn: '',
   environment: 'local',
   release: '',

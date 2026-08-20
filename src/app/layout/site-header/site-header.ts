@@ -11,6 +11,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 export class SiteHeader {
   protected readonly navigation = [
     { label: 'Home', path: '/', exact: true },
+    { label: 'Visualizer', path: '/labs/script-visualizer', exact: false },
     { label: 'About', path: '/about', exact: false },
     { label: 'Roadmap', path: '/roadmap', exact: false },
     { label: 'Blog', path: '/blog', exact: false },

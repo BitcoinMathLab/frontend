@@ -7,6 +7,12 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/home/home').then((page) => page.Home),
   },
   {
+    path: 'labs/script-visualizer',
+    title: 'Script Visualizer — Bitcoin Math Lab',
+    loadComponent: () =>
+      import('./pages/script-visualizer/script-visualizer').then((page) => page.ScriptVisualizer),
+  },
+  {
     path: 'about',
     title: 'About — Bitcoin Math Lab',
     loadComponent: () => import('./pages/about/about').then((page) => page.About),
