@@ -43,6 +43,10 @@ cannot use.
      BML_PRODUCTION_SMOKE=1 BML_LIVE_API=1 npm run test:smoke:production
    ```
 
+   Alternatively, open **Actions → Production smoke → Run workflow**, enter the preview URL, and run the `production`
+   environment job. Configure required reviewers for that GitHub environment when an approval gate is desired. Failed
+   runs retain Playwright evidence for seven days.
+
 7. Confirm the smoke check generated matching privacy-safe request records in backend logs.
 8. Trigger one non-sensitive test error through the monitoring provider's approved verification method, confirm its
    environment and release, and remove the test event if policy permits.
