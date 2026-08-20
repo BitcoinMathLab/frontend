@@ -88,6 +88,14 @@ The post-build step validates `BML_API_BASE_URL` and adds its origin to the depl
 API URLs must use HTTPS; HTTP is accepted only for loopback development addresses. Configuration tests run with
 `npm run test:config` and in CI.
 
+After deploying both services, run the release smoke check against the public frontend:
+
+    BML_E2E_BASE_URL=https://bitcoinmathlab.com BML_PRODUCTION_SMOKE=1 BML_LIVE_API=1 npm run test:smoke:production
+
+`BML_E2E_BASE_URL` tells Playwright to use an existing deployment instead of starting local servers. The check verifies
+public navigation, route metadata, HTTPS security headers, and successful and failing Script Visualizer lessons through
+the deployed API.
+
 ## Related repositories
 
 - BitClone engine: https://github.com/BitcoinMathLab/bitclone
