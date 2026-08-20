@@ -57,6 +57,12 @@ Install Chromium once and run the browser smoke tests:
     npx playwright install chromium
     npm run test:e2e
 
+Run the live cross-repository browser check against sibling backend and Bitclone checkouts:
+
+    BML_LIVE_API=1 npm run test:e2e
+
+CI installs fresh checkouts of both sibling repositories and includes this live API path in every frontend PR.
+
 Check formatting:
 
     npm run format:check
