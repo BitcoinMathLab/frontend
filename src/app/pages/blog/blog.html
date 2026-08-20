@@ -2,28 +2,28 @@
   <p class="eyebrow">Development blog</p>
   <h1>Building Bitcoin Math Lab in public.</h1>
   <p>
-    Short, concrete notes about what shipped, what we learned, and how the visualizer is taking
-    shape.
+    Concrete notes about what we are building, why the architecture has clear boundaries, and how
+    the first visual lesson works.
   </p>
 </section>
 
-<section class="posts" aria-label="Planned articles">
-  <article>
-    <span>Launch article</span>
-    <h2>Why Bitcoin Math Lab?</h2>
-    <p>The case for making Bitcoin execution visible, interactive, and practical.</p>
-    <strong>Coming soon</strong>
-  </article>
-  <article>
-    <span>Engineering</span>
-    <h2>Why build BitClone?</h2>
-    <p>How a reusable engine can support education without trying to replace Bitcoin Core.</p>
-    <strong>Planned</strong>
-  </article>
-  <article>
-    <span>Product</span>
-    <h2>Inside the Script Visualizer</h2>
-    <p>Designing a trace that teaches the stack, opcodes, and validation decisions together.</p>
-    <strong>Planned</strong>
-  </article>
+<section class="posts" aria-label="Published articles">
+  @for (post of posts; track post.slug; let first = $first) {
+    <article [class.posts__featured]="first">
+      <div class="post-meta">
+        <span>{{ post.category }}</span>
+        <span>{{ post.readingTime }}</span>
+      </div>
+      <h2>
+        <a [routerLink]="['/blog', post.slug]">{{ post.title }}</a>
+      </h2>
+      <p>{{ post.summary }}</p>
+      <div class="post-footer">
+        <time [attr.datetime]="post.publishedDate">{{ post.publishedLabel }}</time>
+        <a class="text-link" [routerLink]="['/blog', post.slug]"
+          >Read article <span aria-hidden="true">→</span></a
+        >
+      </div>
+    </article>
+  }
 </section>

@@ -1,0 +1,43 @@
+@if (post; as article) {
+  <article class="article">
+    <header>
+      <a class="back-link" routerLink="/blog"><span aria-hidden="true">←</span> All articles</a>
+      <div class="article-meta">
+        <span>{{ article.category }}</span>
+        <time [attr.datetime]="article.publishedDate">{{ article.publishedLabel }}</time>
+        <span>{{ article.readingTime }}</span>
+      </div>
+      <h1>{{ article.title }}</h1>
+      <p>{{ article.summary }}</p>
+    </header>
+
+    <div class="article-body">
+      @for (section of article.sections; track section.heading) {
+        <section>
+          <h2>{{ section.heading }}</h2>
+          @for (paragraph of section.paragraphs; track paragraph) {
+            <p>{{ paragraph }}</p>
+          }
+        </section>
+      }
+    </div>
+
+    <footer>
+      <p class="eyebrow">Continue exploring</p>
+      <h2>See the mechanism for yourself.</h2>
+      <div>
+        <a class="button button--primary" routerLink="/labs/script-visualizer"
+          >Open the visualizer</a
+        >
+        <a class="button button--secondary" routerLink="/docs">Read the documentation</a>
+      </div>
+    </footer>
+  </article>
+} @else {
+  <section class="missing">
+    <p class="eyebrow">Article not found</p>
+    <h1>This note is not in the lab.</h1>
+    <p>The address may be outdated, or the article may not have been published.</p>
+    <a class="button button--primary" routerLink="/blog">Return to the blog</a>
+  </section>
+}
