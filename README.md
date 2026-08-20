@@ -96,6 +96,8 @@ After deploying both services, run the release smoke check against the public fr
 public navigation, route metadata, HTTPS security headers, and successful and failing Script Visualizer lessons through
 the deployed API.
 
+See the [deployment runbook](docs/deployment.md) for Cloudflare Pages configuration, release verification, and rollback.
+
 ## Related repositories
 
 - BitClone engine: https://github.com/BitcoinMathLab/bitclone
