@@ -66,7 +66,8 @@ li p,
   line-height: 1.65;
 }
 
-li.complete::before {
+li.complete::before,
+li.in-progress::before {
   position: absolute;
   width: 0.4rem;
   height: 0.4rem;
@@ -74,6 +75,11 @@ li.complete::before {
   background: var(--color-valid);
   content: '';
   inset: 1.65rem auto auto -0.8rem;
+}
+
+li.in-progress::before {
+  background: var(--color-amber);
+  box-shadow: 0 0 0.7rem rgba(245, 165, 36, 0.5);
 }
 
 .after-launch p:last-child {

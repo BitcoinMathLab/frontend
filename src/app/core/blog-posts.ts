@@ -22,6 +22,38 @@ const publication = {
 export const BLOG_POSTS: readonly BlogPostEntry[] = Object.freeze([
   {
     ...publication,
+    slug: 'mvp-trace-to-browser',
+    category: 'Progress report',
+    title: 'The MVP now runs from trace engine to browser',
+    summary:
+      'The first complete Bitcoin Math Lab path now connects immutable Bitclone traces, a versioned API, guided browser lessons, and live cross-repository tests.',
+    readingTime: '4 min read',
+    sections: [
+      {
+        heading: 'The complete path is integrated',
+        paragraphs: [
+          'Bitclone now records each executed opcode with its serialized byte range, explanation, diagnostic, and immutable before-and-after snapshots of the main and alternate stacks. The backend exposes that trace through a versioned P2PKH endpoint with safe request validation.',
+          'The browser uses the contract to drive one synchronized player. A learner can select an opcode, step in either direction, autoplay, inspect both stacks, and see the exact bytes responsible for the current operation.',
+        ],
+      },
+      {
+        heading: 'Success and failure use the same machinery',
+        paragraphs: [
+          'The guided sequence begins with P2PK context, runs a valid historical P2PKH spend, and then changes one signature byte to produce a failed spend. Both live lessons call the API and execute in Bitclone; the failure is not a separate canned animation.',
+          'Loading, retry, keyboard controls, mobile layout, landmark semantics, and status announcements are covered alongside the core playback behavior.',
+        ],
+      },
+      {
+        heading: 'The repositories are tested together',
+        paragraphs: [
+          'Frontend CI checks out the backend and Bitclone, starts the actual API, and drives the valid and invalid lessons in Chromium. Independent engine, API, component, and browser suites still run as well, so a failure can be located at the narrowest useful boundary.',
+          'The remaining MVP work is operational: deploy the backend, connect the production frontend origin, and verify monitoring and smoke checks. Those steps need real hosting configuration, but the application path they will run is now integrated and reproducible.',
+        ],
+      },
+    ],
+  },
+  {
+    ...publication,
     slug: 'why-bitcoin-math-lab',
     category: 'Project',
     title: 'Why Bitcoin Math Lab?',
