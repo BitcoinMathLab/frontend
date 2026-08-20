@@ -1,0 +1,51 @@
+<section class="visualizer-hero">
+  <div>
+    <p class="eyebrow">Interactive lab · P2PKH</p>
+    <h1>Follow one spend, one opcode at a time.</h1>
+    <p>
+      This first lab replays a known Bitcoin transaction through Bitclone. Move at your own pace or
+      let the player advance automatically.
+    </p>
+  </div>
+  <dl>
+    <div>
+      <dt>Script type</dt>
+      <dd>P2PKH</dd>
+    </div>
+    <div>
+      <dt>Mode</dt>
+      <dd>Historical example</dd>
+    </div>
+    <div>
+      <dt>Source</dt>
+      <dd>Bitclone trace engine</dd>
+    </div>
+  </dl>
+</section>
+
+<main class="lab" aria-labelledby="lab-heading">
+  <div class="lab__heading">
+    <div>
+      <p class="eyebrow">Trace player</p>
+      <h2 id="lab-heading">Script execution</h2>
+    </div>
+    <p>No keys or funds are used. This lab is educational software.</p>
+  </div>
+
+  @if (loading()) {
+    <div class="state-card" role="status">
+      <span class="state-card__pulse" aria-hidden="true"></span>
+      Loading the execution trace…
+    </div>
+  } @else if (error()) {
+    <div class="state-card state-card--error" role="alert">
+      <div>
+        <strong>The trace API is not available.</strong>
+        <p>Start the local backend or try the request again.</p>
+      </div>
+      <button type="button" (click)="loadTrace()">Retry</button>
+    </div>
+  } @else if (response(); as result) {
+    <app-trace-player [trace]="result.trace" />
+  }
+</main>

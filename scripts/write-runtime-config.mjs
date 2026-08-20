@@ -5,6 +5,7 @@ const outputPath = resolve('dist/bitcoin-math-lab/browser/runtime-config.js');
 const isCloudflare = process.env['CF_PAGES'] === '1';
 const branch = process.env['CF_PAGES_BRANCH'] ?? '';
 const config = {
+  apiBaseUrl: process.env['BML_API_BASE_URL'] ?? '',
   sentryDsn: process.env['BML_SENTRY_DSN'] ?? '',
   environment:
     process.env['BML_ENVIRONMENT'] ??

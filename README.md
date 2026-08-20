@@ -20,6 +20,9 @@ The public-site foundation currently includes:
 Story 2.3 adds Cloudflare Pages deployment assets, production metadata and security headers, and optional Sentry browser
 monitoring. The visualizer and product API are implemented in later stories.
 
+The first visualizer increment adds a live P2PKH trace player at `/labs/script-visualizer`. It loads the curated spend
+from the Bitcoin Math Lab backend and supports play, pause, previous, next, reset, and keyboard controls.
+
 ## Requirements
 
 - Node.js 24.14.1
@@ -35,7 +38,8 @@ Start the local development server:
 
     npm start
 
-Then open http://localhost:4200.
+Start the sibling backend on `http://127.0.0.1:8000`, then open http://localhost:4200. The development server proxies
+`/api` requests to the backend so the browser does not require a development-only CORS policy.
 
 ## Validation
 
@@ -57,6 +61,7 @@ Check formatting:
 provide these build-time variables:
 
 - `BML_SENTRY_DSN` — the public browser DSN; leave unset to disable monitoring;
+- `BML_API_BASE_URL` — optional API origin; leave unset when frontend and API share an origin;
 - `BML_ENVIRONMENT` — optional override such as `production` or `preview`; and
 - `BML_RELEASE` — optional release identifier. Cloudflare's `CF_PAGES_COMMIT_SHA` is used when this is unset.
 

@@ -1,0 +1,47 @@
+<section
+  class="player"
+  tabindex="0"
+  (keydown)="handleKeydown($event)"
+  aria-label="Script trace player"
+>
+  <header class="player__header">
+    <div>
+      <p class="eyebrow">Execution player</p>
+      <p class="step-label" aria-live="polite">{{ stepLabel() }}</p>
+    </div>
+    <span class="outcome" [class.outcome--valid]="trace().success">
+      {{ trace().success ? 'Valid spend' : 'Invalid spend' }}
+    </span>
+  </header>
+
+  @if (currentStep(); as step) {
+    <article class="instruction" aria-live="polite">
+      <span class="instruction__number">{{ (step.index + 1).toString().padStart(2, '0') }}</span>
+      <div>
+        <code>{{ step.opcode.name }}</code>
+        <p>{{ step.explanation }}</p>
+      </div>
+      <span class="instruction__offset">byte {{ step.opcode.byte_offset }}</span>
+    </article>
+  }
+
+  <div class="progress" aria-hidden="true">
+    @for (step of trace().steps; track step.index) {
+      <span
+        [class.progress__complete]="step.index < currentIndex()"
+        [class.progress__current]="step.index === currentIndex()"
+      ></span>
+    }
+  </div>
+
+  <div class="controls" aria-label="Playback controls">
+    <button type="button" (click)="reset()" [disabled]="atStart()">Reset</button>
+    <button type="button" (click)="previous()" [disabled]="atStart()">Previous</button>
+    <button class="controls__primary" type="button" (click)="togglePlay()">
+      {{ playing() ? 'Pause' : 'Play' }}
+    </button>
+    <button type="button" (click)="next()" [disabled]="atEnd()">Next</button>
+  </div>
+
+  <p class="keyboard-help">Keyboard: left/right arrows step through; space plays or pauses.</p>
+</section>

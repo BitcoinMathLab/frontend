@@ -15,6 +15,7 @@ describe('monitoring', () => {
 
   it('initializes Sentry with privacy-conservative defaults', async () => {
     globalThis.__BML_CONFIG__ = {
+      apiBaseUrl: '',
       sentryDsn: 'https://public@example.ingest.sentry.io/1',
       environment: 'preview',
       release: 'abc123',
@@ -23,7 +24,7 @@ describe('monitoring', () => {
     await expect(initializeMonitoring()).resolves.toBe(true);
     expect(Sentry.init).toHaveBeenCalledWith(
       expect.objectContaining({
-        dsn: globalThis.__BML_CONFIG__.sentryDsn,
+        dsn: 'https://public@example.ingest.sentry.io/1',
         environment: 'preview',
         release: 'abc123',
         sendDefaultPii: false,
@@ -34,6 +35,7 @@ describe('monitoring', () => {
 
   it('stays disabled when no Sentry DSN is configured', async () => {
     globalThis.__BML_CONFIG__ = {
+      apiBaseUrl: '',
       sentryDsn: '',
       environment: 'test',
       release: '',
