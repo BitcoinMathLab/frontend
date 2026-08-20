@@ -1,0 +1,56 @@
+name: Production smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: Public frontend URL to verify
+        required: true
+        default: https://bitcoinmathlab.com
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-smoke-${{ inputs.base_url }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Verify deployed product
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: production
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Verify deployed frontend and API
+        run: npm run test:smoke:production
+        env:
+          BML_E2E_BASE_URL: ${{ inputs.base_url }}
+          BML_PRODUCTION_SMOKE: '1'
+          BML_LIVE_API: '1'
+
+      - name: Preserve failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-smoke-failure
+          path: test-results
+          if-no-files-found: ignore
+          retention-days: 7
