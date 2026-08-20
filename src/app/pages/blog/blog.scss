@@ -3,22 +3,34 @@
   width: min(100% - 2rem, 72rem);
   margin-inline: auto;
   gap: 1rem;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   padding-bottom: 7rem;
 }
 
 article {
   display: flex;
-  min-height: 19rem;
+  min-height: 23rem;
   border: 1px solid var(--color-graphite);
   border-radius: 1rem;
   background: var(--color-surface);
   flex-direction: column;
-  padding: 1.5rem;
+  padding: clamp(1.4rem, 4vw, 2rem);
 }
 
-article > span,
-article > strong {
+.posts__featured {
+  min-height: 25rem;
+  grid-column: 1 / -1;
+}
+
+.post-meta,
+.post-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.post-meta {
   color: var(--color-amber);
   font-family: var(--font-mono);
   font-size: 0.72rem;
@@ -26,29 +38,51 @@ article > strong {
 }
 
 h2 {
-  margin: 2.5rem 0 0.8rem;
-  font-size: 1.45rem;
-  letter-spacing: -0.03em;
+  max-width: 21ch;
+  margin: 3rem 0 1rem;
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  letter-spacing: -0.045em;
+  line-height: 1.05;
 }
 
-article p {
+h2 a {
+  color: var(--color-paper);
+  text-decoration: none;
+}
+
+h2 a:hover {
+  color: var(--color-blue);
+}
+
+article > p {
+  max-width: 42rem;
   margin: 0;
   color: var(--color-text-muted);
-  line-height: 1.65;
+  line-height: 1.7;
 }
 
-article > strong {
+.post-footer {
   margin-top: auto;
   padding-top: 2rem;
-  color: var(--color-text-subtle);
 }
 
-@media (max-width: 48rem) {
+time {
+  color: var(--color-text-subtle);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+@media (max-width: 44rem) {
   .posts {
     grid-template-columns: 1fr;
   }
 
-  article {
-    min-height: 15rem;
+  .posts__featured {
+    grid-column: auto;
+  }
+
+  article,
+  .posts__featured {
+    min-height: 20rem;
   }
 }

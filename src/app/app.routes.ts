@@ -1,5 +1,7 @@
 import { Routes } from '@angular/router';
 
+import { findBlogPost } from './core/blog-posts';
+
 export const routes: Routes = [
   {
     path: '',
@@ -31,6 +33,14 @@ export const routes: Routes = [
     path: 'blog',
     title: 'Blog — Bitcoin Math Lab',
     loadComponent: () => import('./pages/blog/blog').then((page) => page.Blog),
+  },
+  {
+    path: 'blog/:slug',
+    title: (route) => {
+      const post = findBlogPost(route.paramMap.get('slug'));
+      return post ? `${post.title} — Bitcoin Math Lab` : 'Article not found — Bitcoin Math Lab';
+    },
+    loadComponent: () => import('./pages/blog-post/blog-post').then((page) => page.BlogPost),
   },
   {
     path: 'contact',
