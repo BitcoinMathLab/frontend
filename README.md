@@ -18,10 +18,11 @@ The public-site foundation currently includes:
 - unit tests for the application shell and public route contract.
 
 Story 2.3 adds Cloudflare Pages deployment assets, production metadata and security headers, and optional Sentry browser
-monitoring. The visualizer and product API are implemented in later stories.
+monitoring.
 
-The first visualizer increment adds a live P2PKH trace player at `/labs/script-visualizer`. It loads the curated spend
-from the Bitcoin Math Lab backend and supports play, pause, previous, next, reset, and keyboard controls.
+The visualizer at `/labs/script-visualizer` loads curated P2PKH spends from the Bitcoin Math Lab backend. It includes
+guided successful and failing lessons, before/after stacks, byte and opcode highlighting, a timeline, playback controls,
+and keyboard navigation.
 
 ## Requirements
 
@@ -50,6 +51,11 @@ Run the production build:
 Run the unit tests once:
 
     npm run test:ci
+
+Install Chromium once and run the browser smoke tests:
+
+    npx playwright install chromium
+    npm run test:e2e
 
 Check formatting:
 
