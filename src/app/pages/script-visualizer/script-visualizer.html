@@ -32,10 +32,51 @@
     <p>No keys or funds are used. This lab is educational software.</p>
   </div>
 
-  @if (loading()) {
+  <div class="lesson-layout">
+    <nav class="lesson-list" aria-label="Visualizer lessons">
+      @for (lesson of lessons; track lesson.id) {
+        <button
+          type="button"
+          (click)="selectLesson(lesson)"
+          [class.lesson-list__active]="lesson.id === selectedLesson().id"
+          [attr.aria-current]="lesson.id === selectedLesson().id ? 'true' : null"
+        >
+          <span>{{ lesson.order }} · {{ lesson.scriptType }}</span>
+          <strong>{{ lesson.title }}</strong>
+          <small>{{ lesson.expectedOutcome }}</small>
+        </button>
+      }
+    </nav>
+
+    <article class="lesson-copy">
+      <div class="lesson-copy__meta">
+        <span>{{ selectedLesson().scriptType }}</span>
+        <span>{{ selectedLesson().kind === 'live' ? 'Live trace' : 'Concept' }}</span>
+      </div>
+      <h3>{{ selectedLesson().title }}</h3>
+      <p>{{ selectedLesson().summary }}</p>
+      <code>{{ selectedLesson().scriptPattern }}</code>
+      <h4>In this lesson</h4>
+      <ul>
+        @for (objective of selectedLesson().objectives; track $index) {
+          <li>{{ objective }}</li>
+        }
+      </ul>
+    </article>
+  </div>
+
+  @if (selectedLesson().kind === 'concept') {
+    <div class="concept-card">
+      <p class="eyebrow">Key connection</p>
+      <p>
+        P2PK locks directly to a public key. P2PKH first proves that the revealed public key has the
+        expected hash, then performs the same signature check. Continue to lesson 02 to see those
+        extra identity opcodes execute.
+      </p>
+    </div>
+  } @else if (loading()) {
     <div class="state-card" role="status">
-      <span class="state-card__pulse" aria-hidden="true"></span>
-      Loading the execution trace…
+      <span class="state-card__pulse" aria-hidden="true"></span> Loading the execution trace…
     </div>
   } @else if (error()) {
     <div class="state-card state-card--error" role="alert">
