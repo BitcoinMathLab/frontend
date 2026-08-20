@@ -7,6 +7,11 @@ test('lists and opens the foundational project articles', async ({ page }) => {
   await page.getByRole('link', { name: 'Inside the Script Visualizer', exact: true }).click();
   await expect(page).toHaveURL(/\/blog\/inside-script-visualizer$/);
   await expect(page).toHaveTitle('Inside the Script Visualizer — Bitcoin Math Lab');
+  await expect(page.locator('meta[property="og:type"]')).toHaveAttribute('content', 'article');
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+    'href',
+    'https://bitcoinmathlab.com/blog/inside-script-visualizer',
+  );
   await expect(page.getByRole('heading', { level: 2 })).toHaveCount(4);
   await expect(page.getByRole('link', { name: 'Open the visualizer' })).toBeVisible();
 });

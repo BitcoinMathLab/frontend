@@ -24,6 +24,9 @@ The visualizer at `/labs/script-visualizer` loads curated P2PKH spends from the 
 guided successful and failing lessons, before/after stacks, byte and opcode highlighting, a timeline, playback controls,
 and keyboard navigation.
 
+Public routes publish route-specific descriptions, canonical URLs, and Open Graph/Twitter metadata. Add every new
+indexable route to `public/sitemap.xml` when it is introduced.
+
 ## Requirements
 
 - Node.js 24.14.1
