@@ -13,7 +13,7 @@ describe('TraceApi', () => {
 
   it('posts the complete spend context to the configured v1 endpoint', () => {
     globalThis.__BML_CONFIG__ = {
-      apiBaseUrl: 'https://api.bitcoinmathlab.com/',
+      apiBaseUrl: 'https://api.btcmathlab.com/',
       sentryDsn: '',
       environment: 'test',
       release: '',
@@ -26,10 +26,32 @@ describe('TraceApi', () => {
     service.loadP2pkhTrace(CURATED_P2PKH_REQUEST).subscribe();
 
     const request = TestBed.inject(HttpTestingController).expectOne(
-      'https://api.bitcoinmathlab.com/api/v1/traces/p2pkh',
+      'https://api.btcmathlab.com/api/v1/traces/p2pkh',
     );
     expect(request.request.method).toBe('POST');
     expect(request.request.body).toEqual(CURATED_P2PKH_REQUEST);
+    request.flush({});
+  });
+
+  it('loads transaction context from the configured v1 endpoint', () => {
+    globalThis.__BML_CONFIG__ = {
+      apiBaseUrl: 'https://api.btcmathlab.com/',
+      sentryDsn: '',
+      environment: 'test',
+      release: '',
+    };
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const service = TestBed.inject(TraceApi);
+    const txid = '40e331b67c0fe7750bb3b1943b378bf702dce86124dc12fa5980f975db7ec930';
+
+    service.loadTransactionContext(txid).subscribe();
+
+    const request = TestBed.inject(HttpTestingController).expectOne(
+      `https://api.btcmathlab.com/api/v1/transactions/${txid}/context`,
+    );
+    expect(request.request.method).toBe('GET');
     request.flush({});
   });
 });
