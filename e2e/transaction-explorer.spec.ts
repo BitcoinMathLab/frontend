@@ -36,6 +36,12 @@ test('loads a transaction and displays its ordered spend context', async ({ page
   await expect(page.getByText('125,000 sats')).toBeVisible();
   await expect(page.getByText('4 bytes')).toBeVisible();
   await expect(page.getByText('76a91400112288ac')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Clear transaction ID' }).click();
+  await expect(page.getByRole('textbox', { name: 'Transaction ID' })).toHaveValue('');
+  await expect(page.getByRole('heading', { name: 'Transaction context', exact: true })).toHaveCount(
+    0,
+  );
 });
 
 test('validates transaction IDs before sending a request', async ({ page }) => {

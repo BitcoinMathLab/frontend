@@ -47,6 +47,14 @@ export class TransactionExplorer implements OnDestroy {
       });
   }
 
+  protected clear(): void {
+    this.requestSubscription?.unsubscribe();
+    this.txid = '';
+    this.loading.set(false);
+    this.error.set('');
+    this.result.set(null);
+  }
+
   protected formatSats(amount: number): string {
     return new Intl.NumberFormat('en-CA').format(amount);
   }
