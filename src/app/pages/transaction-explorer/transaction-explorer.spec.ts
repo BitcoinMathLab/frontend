@@ -12,6 +12,18 @@ const RESPONSE: TransactionContextResponse = {
   txid: TXID,
   transaction_hex: '01020304',
   is_coinbase: false,
+  outputs: [
+    {
+      vout: 0,
+      amount_sats: 556_000_000,
+      script_pubkey_hex: '76a914c398efa9c392ba6013c5e04ee729755ef7f58b3288ac',
+    },
+    {
+      vout: 1,
+      amount_sats: 4_444_000_000,
+      script_pubkey_hex: '76a914948c765a6914d43f2a7ac177da2c2f6b52de3d7c88ac',
+    },
+  ],
   spent_outputs: [
     {
       txid: 'a'.repeat(64),
@@ -38,6 +50,12 @@ describe('TransactionExplorer', () => {
 
     expect(loadTransactionContext).toHaveBeenCalledWith(TXID);
     expect(fixture.nativeElement.textContent).toContain('125,000 sats');
+    expect(fixture.nativeElement.textContent).toContain('2 output(s)');
+    expect(fixture.nativeElement.textContent).toContain('556,000,000 sats');
+    expect(fixture.nativeElement.textContent).toContain('4,444,000,000 sats');
+    expect(fixture.nativeElement.textContent).toContain(
+      '76a914948c765a6914d43f2a7ac177da2c2f6b52de3d7c88ac',
+    );
     expect(fixture.nativeElement.textContent).toContain('4 bytes');
     expect(fixture.nativeElement.textContent).toContain('76a91400112288ac');
 

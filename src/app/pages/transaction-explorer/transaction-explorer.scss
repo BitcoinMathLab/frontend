@@ -164,7 +164,7 @@ button:disabled {
   display: grid;
   margin: 1.5rem 0;
   border-block: 1px solid var(--color-graphite);
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
 }
 
 .summary div {
@@ -185,11 +185,13 @@ button:disabled {
 }
 
 .data-block,
+.outputs,
 .inputs {
   margin-top: 1.5rem;
 }
 
 .data-block h3,
+.outputs h3,
 .inputs h3 {
   margin: 0 0 0.65rem;
   font-size: 0.86rem;

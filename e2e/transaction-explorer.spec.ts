@@ -1,6 +1,6 @@
 import { expect, Page, test } from '@playwright/test';
 
-const TXID = '40e331b67c0fe7750bb3b1943b378bf702dce86124dc12fa5980f975db7ec930';
+const TXID = 'fff2525b8931402dd09222c50775608f75787bd2b87e56995a7bdd30f79702c4';
 
 async function mockTransactionApi(page: Page): Promise<void> {
   await page.route('**/api/v1/transactions/**', async (route) => {
@@ -11,6 +11,18 @@ async function mockTransactionApi(page: Page): Promise<void> {
         txid: TXID,
         transaction_hex: '01020304',
         is_coinbase: false,
+        outputs: [
+          {
+            vout: 0,
+            amount_sats: 556000000,
+            script_pubkey_hex: '76a914c398efa9c392ba6013c5e04ee729755ef7f58b3288ac',
+          },
+          {
+            vout: 1,
+            amount_sats: 4444000000,
+            script_pubkey_hex: '76a914948c765a6914d43f2a7ac177da2c2f6b52de3d7c88ac',
+          },
+        ],
         spent_outputs: [
           {
             txid: 'a'.repeat(64),
@@ -28,12 +40,17 @@ test('loads a transaction and displays its ordered spend context', async ({ page
   await mockTransactionApi(page);
   await page.goto('/labs/transaction-explorer');
 
+  await page.getByRole('textbox', { name: 'Transaction ID' }).fill(TXID);
   await page.getByRole('button', { name: 'Inspect transaction' }).click();
 
   await expect(
     page.getByRole('heading', { name: 'Transaction context', exact: true }),
   ).toBeVisible();
   await expect(page.getByText('125,000 sats')).toBeVisible();
+  await expect(page.getByText('2 output(s)')).toBeVisible();
+  await expect(page.getByText('556,000,000 sats')).toBeVisible();
+  await expect(page.getByText('4,444,000,000 sats')).toBeVisible();
+  await expect(page.getByText('76a914948c765a6914d43f2a7ac177da2c2f6b52de3d7c88ac')).toBeVisible();
   await expect(page.getByText('4 bytes')).toBeVisible();
   await expect(page.getByText('76a91400112288ac')).toBeVisible();
 
