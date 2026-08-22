@@ -105,6 +105,9 @@ export interface TransactionContextResponse {
   readonly total_input_sats: number;
   readonly total_output_sats: number;
   readonly fee_sats: number | null;
+  readonly size_bytes: number;
+  readonly weight_units: number;
+  readonly virtual_size_vbytes: number;
   readonly outputs: readonly TransactionOutputContext[];
   readonly spent_outputs: readonly PreviousOutputContext[];
 }

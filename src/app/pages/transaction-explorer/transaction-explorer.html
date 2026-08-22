@@ -144,7 +144,15 @@
       <dl class="summary">
         <div>
           <dt>Raw size</dt>
-          <dd>{{ byteCount(transaction.transaction_hex) }} bytes</dd>
+          <dd>{{ transaction.size_bytes }} bytes</dd>
+        </div>
+        <div>
+          <dt>Virtual size</dt>
+          <dd>{{ transaction.virtual_size_vbytes }} vbytes</dd>
+        </div>
+        <div>
+          <dt>Weight</dt>
+          <dd>{{ transaction.weight_units }} WU</dd>
         </div>
         <div>
           <dt>Inputs</dt>
