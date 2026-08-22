@@ -1,18 +1,20 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, inject, OnDestroy, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  OnDestroy,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { finalize, Subscription } from 'rxjs';
 
 import { TraceApi } from '../../core/trace-api';
-import { TransactionContextResponse } from '../../core/trace-api.models';
+import { TransactionContextResponse, TransactionExample } from '../../core/trace-api.models';
 
 const TXID_PATTERN = /^[0-9a-fA-F]{64}$/;
-const EXAMPLE_TXIDS = Object.freeze([
-  '40e331b67c0fe7750bb3b1943b378bf702dce86124dc12fa5980f975db7ec930',
-  'ed25927576988e38e4cc8e4b19d1272c480f113fb605271b190df05aa983714e',
-  '242b2de161deac31f77238b898e85a5e4760c5aa004ede2e2cc355202f84e6aa',
-  '62ff4bde640c3fb09faa1223dc7ccc7b11baacb7043fb22f7f328bc2a4cd496b',
-]);
+const DEFAULT_TXID = '40e331b67c0fe7750bb3b1943b378bf702dce86124dc12fa5980f975db7ec930';
 
 @Component({
   selector: 'app-transaction-explorer',
@@ -21,16 +23,25 @@ const EXAMPLE_TXIDS = Object.freeze([
   styleUrl: './transaction-explorer.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TransactionExplorer implements OnDestroy {
+export class TransactionExplorer implements OnInit, OnDestroy {
   private readonly traceApi = inject(TraceApi);
   private requestSubscription: Subscription | undefined;
+  private examplesSubscription: Subscription | undefined;
   private copiedTimeout: ReturnType<typeof setTimeout> | undefined;
 
-  protected txid = '40e331b67c0fe7750bb3b1943b378bf702dce86124dc12fa5980f975db7ec930';
+  protected txid = DEFAULT_TXID;
   protected readonly loading = signal(false);
   protected readonly error = signal('');
   protected readonly result = signal<TransactionContextResponse | null>(null);
   protected readonly copied = signal(false);
+  protected readonly examples = signal<readonly TransactionExample[]>([]);
+
+  ngOnInit(): void {
+    this.examplesSubscription = this.traceApi.loadTransactionExamples().subscribe({
+      next: (response) => this.examples.set(response.examples),
+      error: () => this.examples.set([]),
+    });
+  }
 
   protected lookup(): void {
     const txid = this.txid.trim();
@@ -92,10 +103,16 @@ export class TransactionExplorer implements OnDestroy {
   }
 
   protected random(): void {
-    const candidates = EXAMPLE_TXIDS.filter((txid) => txid !== this.txid.trim().toLowerCase());
-    this.replaceInput(
-      candidates[Math.floor(Math.random() * candidates.length)] ?? EXAMPLE_TXIDS[0],
+    const candidates = this.examples().filter(
+      (example) => example.txid !== this.txid.trim().toLowerCase(),
     );
+    this.replaceInput(
+      candidates[Math.floor(Math.random() * candidates.length)]?.txid ?? DEFAULT_TXID,
+    );
+  }
+
+  protected selectExample(example: TransactionExample): void {
+    this.replaceInput(example.txid);
   }
 
   protected formatSats(amount: number): string {
@@ -108,6 +125,7 @@ export class TransactionExplorer implements OnDestroy {
 
   ngOnDestroy(): void {
     this.requestSubscription?.unsubscribe();
+    this.examplesSubscription?.unsubscribe();
     clearTimeout(this.copiedTimeout);
   }
 

@@ -231,6 +231,27 @@ p {
   background: var(--color-surface);
 }
 
+.selection-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: 0.75rem;
+}
+
+.selection-card {
+  border: 1px solid var(--color-graphite);
+  background: var(--color-canvas);
+  color: var(--color-paper);
+  text-align: left;
+}
+
+.selection-card span,
+.selection-card small {
+  display: block;
+  margin-top: 0.45rem;
+  color: var(--color-text-muted);
+  font-size: 0.7rem;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

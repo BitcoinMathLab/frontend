@@ -5,6 +5,9 @@ exposing Bitcoin Core credentials to the browser. It displays the transaction ID
 hex, every created output, each input's ordered previous output, and the standard output/spend-path classification
 supplied by Bitclone.
 
+The explorer loads its verified example catalog from `/api/v1/transactions/examples`. Each concept card selects a
+confirmed mainnet txid and states the expected input/output shape before the learner inspects it.
+
 ## Automated evidence
 
 Run:
@@ -43,7 +46,9 @@ successful historical lookup until synchronization finishes.
 - **Clear:** After a successful lookup or validation error, activate Clear. Expect the input, result, and error state to
   be removed without sending another request.
 - **Field actions:** Copy writes the current txid to the clipboard, Paste replaces it without submitting, and Random
-  selects a verified curated mainnet P2PKH, P2WPKH, or P2WSH example without submitting.
+  selects a different example from the versioned catalog without submitting.
+- **Example catalog:** Expect labeled cards for genesis, early payment/change, P2PKH, P2WPKH, and P2WSH. Selecting a
+  card replaces the txid without issuing a context request; Inspect remains the explicit lookup action.
 - **Unavailable Core:** Stop Core, interrupt the tunnel, or test while `txindex` is building. Expect a safe message that
   Core is catching up or unavailable, with no hostnames, credentials, or internal exception detail.
 - **Boundary:** Load the genesis coinbase transaction

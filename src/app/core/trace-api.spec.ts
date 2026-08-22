@@ -54,4 +54,25 @@ describe('TraceApi', () => {
     expect(request.request.method).toBe('GET');
     request.flush({});
   });
+
+  it('loads educational transaction examples from the configured v1 endpoint', () => {
+    globalThis.__BML_CONFIG__ = {
+      apiBaseUrl: 'https://api.btcmathlab.com/',
+      sentryDsn: '',
+      environment: 'test',
+      release: '',
+    };
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const service = TestBed.inject(TraceApi);
+
+    service.loadTransactionExamples().subscribe();
+
+    const request = TestBed.inject(HttpTestingController).expectOne(
+      'https://api.btcmathlab.com/api/v1/transactions/examples',
+    );
+    expect(request.request.method).toBe('GET');
+    request.flush({ api_version: 'v1', examples: [] });
+  });
 });

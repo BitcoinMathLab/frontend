@@ -16,3 +16,23 @@ test('runs successful and failing lessons through the real API and engine', asyn
   await expect(page.getByLabel('Failure explanation')).toContainText('false-final-value');
   await expect(page.getByLabel('Execution timeline').getByRole('button')).toHaveCount(7);
 });
+
+test('loads a catalog example through the real API, Core, and classification engine', async ({
+  page,
+}) => {
+  test.skip(!process.env['BML_LIVE_API'], 'Set BML_LIVE_API=1 to run the cross-repository check.');
+
+  await page.goto('/labs/transaction-explorer');
+  await page.getByRole('button', { name: /Early payment and change/ }).click();
+  await expect(page.getByRole('textbox', { name: 'Transaction ID' })).toHaveValue(
+    'fff2525b8931402dd09222c50775608f75787bd2b87e56995a7bdd30f79702c4',
+  );
+  await page.getByRole('button', { name: 'Inspect transaction' }).click();
+
+  const summary = page.locator('.summary');
+  await expect(summary.locator('div').filter({ hasText: 'Inputs' }).locator('dd')).toHaveText('1');
+  await expect(summary.locator('div').filter({ hasText: 'Outputs' }).locator('dd')).toHaveText('2');
+  await expect(page.getByText('P2PKH', { exact: true })).toHaveCount(2);
+  await expect(page.getByText('556,000,000 sats')).toBeVisible();
+  await expect(page.getByText('4,444,000,000 sats')).toBeVisible();
+});

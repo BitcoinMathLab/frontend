@@ -3,10 +3,39 @@ import { TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
 
 import { TraceApi } from '../../core/trace-api';
-import { TransactionContextResponse } from '../../core/trace-api.models';
+import {
+  TransactionContextResponse,
+  TransactionExamplesResponse,
+} from '../../core/trace-api.models';
 import { TransactionExplorer } from './transaction-explorer';
 
 const TXID = '40e331b67c0fe7750bb3b1943b378bf702dce86124dc12fa5980f975db7ec930';
+const GENESIS_TXID = '4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b';
+const EXAMPLES_RESPONSE: TransactionExamplesResponse = {
+  api_version: 'v1',
+  examples: [
+    {
+      slug: 'genesis-coinbase',
+      title: 'Genesis coinbase',
+      description: "Inspect Bitcoin's block-zero coinbase and the output it created.",
+      txid: GENESIS_TXID,
+      input_count: 0,
+      output_count: 1,
+      expected_spend_types: [],
+      concepts: ['coinbase', 'block zero', 'created output'],
+    },
+    {
+      slug: 'legacy-p2pkh',
+      title: 'Legacy P2PKH spend',
+      description: 'Follow a classic pay-to-public-key-hash input and its two outputs.',
+      txid: TXID,
+      input_count: 1,
+      output_count: 2,
+      expected_spend_types: ['P2PKH'],
+      concepts: ['legacy', 'P2PKH', 'scriptSig'],
+    },
+  ],
+};
 const RESPONSE: TransactionContextResponse = {
   api_version: 'v1',
   txid: TXID,
@@ -38,12 +67,19 @@ const RESPONSE: TransactionContextResponse = {
   ],
 };
 
+function traceApiWith(loadTransactionContext: ReturnType<typeof vi.fn>) {
+  return {
+    loadTransactionContext,
+    loadTransactionExamples: vi.fn().mockReturnValue(of(EXAMPLES_RESPONSE)),
+  };
+}
+
 describe('TransactionExplorer', () => {
   it('loads and presents transaction context', async () => {
     const loadTransactionContext = vi.fn().mockReturnValue(of(RESPONSE));
     await TestBed.configureTestingModule({
       imports: [TransactionExplorer],
-      providers: [{ provide: TraceApi, useValue: { loadTransactionContext } }],
+      providers: [{ provide: TraceApi, useValue: traceApiWith(loadTransactionContext) }],
     }).compileComponents();
     const fixture = TestBed.createComponent(TransactionExplorer);
     fixture.detectChanges();
@@ -87,17 +123,29 @@ describe('TransactionExplorer', () => {
     });
     await TestBed.configureTestingModule({
       imports: [TransactionExplorer],
-      providers: [{ provide: TraceApi, useValue: { loadTransactionContext } }],
+      providers: [{ provide: TraceApi, useValue: traceApiWith(loadTransactionContext) }],
     }).compileComponents();
     const fixture = TestBed.createComponent(TransactionExplorer);
     fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Genesis coinbase');
+    expect(fixture.nativeElement.textContent).toContain('0 input(s) · 1 output(s)');
+    const genesis = [...fixture.nativeElement.querySelectorAll('.example-card')].find(
+      (button: HTMLButtonElement) => button.textContent?.includes('Genesis coinbase'),
+    ) as HTMLButtonElement;
+    genesis.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect((fixture.nativeElement.querySelector('input') as HTMLInputElement).value).toBe(
+      GENESIS_TXID,
+    );
 
     const copy = fixture.nativeElement.querySelector(
       '[aria-label="Copy transaction ID"]',
     ) as HTMLButtonElement;
     copy.click();
     await fixture.whenStable();
-    expect(writeText).toHaveBeenCalledWith(TXID);
+    expect(writeText).toHaveBeenCalledWith(GENESIS_TXID);
 
     const paste = fixture.nativeElement.querySelector(
       '[aria-label="Paste transaction ID"]',
@@ -133,7 +181,7 @@ describe('TransactionExplorer', () => {
     const loadTransactionContext = vi.fn();
     await TestBed.configureTestingModule({
       imports: [TransactionExplorer],
-      providers: [{ provide: TraceApi, useValue: { loadTransactionContext } }],
+      providers: [{ provide: TraceApi, useValue: traceApiWith(loadTransactionContext) }],
     }).compileComponents();
     const fixture = TestBed.createComponent(TransactionExplorer);
     fixture.detectChanges();
@@ -161,7 +209,7 @@ describe('TransactionExplorer', () => {
     );
     await TestBed.configureTestingModule({
       imports: [TransactionExplorer],
-      providers: [{ provide: TraceApi, useValue: { loadTransactionContext } }],
+      providers: [{ provide: TraceApi, useValue: traceApiWith(loadTransactionContext) }],
     }).compileComponents();
     const fixture = TestBed.createComponent(TransactionExplorer);
     fixture.detectChanges();

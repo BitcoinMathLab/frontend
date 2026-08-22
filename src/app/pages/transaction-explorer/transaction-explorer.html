@@ -18,6 +18,34 @@
     <p>The example ID is ready to replace with any confirmed mainnet transaction.</p>
   </div>
 
+  @if (examples().length) {
+    <section class="examples" aria-labelledby="examples-heading">
+      <div class="examples__heading">
+        <div>
+          <p class="eyebrow">Verified mainnet fixtures</p>
+          <h3 id="examples-heading">Choose a transaction concept</h3>
+        </div>
+        <span>{{ examples().length }} examples</span>
+      </div>
+      <div class="selection-grid">
+        @for (example of examples(); track example.slug) {
+          <button
+            type="button"
+            class="selection-card example-card"
+            (click)="selectExample(example)"
+          >
+            <strong>{{ example.title }}</strong>
+            <span>{{ example.description }}</span>
+            <small>
+              {{ example.input_count }} input(s) · {{ example.output_count }} output(s)
+            </small>
+            <span class="example-card__concepts">{{ example.concepts.join(' · ') }}</span>
+          </button>
+        }
+      </div>
+    </section>
+  }
+
   <form (ngSubmit)="lookup()" novalidate>
     <div class="field-header">
       <label for="transaction-id">Transaction ID</label>

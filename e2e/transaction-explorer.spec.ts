@@ -1,9 +1,28 @@
 import { expect, Page, test } from '@playwright/test';
 
 const TXID = 'fff2525b8931402dd09222c50775608f75787bd2b87e56995a7bdd30f79702c4';
+const EXAMPLES_RESPONSE = {
+  api_version: 'v1',
+  examples: [
+    {
+      slug: 'early-payment-and-change',
+      title: 'Early payment and change',
+      description: 'Compare one legacy P2PKH input with its payment and change outputs.',
+      txid: TXID,
+      input_count: 1,
+      output_count: 2,
+      expected_spend_types: ['P2PKH'],
+      concepts: ['P2PKH', 'payment', 'change'],
+    },
+  ],
+};
 
 async function mockTransactionApi(page: Page): Promise<void> {
   await page.route('**/api/v1/transactions/**', async (route) => {
+    if (route.request().url().endsWith('/transactions/examples')) {
+      await route.fulfill({ contentType: 'application/json', json: EXAMPLES_RESPONSE });
+      return;
+    }
     await route.fulfill({
       contentType: 'application/json',
       json: {
@@ -44,14 +63,15 @@ test('loads a transaction and displays its ordered spend context', async ({ page
   await mockTransactionApi(page);
   await page.goto('/labs/transaction-explorer');
 
-  await page.getByRole('textbox', { name: 'Transaction ID' }).fill(TXID);
+  await page.getByRole('button', { name: /Early payment and change/ }).click();
+  await expect(page.getByRole('textbox', { name: 'Transaction ID' })).toHaveValue(TXID);
   await page.getByRole('button', { name: 'Inspect transaction' }).click();
 
   await expect(
     page.getByRole('heading', { name: 'Transaction context', exact: true }),
   ).toBeVisible();
   await expect(page.getByText('125,000 sats')).toBeVisible();
-  await expect(page.getByText('2 output(s)')).toBeVisible();
+  await expect(page.getByText('2 output(s)', { exact: true })).toBeVisible();
   await expect(page.getByText('556,000,000 sats')).toBeVisible();
   await expect(page.getByText('4,444,000,000 sats')).toBeVisible();
   await expect(page.getByText('76a914948c765a6914d43f2a7ac177da2c2f6b52de3d7c88ac')).toBeVisible();
@@ -69,6 +89,10 @@ test('loads a transaction and displays its ordered spend context', async ({ page
 test('validates transaction IDs before sending a request', async ({ page }) => {
   let requests = 0;
   await page.route('**/api/v1/transactions/**', async (route) => {
+    if (route.request().url().endsWith('/transactions/examples')) {
+      await route.fulfill({ contentType: 'application/json', json: EXAMPLES_RESPONSE });
+      return;
+    }
     requests += 1;
     await route.abort();
   });
@@ -90,6 +114,10 @@ test('validates transaction IDs before sending a request', async ({ page }) => {
 test('explains Core availability safely and fits a mobile viewport', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.route('**/api/v1/transactions/**', async (route) => {
+    if (route.request().url().endsWith('/transactions/examples')) {
+      await route.fulfill({ contentType: 'application/json', json: EXAMPLES_RESPONSE });
+      return;
+    }
     await route.fulfill({
       status: 503,
       contentType: 'application/json',

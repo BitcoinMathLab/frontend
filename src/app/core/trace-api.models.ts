@@ -98,3 +98,19 @@ export interface TransactionContextResponse {
   readonly outputs: readonly TransactionOutputContext[];
   readonly spent_outputs: readonly PreviousOutputContext[];
 }
+
+export interface TransactionExample {
+  readonly slug: string;
+  readonly title: string;
+  readonly description: string;
+  readonly txid: string;
+  readonly input_count: number;
+  readonly output_count: number;
+  readonly expected_spend_types: readonly string[];
+  readonly concepts: readonly string[];
+}
+
+export interface TransactionExamplesResponse {
+  readonly api_version: 'v1';
+  readonly examples: readonly TransactionExample[];
+}
