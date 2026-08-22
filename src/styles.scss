@@ -273,6 +273,29 @@ p {
   color: var(--color-error);
 }
 
+.decoded-fields {
+  display: grid;
+  margin: 0;
+  border: 1px solid var(--color-graphite);
+  border-radius: 0.55rem;
+  background: var(--color-canvas);
+  gap: 0.65rem;
+  padding: 0.8rem;
+}
+
+.decoded-fields div {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 9rem minmax(0, 1fr);
+  gap: 0.75rem;
+}
+
+.decoded-fields code {
+  color: var(--color-blue);
+  font-family: var(--font-mono);
+  overflow-wrap: anywhere;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

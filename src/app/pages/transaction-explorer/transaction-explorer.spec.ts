@@ -39,7 +39,11 @@ const EXAMPLES_RESPONSE: TransactionExamplesResponse = {
 const RESPONSE: TransactionContextResponse = {
   api_version: 'v1',
   txid: TXID,
+  wtxid: TXID,
   transaction_hex: '01020304',
+  version: 1,
+  locktime: 0,
+  is_segwit: false,
   is_coinbase: false,
   outputs: [
     {
@@ -104,6 +108,10 @@ describe('TransactionExplorer', () => {
       '76a914948c765a6914d43f2a7ac177da2c2f6b52de3d7c88ac',
     );
     expect(fixture.nativeElement.textContent).toContain('4 bytes');
+    expect(fixture.nativeElement.textContent).toContain('Legacy');
+    expect(fixture.nativeElement.textContent).toContain('Version');
+    expect(fixture.nativeElement.textContent).toContain('Locktime');
+    expect(fixture.nativeElement.textContent).toContain(TXID);
     expect(fixture.nativeElement.textContent).toContain('76a91400112288ac');
     expect(fixture.nativeElement.textContent).toContain('P2PKH');
     expect(fixture.nativeElement.textContent).toContain('Fixture verified');

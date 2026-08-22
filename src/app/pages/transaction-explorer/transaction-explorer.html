@@ -155,14 +155,36 @@
           <dd>{{ transaction.outputs.length }}</dd>
         </div>
         <div>
-          <dt>Coinbase</dt>
-          <dd>{{ transaction.is_coinbase ? 'Yes' : 'No' }}</dd>
+          <dt>Format</dt>
+          <dd>
+            {{ transaction.is_coinbase ? 'Coinbase' : transaction.is_segwit ? 'SegWit' : 'Legacy' }}
+          </dd>
         </div>
       </dl>
 
       <section class="data-block" aria-labelledby="txid-heading">
         <h3 id="txid-heading">Transaction ID</h3>
         <code>{{ transaction.txid }}</code>
+      </section>
+
+      <section class="data-block" aria-labelledby="header-heading">
+        <h3 id="header-heading">Decoded header</h3>
+        <dl class="decoded-fields">
+          <div>
+            <dt>Version</dt>
+            <dd>{{ transaction.version }}</dd>
+          </div>
+          <div>
+            <dt>Locktime</dt>
+            <dd>{{ transaction.locktime }}</dd>
+          </div>
+          <div>
+            <dt>Witness transaction ID</dt>
+            <dd>
+              <code>{{ transaction.wtxid }}</code>
+            </dd>
+          </div>
+        </dl>
       </section>
 
       <section class="data-block" aria-labelledby="raw-heading">

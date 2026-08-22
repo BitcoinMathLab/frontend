@@ -28,7 +28,11 @@ async function mockTransactionApi(page: Page): Promise<void> {
       json: {
         api_version: 'v1',
         txid: TXID,
+        wtxid: TXID,
         transaction_hex: '01020304',
+        version: 1,
+        locktime: 0,
+        is_segwit: false,
         is_coinbase: false,
         outputs: [
           {
@@ -76,6 +80,9 @@ test('loads a transaction and displays its ordered spend context', async ({ page
   await expect(page.getByText('4,444,000,000 sats')).toBeVisible();
   await expect(page.getByText('76a914948c765a6914d43f2a7ac177da2c2f6b52de3d7c88ac')).toBeVisible();
   await expect(page.getByText('4 bytes')).toBeVisible();
+  await expect(page.getByText('Legacy', { exact: true })).toBeVisible();
+  await expect(page.getByText('Version', { exact: true })).toBeVisible();
+  await expect(page.getByText('Locktime', { exact: true })).toBeVisible();
   await expect(page.getByText('76a91400112288ac')).toBeVisible();
   await expect(page.getByText('P2PKH', { exact: true })).toHaveCount(2);
   await expect(page.getByText('Fixture verified', { exact: true })).toBeVisible();
