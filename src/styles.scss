@@ -170,7 +170,13 @@ p {
   margin: 0;
 }
 
-.field-action-button {
+.field-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.field-header .field-action-button {
   display: inline-flex;
   min-height: 2.4rem;
   border: 1px solid var(--color-graphite);
@@ -185,18 +191,44 @@ p {
   padding: 0.5rem 0.7rem;
 }
 
-.field-action-button:hover {
+.field-header .field-action-button:hover {
   border-color: var(--color-blue);
   background: var(--color-surface);
 }
 
-.field-action-button svg {
+.field-header .field-action-button--icon {
+  width: 2.4rem;
+  padding: 0;
+  justify-content: center;
+}
+
+.field-header .field-action-button svg {
   width: 1rem;
   fill: none;
   stroke: currentColor;
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 1.8;
+}
+
+.form-actions {
+  display: flex;
+  margin-top: 1rem;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.form-actions .clear-button {
+  border: 1px solid var(--color-graphite);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--color-paper);
+}
+
+.form-actions .clear-button:hover {
+  border-color: var(--color-blue);
+  background: var(--color-surface);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -49,12 +49,66 @@ describe('TransactionExplorer', () => {
       '001400112233445566778899aabbccddeeff00112233',
     );
 
-    const clear = fixture.nativeElement.querySelector('.field-action-button') as HTMLButtonElement;
+    const clear = fixture.nativeElement.querySelector('.clear-button') as HTMLButtonElement;
     clear.click();
     fixture.detectChanges();
 
     expect((fixture.nativeElement.querySelector('input') as HTMLInputElement).value).toBe('');
     expect(fixture.nativeElement.querySelector('.result')).toBeNull();
+  });
+
+  it('copies, pastes, and selects a curated transaction example', async () => {
+    const loadTransactionContext = vi.fn();
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    const pastedTxid = 'a'.repeat(64);
+    const readText = vi.fn().mockResolvedValue(pastedTxid);
+    const previousClipboard = Object.getOwnPropertyDescriptor(navigator, 'clipboard');
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { readText, writeText },
+    });
+    await TestBed.configureTestingModule({
+      imports: [TransactionExplorer],
+      providers: [{ provide: TraceApi, useValue: { loadTransactionContext } }],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(TransactionExplorer);
+    fixture.detectChanges();
+
+    const copy = fixture.nativeElement.querySelector(
+      '[aria-label="Copy transaction ID"]',
+    ) as HTMLButtonElement;
+    copy.click();
+    await fixture.whenStable();
+    expect(writeText).toHaveBeenCalledWith(TXID);
+
+    const paste = fixture.nativeElement.querySelector(
+      '[aria-label="Paste transaction ID"]',
+    ) as HTMLButtonElement;
+    paste.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect((fixture.nativeElement.querySelector('input') as HTMLInputElement).value).toBe(
+      pastedTxid,
+    );
+
+    const random = fixture.nativeElement.querySelector(
+      '[aria-label="Use random transaction example"]',
+    ) as HTMLButtonElement;
+    const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0);
+    random.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const randomTxid = (fixture.nativeElement.querySelector('input') as HTMLInputElement).value;
+    expect(randomTxid).toMatch(/^[0-9a-f]{64}$/);
+    expect(randomTxid).not.toBe(pastedTxid);
+    expect(loadTransactionContext).not.toHaveBeenCalled();
+    randomSpy.mockRestore();
+
+    if (previousClipboard) {
+      Object.defineProperty(navigator, 'clipboard', previousClipboard);
+    } else {
+      delete (navigator as { clipboard?: Clipboard }).clipboard;
+    }
   });
 
   it('rejects malformed transaction IDs without calling the API', async () => {

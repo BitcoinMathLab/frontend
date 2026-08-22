@@ -42,7 +42,7 @@ test('loads a transaction and displays its ordered spend context', async ({ page
   await expect(page.getByText('76a91400112288ac')).toBeVisible();
   await expect(page.getByText('P2SH-P2WPKH')).toBeVisible();
 
-  await page.getByRole('button', { name: 'Clear transaction ID' }).click();
+  await page.getByRole('button', { name: 'Clear', exact: true }).click();
   await expect(page.getByRole('textbox', { name: 'Transaction ID' })).toHaveValue('');
   await expect(page.getByRole('heading', { name: 'Transaction context', exact: true })).toHaveCount(
     0,
@@ -56,6 +56,12 @@ test('validates transaction IDs before sending a request', async ({ page }) => {
     await route.abort();
   });
   await page.goto('/labs/transaction-explorer');
+
+  await expect(page.getByRole('button', { name: 'Copy transaction ID' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Paste transaction ID' })).toBeVisible();
+  await page.getByRole('button', { name: 'Use random transaction example' }).click();
+  await expect(page.getByRole('textbox', { name: 'Transaction ID' })).toHaveValue(/^[0-9a-f]{64}$/);
+  expect(requests).toBe(0);
 
   await page.getByRole('textbox', { name: 'Transaction ID' }).fill('not-a-txid');
   await page.getByRole('button', { name: 'Inspect transaction' }).click();
