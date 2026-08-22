@@ -2,7 +2,7 @@
 
 The transaction explorer at `/labs/transaction-explorer` retrieves transaction context through the backend without
 exposing Bitcoin Core credentials to the browser. It displays the transaction ID, raw byte count, coinbase status, raw
-hex, and each input's ordered previous output.
+hex, every created output, and each input's ordered previous output.
 
 ## Automated evidence
 
@@ -13,7 +13,7 @@ Run:
     npm run build
     npm run test:e2e
 
-Unit coverage verifies the API URL and method, successful rendering, client-side validation, and the safe 503 state.
+Unit coverage verifies the API URL and method, input/output rendering, client-side validation, and the safe 503 state.
 Playwright covers the same user paths and checks a 390-pixel viewport for horizontal overflow. The browser tests mock
 the transaction endpoint so they do not depend on a synchronized local node.
 
@@ -31,8 +31,9 @@ successful historical lookup until synchronization finishes.
 
 ## QA validation
 
-- **Happy path:** Submit the prefilled confirmed transaction ID. Expect one result, a matching transaction ID, raw byte
-  count, coinbase status, raw hex, and previous outputs in input order.
+- **Input/output regression:** Submit
+  `fff2525b8931402dd09222c50775608f75787bd2b87e56995a7bdd30f79702c4`. Expect one input and two outputs. Output 0
+  contains 556,000,000 sats and output 1 contains 4,444,000,000 sats; both locking scripts are visible.
 - **Validation:** Replace the field with a short value or a non-hexadecimal character and submit. Expect an inline
   64-character validation error and no network request.
 - **Clear:** After a successful lookup or validation error, activate Clear. Expect the input, result, and error state to
@@ -41,8 +42,9 @@ successful historical lookup until synchronization finishes.
   selects a verified curated mainnet P2PKH, P2WPKH, or P2WSH example without submitting.
 - **Unavailable Core:** Stop Core, interrupt the tunnel, or test while `txindex` is building. Expect a safe message that
   Core is catching up or unavailable, with no hostnames, credentials, or internal exception detail.
-- **Boundary:** Load a coinbase transaction. Expect `Coinbase: Yes`, zero inputs, and an explanation that no previous
-  outputs are spent.
+- **Boundary:** Load the genesis coinbase transaction
+  `4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b`. Expect `Coinbase: Yes`, zero inputs, its
+  created output, and an explanation that no previous outputs are spent.
 - **Responsive:** Repeat at 390 pixels wide. Expect the form, long transaction IDs, scripts, and raw hex to remain within
   the viewport without page-level horizontal scrolling.
 - **Accessibility:** Use the keyboard to focus the input and submit button. Expect visible focus, a labeled textbox,
