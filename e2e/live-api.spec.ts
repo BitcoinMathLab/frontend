@@ -37,3 +37,27 @@ test('loads a catalog example through the real API, Core, and classification eng
   await expect(page.getByText('556,000,000 sats')).toBeVisible();
   await expect(page.getByText('4,444,000,000 sats')).toBeVisible();
 });
+
+test('loads genesis through the block-zero fallback with coinbase-safe metrics', async ({
+  page,
+}) => {
+  test.skip(!process.env['BML_LIVE_API'], 'Set BML_LIVE_API=1 to run the cross-repository check.');
+
+  await page.goto('/labs/transaction-explorer');
+  await page.getByRole('button', { name: /Genesis coinbase/ }).click();
+  await page.getByRole('button', { name: 'Inspect transaction' }).click();
+
+  const summary = page.locator('.summary');
+  await expect(summary.locator('div').filter({ hasText: 'Inputs' }).locator('dd')).toHaveText('0');
+  await expect(summary.locator('div').filter({ hasText: 'Outputs' }).locator('dd')).toHaveText('1');
+  await expect(summary.locator('div').filter({ hasText: 'Format' }).locator('dd')).toHaveText(
+    'Coinbase',
+  );
+  await expect(
+    summary.locator('div').filter({ hasText: 'Transaction fee' }).locator('dd'),
+  ).toHaveText('Not applicable');
+  await expect(summary.locator('div').filter({ hasText: 'Raw size' }).locator('dd')).toHaveText(
+    '204 bytes',
+  );
+  await expect(page.getByText('Fixture verified', { exact: true })).toBeVisible();
+});
