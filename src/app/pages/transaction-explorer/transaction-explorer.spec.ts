@@ -18,6 +18,10 @@ const RESPONSE: TransactionContextResponse = {
       vout: 1,
       amount_sats: 125_000,
       script_pubkey_hex: '76a91400112288ac',
+      output_type: 'P2SH',
+      spend_type: 'P2SH-P2WPKH',
+      is_nested: true,
+      redeem_script_hex: '001400112233445566778899aabbccddeeff00112233',
     },
   ],
 };
@@ -40,6 +44,10 @@ describe('TransactionExplorer', () => {
     expect(fixture.nativeElement.textContent).toContain('125,000 sats');
     expect(fixture.nativeElement.textContent).toContain('4 bytes');
     expect(fixture.nativeElement.textContent).toContain('76a91400112288ac');
+    expect(fixture.nativeElement.textContent).toContain('P2SH-P2WPKH');
+    expect(fixture.nativeElement.textContent).toContain(
+      '001400112233445566778899aabbccddeeff00112233',
+    );
   });
 
   it('rejects malformed transaction IDs without calling the API', async () => {

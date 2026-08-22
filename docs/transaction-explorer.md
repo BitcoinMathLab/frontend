@@ -2,7 +2,7 @@
 
 The transaction explorer at `/labs/transaction-explorer` retrieves transaction context through the backend without
 exposing Bitcoin Core credentials to the browser. It displays the transaction ID, raw byte count, coinbase status, raw
-hex, and each input's ordered previous output.
+hex, each input's ordered previous output, and the standard output/spend-path classification supplied by Bitclone.
 
 ## Automated evidence
 
@@ -32,7 +32,8 @@ successful historical lookup until synchronization finishes.
 ## QA validation
 
 - **Happy path:** Submit the prefilled confirmed transaction ID. Expect one result, a matching transaction ID, raw byte
-  count, coinbase status, raw hex, and previous outputs in input order.
+  count, coinbase status, raw hex, and previous outputs in input order. Expect each input to show its output type and
+  spend path; nested SegWit also shows the redeem script.
 - **Validation:** Replace the field with a short value or a non-hexadecimal character and submit. Expect an inline
   64-character validation error and no network request.
 - **Unavailable Core:** Stop Core, interrupt the tunnel, or test while `txindex` is building. Expect a safe message that

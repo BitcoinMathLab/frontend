@@ -68,6 +68,20 @@ export interface PreviousOutputContext {
   readonly vout: number;
   readonly amount_sats: number;
   readonly script_pubkey_hex: string;
+  readonly output_type: 'P2PK' | 'P2PKH' | 'P2MS' | 'P2SH' | 'P2WPKH' | 'P2WSH' | 'P2TR' | null;
+  readonly spend_type:
+    | 'P2PK'
+    | 'P2PKH'
+    | 'P2SH'
+    | 'P2SH-P2WPKH'
+    | 'P2SH-P2WSH'
+    | 'P2WPKH'
+    | 'P2WSH'
+    | 'P2TR-KEY-PATH'
+    | 'P2TR-SCRIPT-PATH'
+    | 'UNKNOWN';
+  readonly is_nested: boolean;
+  readonly redeem_script_hex: string | null;
 }
 
 export interface TransactionContextResponse {

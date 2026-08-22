@@ -17,6 +17,10 @@ async function mockTransactionApi(page: Page): Promise<void> {
             vout: 1,
             amount_sats: 125000,
             script_pubkey_hex: '76a91400112288ac',
+            output_type: 'P2SH',
+            spend_type: 'P2SH-P2WPKH',
+            is_nested: true,
+            redeem_script_hex: '001400112233445566778899aabbccddeeff00112233',
           },
         ],
       },
@@ -36,6 +40,7 @@ test('loads a transaction and displays its ordered spend context', async ({ page
   await expect(page.getByText('125,000 sats')).toBeVisible();
   await expect(page.getByText('4 bytes')).toBeVisible();
   await expect(page.getByText('76a91400112288ac')).toBeVisible();
+  await expect(page.getByText('P2SH-P2WPKH')).toBeVisible();
 });
 
 test('validates transaction IDs before sending a request', async ({ page }) => {

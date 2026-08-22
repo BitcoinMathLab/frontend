@@ -103,6 +103,14 @@
                 </div>
                 <dl>
                   <div>
+                    <dt>Output type</dt>
+                    <dd>{{ output.output_type ?? 'Non-standard' }}</dd>
+                  </div>
+                  <div>
+                    <dt>Spend path</dt>
+                    <dd>{{ output.spend_type }}</dd>
+                  </div>
+                  <div>
                     <dt>Previous txid</dt>
                     <dd>
                       <code>{{ output.txid }}</code>
@@ -118,6 +126,14 @@
                       <code>{{ output.script_pubkey_hex }}</code>
                     </dd>
                   </div>
+                  @if (output.redeem_script_hex) {
+                    <div>
+                      <dt>Redeem script</dt>
+                      <dd>
+                        <code>{{ output.redeem_script_hex }}</code>
+                      </dd>
+                    </div>
+                  }
                 </dl>
               </li>
             }
