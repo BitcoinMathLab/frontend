@@ -102,6 +102,9 @@ export interface TransactionContextResponse {
   readonly locktime: number;
   readonly is_segwit: boolean;
   readonly is_coinbase: boolean;
+  readonly total_input_sats: number;
+  readonly total_output_sats: number;
+  readonly fee_sats: number | null;
   readonly outputs: readonly TransactionOutputContext[];
   readonly spent_outputs: readonly PreviousOutputContext[];
 }

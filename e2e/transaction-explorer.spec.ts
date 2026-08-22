@@ -34,6 +34,9 @@ async function mockTransactionApi(page: Page): Promise<void> {
         locktime: 0,
         is_segwit: false,
         is_coinbase: false,
+        total_input_sats: 5000000000,
+        total_output_sats: 5000000000,
+        fee_sats: 0,
         outputs: [
           {
             vout: 0,
@@ -80,6 +83,8 @@ test('loads a transaction and displays its ordered spend context', async ({ page
   await expect(page.getByText('2 output(s)', { exact: true })).toBeVisible();
   await expect(page.getByText('556,000,000 sats')).toBeVisible();
   await expect(page.getByText('4,444,000,000 sats')).toBeVisible();
+  await expect(page.getByText('Transaction fee', { exact: true })).toBeVisible();
+  await expect(page.getByText('0 sats', { exact: true })).toBeVisible();
   await expect(page.getByText('76a914948c765a6914d43f2a7ac177da2c2f6b52de3d7c88ac')).toBeVisible();
   await expect(page.getByText('4 bytes')).toBeVisible();
   await expect(page.getByText('Legacy', { exact: true })).toBeVisible();

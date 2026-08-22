@@ -45,6 +45,9 @@ const RESPONSE: TransactionContextResponse = {
   locktime: 0,
   is_segwit: false,
   is_coinbase: false,
+  total_input_sats: 5_000_000_000,
+  total_output_sats: 5_000_000_000,
+  fee_sats: 0,
   outputs: [
     {
       vout: 0,
@@ -117,6 +120,7 @@ describe('TransactionExplorer', () => {
     expect(fixture.nativeElement.textContent).toContain('76a91400112288ac');
     expect(fixture.nativeElement.textContent).toContain('P2PKH');
     expect(fixture.nativeElement.textContent).toContain('Output type');
+    expect(fixture.nativeElement.textContent).toContain('Transaction fee');
     expect(fixture.nativeElement.textContent).toContain('Fixture verified');
 
     const clear = fixture.nativeElement.querySelector('.clear-button') as HTMLButtonElement;

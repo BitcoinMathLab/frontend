@@ -160,6 +160,24 @@
             {{ transaction.is_coinbase ? 'Coinbase' : transaction.is_segwit ? 'SegWit' : 'Legacy' }}
           </dd>
         </div>
+        <div>
+          <dt>Total input</dt>
+          <dd>{{ formatSats(transaction.total_input_sats) }} sats</dd>
+        </div>
+        <div>
+          <dt>Total output</dt>
+          <dd>{{ formatSats(transaction.total_output_sats) }} sats</dd>
+        </div>
+        <div>
+          <dt>Transaction fee</dt>
+          <dd>
+            {{
+              transaction.fee_sats === null
+                ? 'Not applicable'
+                : formatSats(transaction.fee_sats) + ' sats'
+            }}
+          </dd>
+        </div>
       </dl>
 
       <section class="data-block" aria-labelledby="txid-heading">
