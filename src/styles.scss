@@ -237,19 +237,29 @@ p {
   gap: 0.75rem;
 }
 
-.selection-card {
+.selection-grid .selection-card {
   border: 1px solid var(--color-graphite);
   background: var(--color-canvas);
   color: var(--color-paper);
   text-align: left;
 }
 
-.selection-card span,
-.selection-card small {
+.selection-grid .selection-card:hover,
+.selection-grid .selection-card:focus-visible {
+  border-color: var(--color-amber);
+  background: var(--color-surface);
+}
+
+.selection-grid .selection-card span,
+.selection-grid .selection-card small {
   display: block;
   margin-top: 0.45rem;
   color: var(--color-text-muted);
   font-size: 0.7rem;
+}
+
+.examples .examples__heading {
+  margin-bottom: 1rem;
 }
 
 .result__statuses {
@@ -273,6 +283,12 @@ p {
 }
 
 @media (max-width: 28rem) {
+  .examples .examples__heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
   .opcode-row {
     align-items: flex-start;
   }
