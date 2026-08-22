@@ -37,6 +37,8 @@ successful historical lookup until synchronization finishes.
   64-character validation error and no network request.
 - **Clear:** After a successful lookup or validation error, activate Clear. Expect the input, result, and error state to
   be removed without sending another request.
+- **Field actions:** Copy writes the current txid to the clipboard, Paste replaces it without submitting, and Random
+  selects a verified curated mainnet P2PKH, P2WPKH, or P2WSH example without submitting.
 - **Unavailable Core:** Stop Core, interrupt the tunnel, or test while `txindex` is building. Expect a safe message that
   Core is catching up or unavailable, with no hostnames, credentials, or internal exception detail.
 - **Boundary:** Load a coinbase transaction. Expect `Coinbase: Yes`, zero inputs, and an explanation that no previous
