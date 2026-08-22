@@ -84,10 +84,17 @@ export interface PreviousOutputContext {
   readonly redeem_script_hex: string | null;
 }
 
+export interface TransactionOutputContext {
+  readonly vout: number;
+  readonly amount_sats: number;
+  readonly script_pubkey_hex: string;
+}
+
 export interface TransactionContextResponse {
   readonly api_version: 'v1';
   readonly txid: string;
   readonly transaction_hex: string;
   readonly is_coinbase: boolean;
+  readonly outputs: readonly TransactionOutputContext[];
   readonly spent_outputs: readonly PreviousOutputContext[];
 }

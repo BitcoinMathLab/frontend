@@ -115,6 +115,10 @@
           <dd>{{ transaction.spent_outputs.length }}</dd>
         </div>
         <div>
+          <dt>Outputs</dt>
+          <dd>{{ transaction.outputs.length }}</dd>
+        </div>
+        <div>
           <dt>Coinbase</dt>
           <dd>{{ transaction.is_coinbase ? 'Yes' : 'No' }}</dd>
         </div>
@@ -128,6 +132,35 @@
       <section class="data-block" aria-labelledby="raw-heading">
         <h3 id="raw-heading">Raw transaction</h3>
         <code>{{ transaction.transaction_hex }}</code>
+      </section>
+
+      <section class="outputs" aria-labelledby="outputs-heading">
+        <div class="inputs__heading">
+          <h3 id="outputs-heading">Created outputs</h3>
+          <span>{{ transaction.outputs.length }} output(s)</span>
+        </div>
+        <ol>
+          @for (output of transaction.outputs; track output.vout) {
+            <li>
+              <div class="output-title">
+                <strong>Output {{ output.vout }}</strong>
+                <span>{{ formatSats(output.amount_sats) }} sats</span>
+              </div>
+              <dl>
+                <div>
+                  <dt>Output index</dt>
+                  <dd>{{ output.vout }}</dd>
+                </div>
+                <div>
+                  <dt>Locking script</dt>
+                  <dd>
+                    <code>{{ output.script_pubkey_hex }}</code>
+                  </dd>
+                </div>
+              </dl>
+            </li>
+          }
+        </ol>
       </section>
 
       <section class="inputs" aria-labelledby="inputs-heading">
