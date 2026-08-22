@@ -252,6 +252,17 @@ p {
   font-size: 0.7rem;
 }
 
+.result__statuses {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.status--warning {
+  color: var(--color-error);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

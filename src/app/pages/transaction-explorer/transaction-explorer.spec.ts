@@ -59,10 +59,10 @@ const RESPONSE: TransactionContextResponse = {
       vout: 1,
       amount_sats: 125_000,
       script_pubkey_hex: '76a91400112288ac',
-      output_type: 'P2SH',
-      spend_type: 'P2SH-P2WPKH',
-      is_nested: true,
-      redeem_script_hex: '001400112233445566778899aabbccddeeff00112233',
+      output_type: 'P2PKH',
+      spend_type: 'P2PKH',
+      is_nested: false,
+      redeem_script_hex: null,
     },
   ],
 };
@@ -84,6 +84,13 @@ describe('TransactionExplorer', () => {
     const fixture = TestBed.createComponent(TransactionExplorer);
     fixture.detectChanges();
 
+    const example = [...fixture.nativeElement.querySelectorAll('.example-card')].find(
+      (button: HTMLButtonElement) => button.textContent?.includes('Legacy P2PKH spend'),
+    ) as HTMLButtonElement;
+    example.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
     const form = fixture.nativeElement.querySelector('form') as HTMLFormElement;
     form.dispatchEvent(new Event('submit'));
     fixture.detectChanges();
@@ -98,13 +105,12 @@ describe('TransactionExplorer', () => {
     );
     expect(fixture.nativeElement.textContent).toContain('4 bytes');
     expect(fixture.nativeElement.textContent).toContain('76a91400112288ac');
-    expect(fixture.nativeElement.textContent).toContain('P2SH-P2WPKH');
-    expect(fixture.nativeElement.textContent).toContain(
-      '001400112233445566778899aabbccddeeff00112233',
-    );
+    expect(fixture.nativeElement.textContent).toContain('P2PKH');
+    expect(fixture.nativeElement.textContent).toContain('Fixture verified');
 
     const clear = fixture.nativeElement.querySelector('.clear-button') as HTMLButtonElement;
     clear.click();
+    await fixture.whenStable();
     fixture.detectChanges();
 
     expect((fixture.nativeElement.querySelector('input') as HTMLInputElement).value).toBe('');

@@ -2,6 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
   OnDestroy,
   OnInit,
@@ -35,6 +36,21 @@ export class TransactionExplorer implements OnInit, OnDestroy {
   protected readonly result = signal<TransactionContextResponse | null>(null);
   protected readonly copied = signal(false);
   protected readonly examples = signal<readonly TransactionExample[]>([]);
+  protected readonly selectedExample = signal<TransactionExample | null>(null);
+  protected readonly fixtureVerification = computed(() => {
+    const example = this.selectedExample();
+    const transaction = this.result();
+    if (!example || !transaction || transaction.txid !== example.txid) {
+      return null;
+    }
+    const spendTypes = transaction.spent_outputs.map((output) => output.spend_type);
+    const matches =
+      transaction.spent_outputs.length === example.input_count &&
+      transaction.outputs.length === example.output_count &&
+      spendTypes.length === example.expected_spend_types.length &&
+      spendTypes.every((spendType, index) => spendType === example.expected_spend_types[index]);
+    return matches ? 'Fixture verified' : 'Fixture differs from its expected context';
+  });
 
   ngOnInit(): void {
     this.examplesSubscription = this.traceApi.loadTransactionExamples().subscribe({
@@ -73,6 +89,7 @@ export class TransactionExplorer implements OnInit, OnDestroy {
     this.error.set('');
     this.result.set(null);
     this.copied.set(false);
+    this.selectedExample.set(null);
   }
 
   protected async copy(): Promise<void> {
@@ -106,13 +123,18 @@ export class TransactionExplorer implements OnInit, OnDestroy {
     const candidates = this.examples().filter(
       (example) => example.txid !== this.txid.trim().toLowerCase(),
     );
-    this.replaceInput(
-      candidates[Math.floor(Math.random() * candidates.length)]?.txid ?? DEFAULT_TXID,
-    );
+    const example = candidates[Math.floor(Math.random() * candidates.length)];
+    this.replaceInput(example?.txid ?? DEFAULT_TXID, example ?? null);
   }
 
   protected selectExample(example: TransactionExample): void {
-    this.replaceInput(example.txid);
+    this.replaceInput(example.txid, example);
+  }
+
+  protected inputChanged(txid: string): void {
+    if (this.selectedExample()?.txid !== txid.trim().toLowerCase()) {
+      this.selectedExample.set(null);
+    }
   }
 
   protected formatSats(amount: number): string {
@@ -129,13 +151,14 @@ export class TransactionExplorer implements OnInit, OnDestroy {
     clearTimeout(this.copiedTimeout);
   }
 
-  private replaceInput(txid: string): void {
+  private replaceInput(txid: string, example: TransactionExample | null = null): void {
     this.requestSubscription?.unsubscribe();
     this.txid = txid;
     this.loading.set(false);
     this.error.set('');
     this.result.set(null);
     this.copied.set(false);
+    this.selectedExample.set(example);
   }
 
   private messageFor(error: HttpErrorResponse): string {

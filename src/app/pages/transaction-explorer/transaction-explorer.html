@@ -101,6 +101,7 @@
       autocomplete="off"
       spellcheck="false"
       [(ngModel)]="txid"
+      (ngModelChange)="inputChanged($event)"
       [attr.aria-invalid]="error() ? 'true' : null"
       [attr.aria-describedby]="error() ? 'lookup-error' : 'lookup-help'"
     />
@@ -130,7 +131,14 @@
           <p class="eyebrow">Retrieved transaction</p>
           <h2 id="result-heading">Transaction context</h2>
         </div>
-        <span class="status">Core verified</span>
+        <div class="result__statuses">
+          <span class="status">Core verified</span>
+          @if (fixtureVerification(); as fixtureStatus) {
+            <span class="status" [class.status--warning]="fixtureStatus !== 'Fixture verified'">
+              {{ fixtureStatus }}
+            </span>
+          }
+        </div>
       </div>
 
       <dl class="summary">
