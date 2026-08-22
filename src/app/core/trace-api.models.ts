@@ -63,12 +63,14 @@ export interface P2pkhTraceResponse {
   readonly trace: ExecutionTrace;
 }
 
+export type OutputType = 'P2PK' | 'P2PKH' | 'P2MS' | 'P2SH' | 'P2WPKH' | 'P2WSH' | 'P2TR';
+
 export interface PreviousOutputContext {
   readonly txid: string;
   readonly vout: number;
   readonly amount_sats: number;
   readonly script_pubkey_hex: string;
-  readonly output_type: 'P2PK' | 'P2PKH' | 'P2MS' | 'P2SH' | 'P2WPKH' | 'P2WSH' | 'P2TR' | null;
+  readonly output_type: OutputType | null;
   readonly spend_type:
     | 'P2PK'
     | 'P2PKH'
@@ -88,6 +90,7 @@ export interface TransactionOutputContext {
   readonly vout: number;
   readonly amount_sats: number;
   readonly script_pubkey_hex: string;
+  readonly output_type: OutputType | null;
 }
 
 export interface TransactionContextResponse {

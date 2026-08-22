@@ -210,6 +210,10 @@
                   <dd>{{ output.vout }}</dd>
                 </div>
                 <div>
+                  <dt>Output type</dt>
+                  <dd>{{ output.output_type ?? 'Nonstandard' }}</dd>
+                </div>
+                <div>
                   <dt>Locking script</dt>
                   <dd>
                     <code>{{ output.script_pubkey_hex }}</code>

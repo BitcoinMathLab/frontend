@@ -39,11 +39,13 @@ async function mockTransactionApi(page: Page): Promise<void> {
             vout: 0,
             amount_sats: 556000000,
             script_pubkey_hex: '76a914c398efa9c392ba6013c5e04ee729755ef7f58b3288ac',
+            output_type: 'P2PKH',
           },
           {
             vout: 1,
             amount_sats: 4444000000,
             script_pubkey_hex: '76a914948c765a6914d43f2a7ac177da2c2f6b52de3d7c88ac',
+            output_type: 'P2PKH',
           },
         ],
         spent_outputs: [
@@ -84,7 +86,7 @@ test('loads a transaction and displays its ordered spend context', async ({ page
   await expect(page.getByText('Version', { exact: true })).toBeVisible();
   await expect(page.getByText('Locktime', { exact: true })).toBeVisible();
   await expect(page.getByText('76a91400112288ac')).toBeVisible();
-  await expect(page.getByText('P2PKH', { exact: true })).toHaveCount(2);
+  await expect(page.getByText('P2PKH', { exact: true })).toHaveCount(4);
   await expect(page.getByText('Fixture verified', { exact: true })).toBeVisible();
 
   await page.getByRole('button', { name: 'Clear', exact: true }).click();

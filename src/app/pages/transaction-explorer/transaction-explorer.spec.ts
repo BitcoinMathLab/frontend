@@ -50,11 +50,13 @@ const RESPONSE: TransactionContextResponse = {
       vout: 0,
       amount_sats: 556_000_000,
       script_pubkey_hex: '76a914c398efa9c392ba6013c5e04ee729755ef7f58b3288ac',
+      output_type: 'P2PKH',
     },
     {
       vout: 1,
       amount_sats: 4_444_000_000,
       script_pubkey_hex: '76a914948c765a6914d43f2a7ac177da2c2f6b52de3d7c88ac',
+      output_type: 'P2PKH',
     },
   ],
   spent_outputs: [
@@ -114,6 +116,7 @@ describe('TransactionExplorer', () => {
     expect(fixture.nativeElement.textContent).toContain(TXID);
     expect(fixture.nativeElement.textContent).toContain('76a91400112288ac');
     expect(fixture.nativeElement.textContent).toContain('P2PKH');
+    expect(fixture.nativeElement.textContent).toContain('Output type');
     expect(fixture.nativeElement.textContent).toContain('Fixture verified');
 
     const clear = fixture.nativeElement.querySelector('.clear-button') as HTMLButtonElement;
