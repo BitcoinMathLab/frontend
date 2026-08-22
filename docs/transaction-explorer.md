@@ -21,6 +21,10 @@ Unit coverage verifies the API URL and method, input/output rendering, client-si
 Playwright covers the same user paths and checks a 390-pixel viewport for horizontal overflow. The browser tests mock
 the transaction endpoint so they do not depend on a synchronized local node.
 
+With the backend, Core tunnel, and frontend running, verify the full catalog path with:
+
+    BML_LIVE_API=1 npx playwright test e2e/live-api.spec.ts --grep "catalog example"
+
 ## Manual setup
 
 1. Start the backend with its Bitcoin Core RPC environment configured.
