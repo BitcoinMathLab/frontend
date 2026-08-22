@@ -61,3 +61,29 @@ test('loads genesis through the block-zero fallback with coinbase-safe metrics',
   );
   await expect(page.getByText('Fixture verified', { exact: true })).toBeVisible();
 });
+
+test('loads native SegWit with distinct identity and rounded virtual size', async ({ page }) => {
+  test.skip(!process.env['BML_LIVE_API'], 'Set BML_LIVE_API=1 to run the cross-repository check.');
+
+  await page.goto('/labs/transaction-explorer');
+  await page.getByRole('button', { name: /Native SegWit P2WPKH/ }).click();
+  await page.getByRole('button', { name: 'Inspect transaction' }).click();
+
+  const summary = page.locator('.summary');
+  await expect(summary.locator('div').filter({ hasText: 'Format' }).locator('dd')).toHaveText(
+    'SegWit',
+  );
+  await expect(summary.locator('div').filter({ hasText: 'Raw size' }).locator('dd')).toHaveText(
+    '192 bytes',
+  );
+  await expect(summary.locator('div').filter({ hasText: 'Virtual size' }).locator('dd')).toHaveText(
+    '111 vbytes',
+  );
+  await expect(summary.locator('div').filter({ hasText: 'Weight' }).locator('dd')).toHaveText(
+    '441 WU',
+  );
+  await expect(
+    summary.locator('div').filter({ hasText: 'Transaction fee' }).locator('dd'),
+  ).toHaveText('24,400 sats');
+  await expect(page.getByText('Fixture verified', { exact: true })).toBeVisible();
+});
