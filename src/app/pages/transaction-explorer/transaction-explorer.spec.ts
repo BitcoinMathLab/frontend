@@ -48,6 +48,13 @@ describe('TransactionExplorer', () => {
     expect(fixture.nativeElement.textContent).toContain(
       '001400112233445566778899aabbccddeeff00112233',
     );
+
+    const clear = fixture.nativeElement.querySelector('.field-action-button') as HTMLButtonElement;
+    clear.click();
+    fixture.detectChanges();
+
+    expect((fixture.nativeElement.querySelector('input') as HTMLInputElement).value).toBe('');
+    expect(fixture.nativeElement.querySelector('.result')).toBeNull();
   });
 
   it('rejects malformed transaction IDs without calling the API', async () => {

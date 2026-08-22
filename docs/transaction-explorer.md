@@ -36,6 +36,8 @@ successful historical lookup until synchronization finishes.
   spend path; nested SegWit also shows the redeem script.
 - **Validation:** Replace the field with a short value or a non-hexadecimal character and submit. Expect an inline
   64-character validation error and no network request.
+- **Clear:** After a successful lookup or validation error, activate Clear. Expect the input, result, and error state to
+  be removed without sending another request.
 - **Unavailable Core:** Stop Core, interrupt the tunnel, or test while `txindex` is building. Expect a safe message that
   Core is catching up or unavailable, with no hostnames, credentials, or internal exception detail.
 - **Boundary:** Load a coinbase transaction. Expect `Coinbase: Yes`, zero inputs, and an explanation that no previous
