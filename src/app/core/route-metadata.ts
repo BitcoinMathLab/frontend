@@ -29,6 +29,12 @@ const STATIC_METADATA: Readonly<Record<string, PageMetadata>> = Object.freeze({
       'Step through valid and invalid P2PKH spends with synchronized opcodes, serialized bytes, and stack snapshots.',
     type: 'website',
   },
+  '/labs/transaction-explorer': {
+    title: 'Transaction Explorer — Bitcoin Math Lab',
+    description:
+      'Load a Bitcoin transaction and inspect its raw bytes, inputs, and previous outputs through a local Bitcoin Core node.',
+    type: 'website',
+  },
   '/about': {
     title: 'About — Bitcoin Math Lab',
     description:

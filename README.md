@@ -24,6 +24,10 @@ The visualizer at `/labs/script-visualizer` loads curated P2PKH spends from the 
 guided successful and failing lessons, before/after stacks, byte and opcode highlighting, a timeline, playback controls,
 and keyboard navigation.
 
+The transaction explorer at `/labs/transaction-explorer` validates a mainnet transaction ID and loads its raw bytes and
+ordered previous-output context from the backend's Bitcoin Core connection. See the
+[transaction explorer QA guide](docs/transaction-explorer.md) for setup and story validation.
+
 Public routes publish route-specific descriptions, canonical URLs, and Open Graph/Twitter metadata. Add every new
 indexable route to `public/sitemap.xml` when it is introduced.
 

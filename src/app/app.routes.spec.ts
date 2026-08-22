@@ -5,6 +5,7 @@ describe('application routes', () => {
     expect(routes.map((route) => route.path)).toEqual([
       '',
       'labs/script-visualizer',
+      'labs/transaction-explorer',
       'about',
       'docs',
       'roadmap',

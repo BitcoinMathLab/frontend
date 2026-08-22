@@ -34,6 +34,9 @@
     <loc>https://bitcoinmathlab.com/labs/script-visualizer</loc>
   </url>
   <url>
+    <loc>https://bitcoinmathlab.com/labs/transaction-explorer</loc>
+  </url>
+  <url>
     <loc>https://bitcoinmathlab.com/contact</loc>
   </url>
 </urlset>

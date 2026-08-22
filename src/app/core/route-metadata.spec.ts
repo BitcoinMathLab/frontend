@@ -4,6 +4,7 @@ describe('route metadata catalog', () => {
   it('describes primary product and documentation routes', () => {
     expect(metadataForPath('/').title).toBe('Bitcoin Math Lab — See Bitcoin execute');
     expect(metadataForPath('/labs/script-visualizer').description).toContain('P2PKH');
+    expect(metadataForPath('/labs/transaction-explorer').description).toContain('previous outputs');
     expect(metadataForPath('/docs').description).toContain('architecture');
   });
 

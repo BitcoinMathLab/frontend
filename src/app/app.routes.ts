@@ -15,6 +15,14 @@ export const routes: Routes = [
       import('./pages/script-visualizer/script-visualizer').then((page) => page.ScriptVisualizer),
   },
   {
+    path: 'labs/transaction-explorer',
+    title: 'Transaction Explorer — Bitcoin Math Lab',
+    loadComponent: () =>
+      import('./pages/transaction-explorer/transaction-explorer').then(
+        (page) => page.TransactionExplorer,
+      ),
+  },
+  {
     path: 'about',
     title: 'About — Bitcoin Math Lab',
     loadComponent: () => import('./pages/about/about').then((page) => page.About),

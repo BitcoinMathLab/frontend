@@ -1,0 +1,208 @@
+<section class="explorer-hero">
+  <div>
+    <p class="eyebrow">Interactive lab · Mainnet</p>
+    <h1>Open a Bitcoin transaction.</h1>
+    <p>
+      Retrieve raw transaction bytes and the previous outputs needed to understand each input. Data
+      comes from the Bitcoin Core node connected to Bitcoin Math Lab.
+    </p>
+  </div>
+</section>
+
+<section class="explorer" aria-labelledby="explorer-heading">
+  <div class="explorer__heading">
+    <div>
+      <p class="eyebrow">Transaction context</p>
+      <h2 id="explorer-heading">Look up by transaction ID</h2>
+    </div>
+    <p>The example ID is ready to replace with any confirmed mainnet transaction.</p>
+  </div>
+
+  <form (ngSubmit)="lookup()" novalidate>
+    <div class="field-header">
+      <label for="transaction-id">Transaction ID</label>
+      <div class="field-actions">
+        <button
+          type="button"
+          class="field-action-button field-action-button--icon"
+          [attr.title]="copied() ? 'Copied' : 'Copy transaction ID'"
+          [attr.aria-label]="copied() ? 'Copied transaction ID' : 'Copy transaction ID'"
+          (click)="copy()"
+        >
+          @if (copied()) {
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg>
+          } @else {
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="9" y="9" width="11" height="11" rx="2" />
+              <path d="M15 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h3" />
+            </svg>
+          }
+        </button>
+        <button
+          type="button"
+          class="field-action-button field-action-button--icon"
+          title="Paste transaction ID"
+          aria-label="Paste transaction ID"
+          (click)="paste()"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="5" y="5" width="14" height="16" rx="2" />
+            <path d="M9 5V3h6v2M9 11h6m-6 4h6" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          class="field-action-button field-action-button--icon"
+          title="Use random transaction example"
+          aria-label="Use random transaction example"
+          (click)="random()"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M3 7h3c4 0 6 10 10 10h5m-3-3 3 3-3 3M3 17h3c1.6 0 2.8-1.6 4-3.5M14 7h2.5H21m-3-3 3 3-3 3"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
+    <input
+      id="transaction-id"
+      name="transaction-id"
+      type="text"
+      maxlength="64"
+      autocomplete="off"
+      spellcheck="false"
+      [(ngModel)]="txid"
+      [attr.aria-invalid]="error() ? 'true' : null"
+      [attr.aria-describedby]="error() ? 'lookup-error' : 'lookup-help'"
+    />
+    <p id="lookup-help" class="field-help">64 hexadecimal characters · no private data</p>
+    <div class="form-actions">
+      <button type="submit" [disabled]="loading()">
+        {{ loading() ? 'Loading…' : 'Inspect transaction' }}
+      </button>
+      <button type="button" class="clear-button" (click)="clear()">Clear</button>
+    </div>
+  </form>
+
+  @if (loading()) {
+    <div class="state-card" role="status">
+      <span class="state-card__pulse" aria-hidden="true"></span>
+      Asking Bitcoin Core for transaction context…
+    </div>
+  } @else if (error()) {
+    <div id="lookup-error" class="state-card state-card--error" role="alert">
+      <strong>Transaction unavailable</strong>
+      <p>{{ error() }}</p>
+    </div>
+  } @else if (result(); as transaction) {
+    <article class="result" aria-labelledby="result-heading">
+      <div class="result__heading">
+        <div>
+          <p class="eyebrow">Retrieved transaction</p>
+          <h2 id="result-heading">Transaction context</h2>
+        </div>
+        <span class="status">Core verified</span>
+      </div>
+
+      <dl class="summary">
+        <div>
+          <dt>Raw size</dt>
+          <dd>{{ byteCount(transaction.transaction_hex) }} bytes</dd>
+        </div>
+        <div>
+          <dt>Inputs</dt>
+          <dd>{{ transaction.spent_outputs.length }}</dd>
+        </div>
+        <div>
+          <dt>Outputs</dt>
+          <dd>{{ transaction.outputs.length }}</dd>
+        </div>
+        <div>
+          <dt>Coinbase</dt>
+          <dd>{{ transaction.is_coinbase ? 'Yes' : 'No' }}</dd>
+        </div>
+      </dl>
+
+      <section class="data-block" aria-labelledby="txid-heading">
+        <h3 id="txid-heading">Transaction ID</h3>
+        <code>{{ transaction.txid }}</code>
+      </section>
+
+      <section class="data-block" aria-labelledby="raw-heading">
+        <h3 id="raw-heading">Raw transaction</h3>
+        <code>{{ transaction.transaction_hex }}</code>
+      </section>
+
+      <section class="outputs" aria-labelledby="outputs-heading">
+        <div class="inputs__heading">
+          <h3 id="outputs-heading">Created outputs</h3>
+          <span>{{ transaction.outputs.length }} output(s)</span>
+        </div>
+        <ol>
+          @for (output of transaction.outputs; track output.vout) {
+            <li>
+              <div class="output-title">
+                <strong>Output {{ output.vout }}</strong>
+                <span>{{ formatSats(output.amount_sats) }} sats</span>
+              </div>
+              <dl>
+                <div>
+                  <dt>Output index</dt>
+                  <dd>{{ output.vout }}</dd>
+                </div>
+                <div>
+                  <dt>Locking script</dt>
+                  <dd>
+                    <code>{{ output.script_pubkey_hex }}</code>
+                  </dd>
+                </div>
+              </dl>
+            </li>
+          }
+        </ol>
+      </section>
+
+      <section class="inputs" aria-labelledby="inputs-heading">
+        <div class="inputs__heading">
+          <h3 id="inputs-heading">Previous outputs</h3>
+          <span>{{ transaction.spent_outputs.length }} input(s)</span>
+        </div>
+        @if (transaction.spent_outputs.length === 0) {
+          <p class="empty-state">
+            Coinbase transactions create new outputs and spend no previous outputs.
+          </p>
+        } @else {
+          <ol>
+            @for (output of transaction.spent_outputs; track $index) {
+              <li>
+                <div class="output-title">
+                  <strong>Input {{ $index + 1 }}</strong>
+                  <span>{{ formatSats(output.amount_sats) }} sats</span>
+                </div>
+                <dl>
+                  <div>
+                    <dt>Previous txid</dt>
+                    <dd>
+                      <code>{{ output.txid }}</code>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Output index</dt>
+                    <dd>{{ output.vout }}</dd>
+                  </div>
+                  <div>
+                    <dt>Locking script</dt>
+                    <dd>
+                      <code>{{ output.script_pubkey_hex }}</code>
+                    </dd>
+                  </div>
+                </dl>
+              </li>
+            }
+          </ol>
+        }
+      </section>
+    </article>
+  }
+</section>
