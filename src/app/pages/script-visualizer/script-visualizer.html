@@ -1,7 +1,6 @@
 <section class="visualizer-hero">
   <p class="eyebrow">P2PKH script visualizer</p>
   <h1>Watch Bitcoin Script execute.</h1>
-  <p>Follow the script flow, stack state, and current operation one step at a time.</p>
 </section>
 
 <section class="lab" aria-label="P2PKH spend verification">
@@ -20,10 +19,9 @@
   } @else if (response(); as result) {
     <aside class="spend-context" aria-label="Loaded transaction context">
       <div class="spend-context__title">
-        <span class="context-status" aria-hidden="true"></span>
         <div>
-          <strong>P2PKH spend loaded</strong>
-          <span>Input 0 → previous output {{ outpoint.vout }}</span>
+          <strong>P2PKH example</strong>
+          <span>Input 0 → output {{ outpoint.vout }}</span>
         </div>
       </div>
       <dl>

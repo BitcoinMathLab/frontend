@@ -19,13 +19,13 @@
 .stack-workbench__header h2 {
   margin: 0;
   color: var(--color-paper);
-  font-size: 0.9rem;
+  font-size: 1.05rem;
 }
 
 .stack-workbench__header span {
   color: var(--color-text-subtle);
   font-family: var(--font-mono);
-  font-size: 0.55rem;
+  font-size: 0.75rem;
   text-align: right;
   text-transform: uppercase;
 }
@@ -55,7 +55,7 @@
   margin: 0;
   color: var(--color-amber);
   font-family: var(--font-mono);
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   letter-spacing: 0.07em;
   text-transform: uppercase;
 }
@@ -63,7 +63,7 @@
 .movement-pill,
 .movement-empty {
   border-radius: 0.4rem;
-  font-size: 0.65rem;
+  font-size: 0.78rem;
   padding: 0.35rem 0.5rem;
 }
 

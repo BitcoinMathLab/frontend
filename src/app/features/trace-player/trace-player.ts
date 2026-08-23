@@ -38,6 +38,10 @@ export class TracePlayer implements OnDestroy {
     const count = this.trace().steps.length;
     return count ? ((this.currentIndex() + 1) / count) * 100 : 0;
   });
+  protected readonly outcomeLabel = computed(() => {
+    if (!this.atEnd()) return 'In progress';
+    return this.trace().success ? 'Valid spend' : 'Invalid spend';
+  });
   protected readonly phaseLabel = computed(() => {
     const unlockingLength = this.scripts().unlocking.length / 2;
     return this.currentStep()?.opcode.byte_offset < unlockingLength

@@ -49,6 +49,9 @@ describe('TracePlayer', () => {
   });
 
   it('moves forward, backward, jumps to the result, and resets', () => {
+    expect(fixture.nativeElement.textContent).toContain('In progress');
+    expect(fixture.nativeElement.textContent).not.toContain('Valid spend');
+
     control('Next step').click();
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Step 2 of 3');
@@ -60,10 +63,12 @@ describe('TracePlayer', () => {
     control('Go to result').click();
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Step 3 of 3');
+    expect(fixture.nativeElement.textContent).toContain('Valid spend');
 
     control('Restart trace').click();
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Step 1 of 3');
+    expect(fixture.nativeElement.textContent).toContain('In progress');
   });
 
   it('plays to the final step and pauses automatically', () => {

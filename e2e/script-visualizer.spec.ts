@@ -106,7 +106,7 @@ test('connects spend elements, parsing, execution, stacks, and signature detail'
 
   const player = page.getByLabel('Script trace player');
   await expect(page.getByRole('heading', { name: 'Watch Bitcoin Script execute.' })).toBeVisible();
-  await expect(page.getByLabel('Loaded transaction context')).toContainText('P2PKH spend loaded');
+  await expect(page.getByLabel('Loaded transaction context')).toContainText('P2PKH example');
   await expect(page.getByRole('heading', { name: 'Script flow' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Stack state' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Execution details' })).toBeVisible();
@@ -120,12 +120,23 @@ test('connects spend elements, parsing, execution, stacks, and signature detail'
     );
   expect(columnCount).toBe(3);
   const controlsBox = await page.getByLabel('Playback controls').boundingBox();
+  const controlsBarBox = await page.locator('.controls-bar').boundingBox();
   const workspaceBox = await page.locator('.visualizer-grid').boundingBox();
   expect(controlsBox?.y).toBeLessThan(workspaceBox?.y ?? 0);
+  expect(
+    Math.abs(
+      (controlsBox?.x ?? 0) +
+        (controlsBox?.width ?? 0) / 2 -
+        ((controlsBarBox?.x ?? 0) + (controlsBarBox?.width ?? 0) / 2),
+    ),
+  ).toBeLessThan(2);
+  await expect(page.getByText('Keyboard:', { exact: false })).toHaveCount(0);
   await expect(page.getByText('1 · scriptSig')).toBeVisible();
   await expect(page.getByText('2 · scriptPubKey')).toBeVisible();
   await expect(page.getByText('PUSH signature')).toBeVisible();
   await expect(page.getByLabel('Execution status').getByText('Step 1 of 3')).toBeVisible();
+  await expect(page.getByLabel('Execution status')).toContainText('In progress');
+  await expect(page.getByText('Valid spend', { exact: true })).toHaveCount(0);
 
   await page.getByRole('button', { name: 'Next step' }).click();
   await expect(page.getByLabel('Execution status').getByText('Step 2 of 3')).toBeVisible();
@@ -136,6 +147,7 @@ test('connects spend elements, parsing, execution, stacks, and signature detail'
   await expect(page.getByLabel('Alt stack').getByText('empty')).toBeVisible();
 
   await page.getByRole('button', { name: 'Go to result' }).click();
+  await expect(page.getByText('Valid spend', { exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'OP_CHECKSIG', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Open signature verification detail' }).click();
   await expect(page.getByRole('dialog')).toContainText('How this signature is verified');
@@ -151,6 +163,9 @@ test('shows a failed P2PKH result without adding another lesson surface', async 
   await mockTraceApi(page, false);
   await page.goto('/visualizer');
 
+  await expect(page.getByText('In progress', { exact: true })).toBeVisible();
+  await expect(page.getByText('Invalid spend', { exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Go to result' }).click();
   await expect(page.getByText('Invalid spend', { exact: true })).toBeVisible();
   await expect(page.getByLabel('Failure explanation')).toContainText(
     'The final stack value is false.',

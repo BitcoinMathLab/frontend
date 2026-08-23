@@ -50,8 +50,13 @@
 
     <div class="execution-status" aria-label="Execution status">
       <span class="step-label" aria-live="polite">{{ stepLabel() }}</span>
-      <span class="outcome" role="status" [class.outcome--valid]="trace().success">
-        {{ trace().success ? 'Valid spend' : 'Invalid spend' }}
+      <span
+        class="outcome"
+        role="status"
+        [class.outcome--valid]="atEnd() && trace().success"
+        [class.outcome--invalid]="atEnd() && !trace().success"
+      >
+        {{ outcomeLabel() }}
       </span>
     </div>
   </div>
@@ -83,7 +88,6 @@
         </header>
 
         <article class="current-operation">
-          <span class="operation-category">Current operation</span>
           <h3>{{ step.opcode.name }}</h3>
           <p>{{ step.explanation }}</p>
         </article>
@@ -92,10 +96,6 @@
           <div>
             <dt>Stack effect</dt>
             <dd>{{ stackEffect() }}</dd>
-          </div>
-          <div>
-            <dt>Position</dt>
-            <dd>{{ stepLabel() }}</dd>
           </div>
         </dl>
 
@@ -115,8 +115,6 @@
       </section>
     </div>
   }
-
-  <p class="keyboard-help">Keyboard: ←/→ step · Space play/pause · Escape closes detail</p>
 
   @if (signatureDetailOpen()) {
     <app-signature-detail

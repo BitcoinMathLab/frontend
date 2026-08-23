@@ -18,7 +18,7 @@ describe('ScriptVisualizer', () => {
 
     expect(loadP2pkhTrace).toHaveBeenCalledOnce();
     expect(fixture.nativeElement.textContent).toContain('Watch Bitcoin Script execute.');
-    expect(fixture.nativeElement.textContent).toContain('P2PKH spend loaded');
+    expect(fixture.nativeElement.textContent).toContain('P2PKH example');
     expect(fixture.nativeElement.textContent).toContain('Raw scripts');
     expect(fixture.nativeElement.textContent).toContain('scriptSig');
     expect(fixture.nativeElement.textContent).toContain('scriptPubKey');
@@ -26,7 +26,8 @@ describe('ScriptVisualizer', () => {
     expect(fixture.nativeElement.textContent).toContain('Stack state');
     expect(fixture.nativeElement.textContent).toContain('Execution details');
     expect(fixture.nativeElement.textContent).toContain('Step 1 of 3');
-    expect(fixture.nativeElement.textContent).toContain('Valid spend');
+    expect(fixture.nativeElement.textContent).toContain('In progress');
+    expect(fixture.nativeElement.textContent).not.toContain('Valid spend');
   });
 
   it('shows a safe retry state and recovers on the next request', async () => {
