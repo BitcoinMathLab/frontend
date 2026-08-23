@@ -86,7 +86,10 @@ async function mockTransactionApi(page: Page): Promise<void> {
   });
 }
 
-test('loads a transaction and displays its ordered spend context', async ({ page }) => {
+test('loads a transaction and displays its ordered spend context', async ({ page, context }) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write'], {
+    origin: 'http://127.0.0.1:4200',
+  });
   await mockTransactionApi(page);
   await page.goto('/labs/transaction-explorer');
 
@@ -121,6 +124,15 @@ test('loads a transaction and displays its ordered spend context', async ({ page
   await expect(page.locator('.byte-detail')).toContainText('Output 1 locking-script length');
   await page.getByRole('button', { name: 'Locate output 2 bytes' }).click();
   await expect(page.locator('.byte-detail')).toContainText('Output 2 amount');
+  const selectedOutputBytes = page.locator('.byte-field--active');
+  await selectedOutputBytes.focus();
+  await page.keyboard.press('End');
+  await expect(page.locator('.byte-detail')).toContainText('Locktime');
+  await expect(page.locator('.byte-field').last()).toBeFocused();
+  const copyLocktime = page.locator('.byte-detail__title button');
+  await copyLocktime.click();
+  await expect(copyLocktime).toHaveText('Copied');
+  await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe('00000000');
 
   await page.setViewportSize({ width: 390, height: 844 });
   const hasHorizontalOverflow = await page.evaluate(
