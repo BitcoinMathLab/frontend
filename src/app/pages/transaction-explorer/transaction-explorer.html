@@ -267,6 +267,23 @@
                   </div>
                 </dl>
                 <p>{{ field.description }}</p>
+                <div class="byte-navigation" aria-label="Byte field walkthrough controls">
+                  <button
+                    type="button"
+                    [disabled]="selectedByteFieldIndex() === 0"
+                    (click)="navigateByteField(-1)"
+                  >
+                    Previous field
+                  </button>
+                  <span>{{ selectedByteFieldIndex() + 1 }} / {{ byteFields().length }}</span>
+                  <button
+                    type="button"
+                    [disabled]="selectedByteFieldIndex() === byteFields().length - 1"
+                    (click)="navigateByteField(1)"
+                  >
+                    Next field
+                  </button>
+                </div>
               </aside>
             }
           </div>

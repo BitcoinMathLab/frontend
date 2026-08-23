@@ -147,6 +147,14 @@ describe('TransactionExplorer', () => {
     amountBytes.click();
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('.byte-detail').textContent).toContain('1000 sats');
+    const nextField = [...fixture.nativeElement.querySelectorAll('.byte-navigation button')].find(
+      (button: HTMLButtonElement) => button.textContent?.includes('Next field'),
+    ) as HTMLButtonElement;
+    nextField.click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.byte-detail').textContent).toContain(
+      'Output 1 locking-script length',
+    );
     expect(fixture.nativeElement.textContent).toContain('Fixture verified');
 
     const clear = fixture.nativeElement.querySelector('.clear-button') as HTMLButtonElement;

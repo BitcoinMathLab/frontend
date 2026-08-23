@@ -114,6 +114,8 @@ test('loads a transaction and displays its ordered spend context', async ({ page
   await expect(page.getByRole('heading', { name: 'Transaction byte inspector' })).toBeVisible();
   await page.getByRole('button', { name: /Output 1 amount, bytes/ }).click();
   await expect(page.locator('.byte-detail')).toContainText('1000 sats');
+  await page.getByRole('button', { name: 'Next field' }).click();
+  await expect(page.locator('.byte-detail')).toContainText('Output 1 locking-script length');
 
   await page.setViewportSize({ width: 390, height: 844 });
   const hasHorizontalOverflow = await page.evaluate(

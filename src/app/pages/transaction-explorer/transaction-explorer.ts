@@ -54,6 +54,10 @@ export class TransactionExplorer implements OnInit, OnDestroy {
     const fields = this.byteFields();
     return fields.find((field) => field.id === this.selectedByteFieldId()) ?? fields[0] ?? null;
   });
+  protected readonly selectedByteFieldIndex = computed(() => {
+    const selected = this.selectedByteField();
+    return selected ? this.byteFields().findIndex((field) => field.id === selected.id) : -1;
+  });
   protected readonly fixtureVerification = computed(() => {
     const example = this.selectedExample();
     const transaction = this.result();
@@ -164,6 +168,14 @@ export class TransactionExplorer implements OnInit, OnDestroy {
 
   protected selectByteField(field: TransactionByteField): void {
     this.selectedByteFieldId.set(field.id);
+  }
+
+  protected navigateByteField(direction: -1 | 1): void {
+    const fields = this.byteFields();
+    const nextIndex = this.selectedByteFieldIndex() + direction;
+    if (nextIndex >= 0 && nextIndex < fields.length) {
+      this.selectedByteFieldId.set(fields[nextIndex].id);
+    }
   }
 
   ngOnDestroy(): void {
