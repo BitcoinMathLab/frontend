@@ -36,6 +36,9 @@ test('loads a catalog example through the real API, Core, and classification eng
   await expect(page.getByText('Fixture verified', { exact: true })).toBeVisible();
   await expect(page.getByText('556,000,000 sats')).toBeVisible();
   await expect(page.getByText('4,444,000,000 sats')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Transaction byte inspector' })).toBeVisible();
+  await page.getByRole('button', { name: 'Locate output 2 bytes' }).click();
+  await expect(page.locator('.byte-detail')).toContainText('4444000000 sats');
 });
 
 test('loads genesis through the block-zero fallback with coinbase-safe metrics', async ({
@@ -59,6 +62,8 @@ test('loads genesis through the block-zero fallback with coinbase-safe metrics',
   await expect(summary.locator('div').filter({ hasText: 'Raw size' }).locator('dd')).toHaveText(
     '204 bytes',
   );
+  await page.getByRole('button', { name: /Input 1 previous output index, bytes/ }).click();
+  await expect(page.locator('.byte-detail')).toContainText('coinbase marker');
   await expect(page.getByText('Fixture verified', { exact: true })).toBeVisible();
 });
 
@@ -85,5 +90,7 @@ test('loads native SegWit with distinct identity and rounded virtual size', asyn
   await expect(
     summary.locator('div').filter({ hasText: 'Transaction fee' }).locator('dd'),
   ).toHaveText('24,400 sats');
+  await expect(page.getByRole('button', { name: /SegWit marker and flag, bytes/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Input 1 witness item 2, bytes/ })).toBeVisible();
   await expect(page.getByText('Fixture verified', { exact: true })).toBeVisible();
 });
