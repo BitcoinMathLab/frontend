@@ -1,8 +1,14 @@
-<section class="stack-view" [attr.aria-label]="label()">
-  <header>
-    <strong>{{ label() }}</strong>
-    <span>{{ snapshot().depth }} {{ snapshot().depth === 1 ? 'item' : 'items' }}</span>
-  </header>
+<section
+  class="stack-view"
+  [class.stack-view--headerless]="!showHeader()"
+  [attr.aria-label]="label()"
+>
+  @if (showHeader()) {
+    <header>
+      <strong>{{ label() }}</strong>
+      <span>{{ snapshot().depth }} {{ snapshot().depth === 1 ? 'item' : 'items' }}</span>
+    </header>
+  }
   <div class="stack-view__items">
     @for (item of items(); track item.key) {
       <article class="stack-item" [class]="item.kind">

@@ -12,6 +12,7 @@ export class StackView {
   readonly label = input.required<string>();
   readonly snapshot = input.required<StackSnapshot>();
   readonly stepIndex = input.required<number>();
+  readonly showHeader = input(true);
 
   protected readonly items = computed(() =>
     this.snapshot().items.map((value, index) => ({

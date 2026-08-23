@@ -1,0 +1,160 @@
+<section class="sandbox" aria-label="OP_DUP sandbox">
+  <div class="sandbox-controls">
+    <label>
+      <span>Hex data</span>
+      <input [value]="dataHex()" (input)="updateData($event)" spellcheck="false" />
+    </label>
+    <label>
+      <span>Add to</span>
+      <select [value]="destination()" (change)="updateDestination($event)">
+        <option value="flow">Script flow</option>
+        <option value="main">Main stack</option>
+        <option value="alt">Alt stack</option>
+      </select>
+    </label>
+    <button type="button" (click)="randomize()">Random</button>
+    <button type="button" (click)="addData()">Add data</button>
+  </div>
+
+  <section class="flow" aria-labelledby="sandbox-flow-heading">
+    <header>
+      <h2 id="sandbox-flow-heading">Script flow</h2>
+      <button type="button" (click)="clear('flow')" [disabled]="flowData().length === 0">
+        Clear
+      </button>
+    </header>
+    <div class="flow-items">
+      @for (value of flowData(); track $index) {
+        <article>
+          <button type="button" class="inspect" (click)="inspect('Script flow', value)">
+            <strong>{{ pushOpcode(value) }}</strong
+            ><code>{{ value }}</code>
+          </button>
+          <button
+            type="button"
+            class="remove"
+            (click)="remove('flow', $index)"
+            aria-label="Remove flow data"
+          >
+            ×
+          </button>
+        </article>
+      }
+      <article class="opcode">
+        <strong>OP_DUP</strong><span>Duplicate the top stack item</span>
+      </article>
+    </div>
+  </section>
+
+  <section class="execution" aria-labelledby="sandbox-execution-heading">
+    <div>
+      <span>Execution</span>
+      <h2 id="sandbox-execution-heading">OP_DUP</h2>
+    </div>
+    <p>Copy the top main-stack item.</p>
+    <button type="button" class="run" (click)="run()" [disabled]="running()">Run OP_DUP</button>
+    <strong class="status" [class.failed]="response() && !response()?.trace?.success">{{
+      status()
+    }}</strong>
+  </section>
+
+  @if (error()) {
+    <p class="sandbox-error" role="alert">{{ error() }}</p>
+  }
+
+  <div class="sandbox-stacks">
+    <section>
+      <header>
+        <h2>Main stack</h2>
+        <button type="button" (click)="clear('main')" [disabled]="mainStack().length === 0">
+          Clear
+        </button>
+      </header>
+      <app-stack-view
+        label="Main stack result"
+        [snapshot]="displayedMain()"
+        [stepIndex]="response()?.trace?.steps?.length ?? 0"
+        [showHeader]="false"
+      />
+      <div class="edit-items">
+        @for (value of mainStack(); track $index) {
+          <button type="button" (click)="inspect('Initial main stack', value)">
+            <code>{{ value }}</code>
+          </button>
+          <button
+            type="button"
+            class="remove"
+            (click)="remove('main', $index)"
+            aria-label="Remove main stack item"
+          >
+            ×
+          </button>
+        }
+      </div>
+    </section>
+    <section>
+      <header>
+        <h2>Alt stack</h2>
+        <button type="button" (click)="clear('alt')" [disabled]="altStack().length === 0">
+          Clear
+        </button>
+      </header>
+      <app-stack-view
+        label="Alt stack result"
+        [snapshot]="displayedAlt()"
+        [stepIndex]="response()?.trace?.steps?.length ?? 0"
+        [showHeader]="false"
+      />
+      <div class="edit-items">
+        @for (value of altStack(); track $index) {
+          <button type="button" (click)="inspect('Initial alt stack', value)">
+            <code>{{ value }}</code>
+          </button>
+          <button
+            type="button"
+            class="remove"
+            (click)="remove('alt', $index)"
+            aria-label="Remove alt stack item"
+          >
+            ×
+          </button>
+        }
+      </div>
+    </section>
+  </div>
+
+  @if (selectedDetail(); as detail) {
+    <div class="detail-backdrop" role="presentation" (click)="selectedDetail.set(null)">
+      <section
+        class="detail"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="data-detail-heading"
+        (click)="$event.stopPropagation()"
+      >
+        <button
+          type="button"
+          class="detail-close"
+          (click)="selectedDetail.set(null)"
+          aria-label="Close data detail"
+        >
+          ×
+        </button>
+        <span>{{ detail.location }}</span>
+        <h2 id="data-detail-heading">Data element</h2>
+        <dl>
+          <div>
+            <dt>Size</dt>
+            <dd>{{ detail.value.length / 2 }} bytes</dd>
+          </div>
+          <div>
+            <dt>Hex</dt>
+            <dd>
+              <code>{{ detail.value }}</code>
+            </dd>
+          </div>
+        </dl>
+      </section>
+    </div>
+  }
+</section>

@@ -98,6 +98,59 @@ async function mockTraceApi(page: Page, success = true): Promise<void> {
   });
 }
 
+async function mockOpcodeApi(page: Page): Promise<void> {
+  await page.route('**/api/v1/traces/opcode', async (route) => {
+    const request = route.request().postDataJSON();
+    const initial = request.main_stack as string[];
+    const top = (request.flow_data as string[]).at(-1) ?? initial[0];
+    await route.fulfill({
+      contentType: 'application/json',
+      json: {
+        api_version: 'v1',
+        mode: 'opcode',
+        opcode: 'OP_DUP',
+        initial_stacks: {
+          main: { depth: initial.length, items: initial },
+          alt: { depth: request.alt_stack.length, items: request.alt_stack },
+        },
+        trace: {
+          schema_version: 1,
+          script: '76',
+          success: Boolean(top),
+          diagnostic: null,
+          steps: [
+            {
+              index: 0,
+              opcode: {
+                name: 'OP_DUP',
+                value: 118,
+                hex: '0x76',
+                byte_offset: 0,
+                byte_length: 1,
+                raw: '76',
+                is_push: false,
+                push_data: null,
+              },
+              stacks: {
+                before: {
+                  main: { depth: initial.length, items: initial },
+                  alt: { depth: request.alt_stack.length, items: request.alt_stack },
+                },
+                after: {
+                  main: { depth: initial.length + 2, items: [top, top, ...initial] },
+                  alt: { depth: request.alt_stack.length, items: request.alt_stack },
+                },
+              },
+              explanation: 'Copy the top item.',
+              diagnostic: null,
+            },
+          ],
+        },
+      },
+    });
+  });
+}
+
 test('connects spend elements, parsing, execution, stacks, and signature detail', async ({
   page,
 }) => {
@@ -201,4 +254,29 @@ test('redirects the former lab URL to the minimal visualizer route', async ({ pa
   await mockTraceApi(page);
   await page.goto('/labs/script-visualizer');
   await expect(page).toHaveURL(/\/visualizer$/);
+});
+
+test('builds and executes an editable OP_DUP sandbox state', async ({ page }) => {
+  await mockTraceApi(page);
+  await mockOpcodeApi(page);
+  await page.goto('/visualizer');
+  await page.getByRole('button', { name: 'OP_DUP sandbox' }).click();
+
+  const sandbox = page.getByLabel('OP_DUP sandbox');
+  await expect(sandbox).toContainText('Ready');
+  await sandbox.getByLabel('Hex data').fill('aabb');
+  await sandbox.getByLabel('Add to').selectOption('flow');
+  await sandbox.getByRole('button', { name: 'Add data' }).click();
+  await expect(sandbox.getByText('OP_PUSHBYTES_2')).toBeVisible();
+
+  await sandbox.getByText('a1b2c3d4', { exact: true }).last().click();
+  await expect(page.getByRole('dialog')).toContainText('4 bytes');
+  await page.getByRole('button', { name: 'Close data detail' }).click();
+
+  await sandbox.getByRole('button', { name: 'Run OP_DUP' }).click();
+  await expect(sandbox).toContainText('Executed');
+  await expect(sandbox.getByLabel('Main stack result').locator('.stack-item')).toHaveCount(3);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
 });

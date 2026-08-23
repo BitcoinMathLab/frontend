@@ -63,6 +63,24 @@ export interface P2pkhTraceResponse {
   readonly trace: ExecutionTrace;
 }
 
+export interface OpcodeTraceRequest {
+  readonly opcode: 'OP_DUP';
+  readonly flow_data: readonly string[];
+  readonly main_stack: readonly string[];
+  readonly alt_stack: readonly string[];
+}
+
+export interface OpcodeTraceResponse {
+  readonly api_version: 'v1';
+  readonly mode: 'opcode';
+  readonly opcode: 'OP_DUP';
+  readonly initial_stacks: {
+    readonly main: StackSnapshot;
+    readonly alt: StackSnapshot;
+  };
+  readonly trace: ExecutionTrace;
+}
+
 export type OutputType = 'P2PK' | 'P2PKH' | 'P2MS' | 'P2SH' | 'P2WPKH' | 'P2WSH' | 'P2TR';
 
 export interface PreviousOutputContext {

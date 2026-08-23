@@ -55,6 +55,34 @@ describe('TraceApi', () => {
     request.flush({});
   });
 
+  it('posts editable stack state to the opcode trace endpoint', () => {
+    globalThis.__BML_CONFIG__ = {
+      apiBaseUrl: 'https://api.btcmathlab.com/',
+      sentryDsn: '',
+      environment: 'test',
+      release: '',
+    };
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const service = TestBed.inject(TraceApi);
+    const body = {
+      opcode: 'OP_DUP' as const,
+      flow_data: ['aabb'],
+      main_stack: ['01'],
+      alt_stack: [],
+    };
+
+    service.traceOpcode(body).subscribe();
+
+    const request = TestBed.inject(HttpTestingController).expectOne(
+      'https://api.btcmathlab.com/api/v1/traces/opcode',
+    );
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual(body);
+    request.flush({});
+  });
+
   it('loads educational transaction examples from the configured v1 endpoint', () => {
     globalThis.__BML_CONFIG__ = {
       apiBaseUrl: 'https://api.btcmathlab.com/',

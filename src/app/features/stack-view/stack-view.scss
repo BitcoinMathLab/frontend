@@ -5,6 +5,10 @@
   gap: 0.5rem;
 }
 
+.stack-view--headerless {
+  grid-template-rows: minmax(13rem, 1fr);
+}
+
 header {
   display: flex;
   align-items: center;
@@ -105,6 +109,10 @@ header span {
 @media (max-width: 44rem) {
   .stack-view {
     grid-template-rows: auto minmax(8rem, 1fr);
+  }
+
+  .stack-view--headerless {
+    grid-template-rows: minmax(8rem, 1fr);
   }
 
   .stack-view__items {

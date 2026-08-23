@@ -6,6 +6,8 @@ import { getRuntimeConfig } from './runtime-config';
 import {
   P2pkhTraceRequest,
   P2pkhTraceResponse,
+  OpcodeTraceRequest,
+  OpcodeTraceResponse,
   TransactionContextResponse,
   TransactionExamplesResponse,
 } from './trace-api.models';
@@ -17,6 +19,10 @@ export class TraceApi {
 
   loadP2pkhTrace(request: P2pkhTraceRequest): Observable<P2pkhTraceResponse> {
     return this.http.post<P2pkhTraceResponse>(`${this.apiBaseUrl}/api/v1/traces/p2pkh`, request);
+  }
+
+  traceOpcode(request: OpcodeTraceRequest): Observable<OpcodeTraceResponse> {
+    return this.http.post<OpcodeTraceResponse>(`${this.apiBaseUrl}/api/v1/traces/opcode`, request);
   }
 
   loadTransactionContext(txid: string): Observable<TransactionContextResponse> {
