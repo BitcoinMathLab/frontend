@@ -210,6 +210,24 @@
   }
 }
 
+.locate-bytes {
+  min-height: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-blue);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0;
+  text-decoration: none;
+
+  &:hover,
+  &:focus-visible {
+    text-decoration: underline;
+  }
+}
+
 @media (max-width: 46rem) {
   .byte-inspector__heading {
     align-items: flex-start;

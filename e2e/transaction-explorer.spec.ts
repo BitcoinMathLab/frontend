@@ -8,8 +8,11 @@ const TRANSACTION_HEX =
   'ffffffff' +
   '00' +
   'ffffffff' +
-  '01' +
+  '02' +
   'e803000000000000' +
+  '01' +
+  '51' +
+  'd007000000000000' +
   '01' +
   '51' +
   '00000000';
@@ -49,9 +52,9 @@ async function mockTransactionApi(page: Page): Promise<void> {
         total_input_sats: 5000000000,
         total_output_sats: 5000000000,
         fee_sats: 0,
-        size_bytes: 61,
-        weight_units: 244,
-        virtual_size_vbytes: 61,
+        size_bytes: 71,
+        weight_units: 284,
+        virtual_size_vbytes: 71,
         outputs: [
           {
             vout: 0,
@@ -101,9 +104,9 @@ test('loads a transaction and displays its ordered spend context', async ({ page
   await expect(page.getByText('Transaction fee', { exact: true })).toBeVisible();
   await expect(page.getByText('0 sats', { exact: true })).toBeVisible();
   await expect(page.getByText('76a914948c765a6914d43f2a7ac177da2c2f6b52de3d7c88ac')).toBeVisible();
-  await expect(page.getByText('61 bytes')).toBeVisible();
-  await expect(page.getByText('61 vbytes')).toBeVisible();
-  await expect(page.getByText('244 WU')).toBeVisible();
+  await expect(page.getByText('71 bytes')).toBeVisible();
+  await expect(page.getByText('71 vbytes')).toBeVisible();
+  await expect(page.getByText('284 WU')).toBeVisible();
   await expect(page.getByText('Legacy', { exact: true })).toBeVisible();
   const decodedHeader = page.locator('.decoded-fields');
   await expect(decodedHeader.getByText('Version', { exact: true })).toBeVisible();
@@ -116,6 +119,8 @@ test('loads a transaction and displays its ordered spend context', async ({ page
   await expect(page.locator('.byte-detail')).toContainText('1000 sats');
   await page.getByRole('button', { name: 'Next field' }).click();
   await expect(page.locator('.byte-detail')).toContainText('Output 1 locking-script length');
+  await page.getByRole('button', { name: 'Locate output 2 bytes' }).click();
+  await expect(page.locator('.byte-detail')).toContainText('Output 2 amount');
 
   await page.setViewportSize({ width: 390, height: 844 });
   const hasHorizontalOverflow = await page.evaluate(

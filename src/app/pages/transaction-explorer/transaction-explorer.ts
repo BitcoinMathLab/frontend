@@ -170,6 +170,15 @@ export class TransactionExplorer implements OnInit, OnDestroy {
     this.selectedByteFieldId.set(field.id);
   }
 
+  protected selectByteFieldById(fieldId: string): void {
+    if (this.byteFields().some((field) => field.id === fieldId)) {
+      this.selectedByteFieldId.set(fieldId);
+      document
+        .getElementById('byte-inspector-heading')
+        ?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
   protected navigateByteField(direction: -1 | 1): void {
     const fields = this.byteFields();
     const nextIndex = this.selectedByteFieldIndex() + direction;

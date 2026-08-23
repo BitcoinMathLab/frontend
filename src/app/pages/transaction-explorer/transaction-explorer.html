@@ -320,6 +320,19 @@
                   <dd>{{ output.output_type ?? 'Nonstandard' }}</dd>
                 </div>
                 <div>
+                  <dt>Serialization</dt>
+                  <dd>
+                    <button
+                      type="button"
+                      class="locate-bytes"
+                      [attr.aria-label]="'Locate output ' + (output.vout + 1) + ' bytes'"
+                      (click)="selectByteFieldById('output-' + output.vout + '-amount')"
+                    >
+                      Locate amount bytes ↑
+                    </button>
+                  </dd>
+                </div>
+                <div>
                   <dt>Locking script</dt>
                   <dd>
                     <code>{{ output.script_pubkey_hex }}</code>
@@ -356,6 +369,19 @@
                   <div>
                     <dt>Spend path</dt>
                     <dd>{{ output.spend_type }}</dd>
+                  </div>
+                  <div>
+                    <dt>Serialization</dt>
+                    <dd>
+                      <button
+                        type="button"
+                        class="locate-bytes"
+                        [attr.aria-label]="'Locate input ' + ($index + 1) + ' outpoint bytes'"
+                        (click)="selectByteFieldById('input-' + $index + '-previous-txid')"
+                      >
+                        Locate outpoint bytes ↑
+                      </button>
+                    </dd>
                   </div>
                   <div>
                     <dt>Previous txid</dt>

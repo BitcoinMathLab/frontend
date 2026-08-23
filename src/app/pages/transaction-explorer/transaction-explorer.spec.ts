@@ -18,8 +18,11 @@ const TRANSACTION_HEX =
   'ffffffff' +
   '00' +
   'ffffffff' +
-  '01' +
+  '02' +
   'e803000000000000' +
+  '01' +
+  '51' +
+  'd007000000000000' +
   '01' +
   '51' +
   '00000000';
@@ -60,9 +63,9 @@ const RESPONSE: TransactionContextResponse = {
   total_input_sats: 5_000_000_000,
   total_output_sats: 5_000_000_000,
   fee_sats: 0,
-  size_bytes: 61,
-  weight_units: 244,
-  virtual_size_vbytes: 61,
+  size_bytes: 71,
+  weight_units: 284,
+  virtual_size_vbytes: 71,
   outputs: [
     {
       vout: 0,
@@ -127,7 +130,7 @@ describe('TransactionExplorer', () => {
     expect(fixture.nativeElement.textContent).toContain(
       '76a914948c765a6914d43f2a7ac177da2c2f6b52de3d7c88ac',
     );
-    expect(fixture.nativeElement.textContent).toContain('61 bytes');
+    expect(fixture.nativeElement.textContent).toContain('71 bytes');
     expect(fixture.nativeElement.textContent).toContain('Legacy');
     expect(fixture.nativeElement.textContent).toContain('Version');
     expect(fixture.nativeElement.textContent).toContain('Locktime');
@@ -136,7 +139,7 @@ describe('TransactionExplorer', () => {
     expect(fixture.nativeElement.textContent).toContain('P2PKH');
     expect(fixture.nativeElement.textContent).toContain('Output type');
     expect(fixture.nativeElement.textContent).toContain('Transaction fee');
-    expect(fixture.nativeElement.textContent).toContain('244 WU');
+    expect(fixture.nativeElement.textContent).toContain('284 WU');
     expect(fixture.nativeElement.textContent).toContain('Transaction byte inspector');
     expect(fixture.nativeElement.textContent).toContain('Input 1 previous txid');
     expect(fixture.nativeElement.textContent).toContain('Selects the transaction serialization');
@@ -154,6 +157,14 @@ describe('TransactionExplorer', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('.byte-detail').textContent).toContain(
       'Output 1 locking-script length',
+    );
+    const outputTwoBytes = fixture.nativeElement.querySelector(
+      '[aria-label="Locate output 2 bytes"]',
+    ) as HTMLButtonElement;
+    outputTwoBytes.click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.byte-detail').textContent).toContain(
+      'Output 2 amount',
     );
     expect(fixture.nativeElement.textContent).toContain('Fixture verified');
 
