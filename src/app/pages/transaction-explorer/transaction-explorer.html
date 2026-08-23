@@ -213,9 +213,72 @@
         </dl>
       </section>
 
-      <section class="data-block" aria-labelledby="raw-heading">
-        <h3 id="raw-heading">Raw transaction</h3>
-        <code>{{ transaction.transaction_hex }}</code>
+      <section class="byte-inspector" aria-labelledby="byte-inspector-heading">
+        <div class="byte-inspector__heading">
+          <div>
+            <p class="eyebrow">Serialization map</p>
+            <h3 id="byte-inspector-heading">Transaction byte inspector</h3>
+          </div>
+          <span>{{ byteFields().length }} decoded fields</span>
+        </div>
+        @if (byteFields().length) {
+          <p class="byte-inspector__help">
+            Select a byte range to see its offset, decoded value, and role in the transaction.
+          </p>
+          <div class="byte-inspector__layout">
+            <div class="byte-stream" aria-label="Decoded transaction byte ranges">
+              @for (field of byteFields(); track field.id) {
+                <button
+                  type="button"
+                  class="byte-field"
+                  [class.byte-field--active]="selectedByteField().id === field.id"
+                  [attr.data-group]="field.group"
+                  [attr.aria-pressed]="selectedByteField().id === field.id"
+                  [attr.aria-label]="
+                    field.label +
+                    ', bytes ' +
+                    field.offset +
+                    ' through ' +
+                    (field.offset + field.length - 1)
+                  "
+                  (click)="selectByteField(field)"
+                >
+                  <span>{{ field.label }}</span>
+                  <code>{{ field.hex }}</code>
+                </button>
+              }
+            </div>
+            @if (selectedByteField(); as field) {
+              <aside class="byte-detail" aria-live="polite">
+                <p class="eyebrow">Selected field</p>
+                <h4>{{ field.label }}</h4>
+                <dl>
+                  <div>
+                    <dt>Byte range</dt>
+                    <dd>{{ field.offset }}–{{ field.offset + field.length - 1 }}</dd>
+                  </div>
+                  <div>
+                    <dt>Length</dt>
+                    <dd>{{ field.length }} byte(s)</dd>
+                  </div>
+                  <div>
+                    <dt>Decoded value</dt>
+                    <dd>{{ field.decoded }}</dd>
+                  </div>
+                </dl>
+                <p>{{ field.description }}</p>
+              </aside>
+            }
+          </div>
+          <details class="raw-hex">
+            <summary>Show uninterrupted raw transaction hex</summary>
+            <code>{{ transaction.transaction_hex }}</code>
+          </details>
+        } @else {
+          <p class="empty-state">
+            These transaction bytes could not be divided into fields safely.
+          </p>
+        }
       </section>
 
       <section class="outputs" aria-labelledby="outputs-heading">

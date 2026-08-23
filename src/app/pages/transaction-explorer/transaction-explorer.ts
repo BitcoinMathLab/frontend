@@ -13,6 +13,7 @@ import { finalize, Subscription } from 'rxjs';
 
 import { TraceApi } from '../../core/trace-api';
 import { TransactionContextResponse, TransactionExample } from '../../core/trace-api.models';
+import { decodeTransactionBytes, TransactionByteField } from './transaction-byte-decoder';
 
 const TXID_PATTERN = /^[0-9a-fA-F]{64}$/;
 const DEFAULT_TXID = '40e331b67c0fe7750bb3b1943b378bf702dce86124dc12fa5980f975db7ec930';
@@ -37,6 +38,22 @@ export class TransactionExplorer implements OnInit, OnDestroy {
   protected readonly copied = signal(false);
   protected readonly examples = signal<readonly TransactionExample[]>([]);
   protected readonly selectedExample = signal<TransactionExample | null>(null);
+  protected readonly selectedByteFieldId = signal<string | null>(null);
+  protected readonly byteFields = computed<readonly TransactionByteField[]>(() => {
+    const transaction = this.result();
+    if (!transaction) {
+      return [];
+    }
+    try {
+      return decodeTransactionBytes(transaction.transaction_hex);
+    } catch {
+      return [];
+    }
+  });
+  protected readonly selectedByteField = computed(() => {
+    const fields = this.byteFields();
+    return fields.find((field) => field.id === this.selectedByteFieldId()) ?? fields[0] ?? null;
+  });
   protected readonly fixtureVerification = computed(() => {
     const example = this.selectedExample();
     const transaction = this.result();
@@ -77,7 +94,10 @@ export class TransactionExplorer implements OnInit, OnDestroy {
       .loadTransactionContext(txid.toLowerCase())
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
-        next: (response) => this.result.set(response),
+        next: (response) => {
+          this.result.set(response);
+          this.selectedByteFieldId.set('version');
+        },
         error: (error: HttpErrorResponse) => this.error.set(this.messageFor(error)),
       });
   }
@@ -90,6 +110,7 @@ export class TransactionExplorer implements OnInit, OnDestroy {
     this.result.set(null);
     this.copied.set(false);
     this.selectedExample.set(null);
+    this.selectedByteFieldId.set(null);
   }
 
   protected async copy(): Promise<void> {
@@ -141,8 +162,8 @@ export class TransactionExplorer implements OnInit, OnDestroy {
     return new Intl.NumberFormat('en-CA').format(amount);
   }
 
-  protected byteCount(transactionHex: string): number {
-    return transactionHex.length / 2;
+  protected selectByteField(field: TransactionByteField): void {
+    this.selectedByteFieldId.set(field.id);
   }
 
   ngOnDestroy(): void {
@@ -159,6 +180,7 @@ export class TransactionExplorer implements OnInit, OnDestroy {
     this.result.set(null);
     this.copied.set(false);
     this.selectedExample.set(example);
+    this.selectedByteFieldId.set(null);
   }
 
   private messageFor(error: HttpErrorResponse): string {

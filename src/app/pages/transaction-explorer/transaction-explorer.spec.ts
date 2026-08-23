@@ -11,6 +11,18 @@ import { TransactionExplorer } from './transaction-explorer';
 
 const TXID = '40e331b67c0fe7750bb3b1943b378bf702dce86124dc12fa5980f975db7ec930';
 const GENESIS_TXID = '4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b';
+const TRANSACTION_HEX =
+  '01000000' +
+  '01' +
+  '00'.repeat(32) +
+  'ffffffff' +
+  '00' +
+  'ffffffff' +
+  '01' +
+  'e803000000000000' +
+  '01' +
+  '51' +
+  '00000000';
 const EXAMPLES_RESPONSE: TransactionExamplesResponse = {
   api_version: 'v1',
   examples: [
@@ -40,7 +52,7 @@ const RESPONSE: TransactionContextResponse = {
   api_version: 'v1',
   txid: TXID,
   wtxid: TXID,
-  transaction_hex: '01020304',
+  transaction_hex: TRANSACTION_HEX,
   version: 1,
   locktime: 0,
   is_segwit: false,
@@ -48,9 +60,9 @@ const RESPONSE: TransactionContextResponse = {
   total_input_sats: 5_000_000_000,
   total_output_sats: 5_000_000_000,
   fee_sats: 0,
-  size_bytes: 4,
-  weight_units: 16,
-  virtual_size_vbytes: 4,
+  size_bytes: 61,
+  weight_units: 244,
+  virtual_size_vbytes: 61,
   outputs: [
     {
       vout: 0,
@@ -115,7 +127,7 @@ describe('TransactionExplorer', () => {
     expect(fixture.nativeElement.textContent).toContain(
       '76a914948c765a6914d43f2a7ac177da2c2f6b52de3d7c88ac',
     );
-    expect(fixture.nativeElement.textContent).toContain('4 bytes');
+    expect(fixture.nativeElement.textContent).toContain('61 bytes');
     expect(fixture.nativeElement.textContent).toContain('Legacy');
     expect(fixture.nativeElement.textContent).toContain('Version');
     expect(fixture.nativeElement.textContent).toContain('Locktime');
@@ -124,7 +136,17 @@ describe('TransactionExplorer', () => {
     expect(fixture.nativeElement.textContent).toContain('P2PKH');
     expect(fixture.nativeElement.textContent).toContain('Output type');
     expect(fixture.nativeElement.textContent).toContain('Transaction fee');
-    expect(fixture.nativeElement.textContent).toContain('16 WU');
+    expect(fixture.nativeElement.textContent).toContain('244 WU');
+    expect(fixture.nativeElement.textContent).toContain('Transaction byte inspector');
+    expect(fixture.nativeElement.textContent).toContain('Input 1 previous txid');
+    expect(fixture.nativeElement.textContent).toContain('Selects the transaction serialization');
+
+    const amountBytes = [...fixture.nativeElement.querySelectorAll('.byte-field')].find(
+      (button: HTMLButtonElement) => button.textContent?.includes('Output 1 amount'),
+    ) as HTMLButtonElement;
+    amountBytes.click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.byte-detail').textContent).toContain('1000 sats');
     expect(fixture.nativeElement.textContent).toContain('Fixture verified');
 
     const clear = fixture.nativeElement.querySelector('.clear-button') as HTMLButtonElement;

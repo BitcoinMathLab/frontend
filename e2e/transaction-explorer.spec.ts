@@ -1,6 +1,18 @@
 import { expect, Page, test } from '@playwright/test';
 
 const TXID = 'fff2525b8931402dd09222c50775608f75787bd2b87e56995a7bdd30f79702c4';
+const TRANSACTION_HEX =
+  '01000000' +
+  '01' +
+  '00'.repeat(32) +
+  'ffffffff' +
+  '00' +
+  'ffffffff' +
+  '01' +
+  'e803000000000000' +
+  '01' +
+  '51' +
+  '00000000';
 const EXAMPLES_RESPONSE = {
   api_version: 'v1',
   examples: [
@@ -29,7 +41,7 @@ async function mockTransactionApi(page: Page): Promise<void> {
         api_version: 'v1',
         txid: TXID,
         wtxid: TXID,
-        transaction_hex: '01020304',
+        transaction_hex: TRANSACTION_HEX,
         version: 1,
         locktime: 0,
         is_segwit: false,
@@ -37,9 +49,9 @@ async function mockTransactionApi(page: Page): Promise<void> {
         total_input_sats: 5000000000,
         total_output_sats: 5000000000,
         fee_sats: 0,
-        size_bytes: 4,
-        weight_units: 16,
-        virtual_size_vbytes: 4,
+        size_bytes: 61,
+        weight_units: 244,
+        virtual_size_vbytes: 61,
         outputs: [
           {
             vout: 0,
@@ -89,15 +101,25 @@ test('loads a transaction and displays its ordered spend context', async ({ page
   await expect(page.getByText('Transaction fee', { exact: true })).toBeVisible();
   await expect(page.getByText('0 sats', { exact: true })).toBeVisible();
   await expect(page.getByText('76a914948c765a6914d43f2a7ac177da2c2f6b52de3d7c88ac')).toBeVisible();
-  await expect(page.getByText('4 bytes')).toBeVisible();
-  await expect(page.getByText('4 vbytes')).toBeVisible();
-  await expect(page.getByText('16 WU')).toBeVisible();
+  await expect(page.getByText('61 bytes')).toBeVisible();
+  await expect(page.getByText('61 vbytes')).toBeVisible();
+  await expect(page.getByText('244 WU')).toBeVisible();
   await expect(page.getByText('Legacy', { exact: true })).toBeVisible();
-  await expect(page.getByText('Version', { exact: true })).toBeVisible();
-  await expect(page.getByText('Locktime', { exact: true })).toBeVisible();
+  const decodedHeader = page.locator('.decoded-fields');
+  await expect(decodedHeader.getByText('Version', { exact: true })).toBeVisible();
+  await expect(decodedHeader.getByText('Locktime', { exact: true })).toBeVisible();
   await expect(page.getByText('76a91400112288ac')).toBeVisible();
   await expect(page.getByText('P2PKH', { exact: true })).toHaveCount(4);
   await expect(page.getByText('Fixture verified', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Transaction byte inspector' })).toBeVisible();
+  await page.getByRole('button', { name: /Output 1 amount, bytes/ }).click();
+  await expect(page.locator('.byte-detail')).toContainText('1000 sats');
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  const hasHorizontalOverflow = await page.evaluate(
+    () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+  );
+  expect(hasHorizontalOverflow).toBe(false);
 
   await page.getByRole('button', { name: 'Clear', exact: true }).click();
   await expect(page.getByRole('textbox', { name: 'Transaction ID' })).toHaveValue('');
