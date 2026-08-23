@@ -246,7 +246,7 @@
                   (keydown)="handleByteFieldKeydown($event, $index)"
                 >
                   <span>{{ field.label }}</span>
-                  <code>{{ field.hex }}</code>
+                  <code>{{ previewHex(field.hex) }}</code>
                 </button>
               }
             </div>

@@ -232,6 +232,15 @@ describe('TransactionExplorer', () => {
             hex: '01000000',
             decoded: '1 (engine authoritative)',
           },
+          {
+            id: 'output-0-script-pubkey',
+            label: 'Long locking script',
+            group: 'output' as const,
+            offset: 4,
+            length: 50,
+            hex: 'ab'.repeat(50),
+            decoded: '50 bytes nonstandard or unrecognized locking script',
+          },
         ],
       }),
     );
@@ -246,10 +255,13 @@ describe('TransactionExplorer', () => {
     form.dispatchEvent(new Event('submit'));
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelectorAll('.byte-field')).toHaveLength(1);
+    expect(fixture.nativeElement.querySelectorAll('.byte-field')).toHaveLength(2);
     expect(fixture.nativeElement.querySelector('.byte-detail').textContent).toContain(
       '1 (engine authoritative)',
     );
+    const longHex = fixture.nativeElement.querySelectorAll('.byte-field code').item(1).textContent;
+    expect(longHex).toBe(`${'ab'.repeat(12)}…${'ab'.repeat(4)}`);
+    expect(longHex).not.toContain('ab'.repeat(50));
   });
 
   it('copies, pastes, and selects a curated transaction example', async () => {

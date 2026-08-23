@@ -180,6 +180,10 @@ export class TransactionExplorer implements OnInit, OnDestroy {
     return new Intl.NumberFormat('en-CA').format(amount);
   }
 
+  protected previewHex(hex: string): string {
+    return hex.length <= 40 ? hex : `${hex.slice(0, 24)}…${hex.slice(-8)}`;
+  }
+
   protected selectByteField(field: TransactionByteField): void {
     this.selectedByteFieldId.set(field.id);
   }
