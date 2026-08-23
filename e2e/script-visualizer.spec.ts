@@ -103,6 +103,14 @@ async function mockOpcodeApi(page: Page): Promise<void> {
     const request = route.request().postDataJSON();
     const initial = request.main_stack as string[];
     const top = (request.flow_data as string[]).at(-1) ?? initial[0];
+    const diagnostic = top
+      ? null
+      : {
+          code: 'stack-underflow',
+          message: 'OP_DUP requires one main-stack item.',
+          step_index: 0,
+          opcode_name: 'OP_DUP',
+        };
     await route.fulfill({
       contentType: 'application/json',
       json: {
@@ -117,34 +125,36 @@ async function mockOpcodeApi(page: Page): Promise<void> {
           schema_version: 1,
           script: '76',
           success: Boolean(top),
-          diagnostic: null,
-          steps: [
-            {
-              index: 0,
-              opcode: {
-                name: 'OP_DUP',
-                value: 118,
-                hex: '0x76',
-                byte_offset: 0,
-                byte_length: 1,
-                raw: '76',
-                is_push: false,
-                push_data: null,
-              },
-              stacks: {
-                before: {
-                  main: { depth: initial.length, items: initial },
-                  alt: { depth: request.alt_stack.length, items: request.alt_stack },
+          diagnostic,
+          steps: top
+            ? [
+                {
+                  index: 0,
+                  opcode: {
+                    name: 'OP_DUP',
+                    value: 118,
+                    hex: '0x76',
+                    byte_offset: 0,
+                    byte_length: 1,
+                    raw: '76',
+                    is_push: false,
+                    push_data: null,
+                  },
+                  stacks: {
+                    before: {
+                      main: { depth: initial.length, items: initial },
+                      alt: { depth: request.alt_stack.length, items: request.alt_stack },
+                    },
+                    after: {
+                      main: { depth: initial.length + 2, items: [top, top, ...initial] },
+                      alt: { depth: request.alt_stack.length, items: request.alt_stack },
+                    },
+                  },
+                  explanation: 'Copy the top item.',
+                  diagnostic: null,
                 },
-                after: {
-                  main: { depth: initial.length + 2, items: [top, top, ...initial] },
-                  alt: { depth: request.alt_stack.length, items: request.alt_stack },
-                },
-              },
-              explanation: 'Copy the top item.',
-              diagnostic: null,
-            },
-          ],
+              ]
+            : [],
         },
       },
     });
@@ -276,6 +286,17 @@ test('builds and executes an editable OP_DUP sandbox state', async ({ page }) =>
   await sandbox.getByRole('button', { name: 'Run OP_DUP' }).click();
   await expect(sandbox).toContainText('Executed');
   await expect(sandbox.getByLabel('Main stack result').locator('.stack-item')).toHaveCount(3);
+
+  await sandbox.getByRole('button', { name: 'Reset sandbox' }).click();
+  await sandbox.getByRole('button', { name: 'Remove main stack item' }).click();
+  await sandbox.getByRole('button', { name: 'Run OP_DUP' }).click();
+  await expect(sandbox).toContainText('Stopped');
+  await expect(sandbox.getByLabel('Execution diagnostic')).toContainText('stack-underflow');
+
+  await sandbox.getByRole('button', { name: 'Reset sandbox' }).click();
+  await expect(sandbox).toContainText('Ready');
+  await expect(sandbox.getByLabel('Execution diagnostic')).toHaveCount(0);
+  await expect(sandbox.getByLabel('Main stack result').locator('.stack-item')).toHaveCount(1);
 
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);

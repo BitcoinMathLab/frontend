@@ -14,6 +14,7 @@
     </label>
     <button type="button" (click)="randomize()">Random</button>
     <button type="button" (click)="addData()">Add data</button>
+    <button type="button" class="reset" (click)="reset()">Reset sandbox</button>
   </div>
 
   <section class="flow" aria-labelledby="sandbox-flow-heading">
@@ -26,7 +27,11 @@
     <div class="flow-items">
       @for (value of flowData(); track $index) {
         <article>
-          <button type="button" class="inspect" (click)="inspect('Script flow', value)">
+          <button
+            type="button"
+            class="inspect"
+            (click)="inspect('Script flow', value, pushOpcode(value))"
+          >
             <strong>{{ pushOpcode(value) }}</strong
             ><code>{{ value }}</code>
           </button>
@@ -60,6 +65,12 @@
 
   @if (error()) {
     <p class="sandbox-error" role="alert">{{ error() }}</p>
+  }
+
+  @if (response()?.trace?.diagnostic; as diagnostic) {
+    <p class="sandbox-error" aria-label="Execution diagnostic">
+      <strong>{{ diagnostic.code }}</strong> {{ diagnostic.message }}
+    </p>
   }
 
   <div class="sandbox-stacks">
@@ -146,6 +157,10 @@
           <div>
             <dt>Size</dt>
             <dd>{{ detail.value.length / 2 }} bytes</dd>
+          </div>
+          <div>
+            <dt>Type</dt>
+            <dd>{{ detail.type }}</dd>
           </div>
           <div>
             <dt>Hex</dt>

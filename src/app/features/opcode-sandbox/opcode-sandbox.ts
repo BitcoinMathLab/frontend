@@ -16,7 +16,10 @@ type Destination = 'flow' | 'main' | 'alt';
 interface ItemDetail {
   readonly location: string;
   readonly value: string;
+  readonly type: string;
 }
+
+const DEFAULT_DATA = 'a1b2c3d4';
 
 @Component({
   selector: 'app-opcode-sandbox',
@@ -29,10 +32,10 @@ export class OpcodeSandbox implements OnDestroy {
   private readonly traceApi = inject(TraceApi);
   private requestSubscription: Subscription | undefined;
 
-  protected readonly dataHex = signal('a1b2c3d4');
+  protected readonly dataHex = signal(DEFAULT_DATA);
   protected readonly destination = signal<Destination>('main');
   protected readonly flowData = signal<readonly string[]>([]);
-  protected readonly mainStack = signal<readonly string[]>(['a1b2c3d4']);
+  protected readonly mainStack = signal<readonly string[]>([DEFAULT_DATA]);
   protected readonly altStack = signal<readonly string[]>([]);
   protected readonly response = signal<OpcodeTraceResponse | null>(null);
   protected readonly running = signal(false);
@@ -90,8 +93,8 @@ export class OpcodeSandbox implements OnDestroy {
     this.resetResult();
   }
 
-  protected inspect(location: string, value: string): void {
-    this.selectedDetail.set({ location, value });
+  protected inspect(location: string, value: string, type = 'Stack byte vector'): void {
+    this.selectedDetail.set({ location, value, type });
   }
 
   protected pushOpcode(value: string): string {
@@ -117,6 +120,18 @@ export class OpcodeSandbox implements OnDestroy {
         next: (response) => this.response.set(response),
         error: () => this.error.set('The opcode sandbox API is unavailable.'),
       });
+  }
+
+  protected reset(): void {
+    this.requestSubscription?.unsubscribe();
+    this.dataHex.set(DEFAULT_DATA);
+    this.destination.set('main');
+    this.flowData.set([]);
+    this.mainStack.set([DEFAULT_DATA]);
+    this.altStack.set([]);
+    this.selectedDetail.set(null);
+    this.running.set(false);
+    this.resetResult();
   }
 
   ngOnDestroy(): void {

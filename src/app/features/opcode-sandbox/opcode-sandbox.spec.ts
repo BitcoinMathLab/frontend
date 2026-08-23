@@ -48,6 +48,25 @@ const response: OpcodeTraceResponse = {
   },
 };
 
+const failedResponse: OpcodeTraceResponse = {
+  ...response,
+  initial_stacks: {
+    main: { depth: 0, items: [] },
+    alt: { depth: 0, items: [] },
+  },
+  trace: {
+    ...response.trace,
+    success: false,
+    steps: [],
+    diagnostic: {
+      code: 'stack-underflow',
+      message: 'OP_DUP requires one main-stack item.',
+      step_index: 0,
+      opcode_name: 'OP_DUP',
+    },
+  },
+};
+
 describe('OpcodeSandbox', () => {
   it('adds typed data to flow, infers its push, and runs OP_DUP through the API', async () => {
     const traceOpcode = vi.fn().mockReturnValue(of(response));
@@ -106,5 +125,40 @@ describe('OpcodeSandbox', () => {
     expect(
       fixture.nativeElement.querySelector('[aria-label="Main stack result"]').textContent,
     ).toContain('empty');
+  });
+
+  it('explains a stopped execution and resets to deterministic initial state', async () => {
+    const traceOpcode = vi.fn().mockReturnValue(of(failedResponse));
+    await TestBed.configureTestingModule({
+      imports: [OpcodeSandbox],
+      providers: [{ provide: TraceApi, useValue: { traceOpcode } }],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(OpcodeSandbox);
+    fixture.detectChanges();
+
+    (
+      fixture.nativeElement.querySelector(
+        '[aria-label="Remove main stack item"]',
+      ) as HTMLButtonElement
+    ).click();
+    [...fixture.nativeElement.querySelectorAll('button')]
+      .find((button: HTMLButtonElement) => button.textContent?.includes('Run OP_DUP'))
+      ?.click();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Stopped');
+    expect(
+      fixture.nativeElement.querySelector('[aria-label="Execution diagnostic"]').textContent,
+    ).toContain('stack-underflow');
+
+    [...fixture.nativeElement.querySelectorAll('button')]
+      .find((button: HTMLButtonElement) => button.textContent?.includes('Reset sandbox'))
+      ?.click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Ready');
+    expect(fixture.nativeElement.querySelector('[aria-label="Execution diagnostic"]')).toBeNull();
+    expect(
+      fixture.nativeElement.querySelector('[aria-label="Main stack result"]').textContent,
+    ).toContain('a1b2c3d4');
   });
 });
