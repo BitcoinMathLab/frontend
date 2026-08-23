@@ -177,6 +177,41 @@ describe('TransactionExplorer', () => {
     expect(fixture.nativeElement.querySelector('.result')).toBeNull();
   });
 
+  it('prefers canonical byte fields returned by the engine API', async () => {
+    const loadTransactionContext = vi.fn().mockReturnValue(
+      of({
+        ...RESPONSE,
+        transaction_hex: 'not-locally-decodable',
+        byte_fields: [
+          {
+            id: 'version',
+            label: 'Version from engine',
+            group: 'header' as const,
+            offset: 0,
+            length: 4,
+            hex: '01000000',
+            decoded: '1 (engine authoritative)',
+          },
+        ],
+      }),
+    );
+    await TestBed.configureTestingModule({
+      imports: [TransactionExplorer],
+      providers: [{ provide: TraceApi, useValue: traceApiWith(loadTransactionContext) }],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(TransactionExplorer);
+    fixture.detectChanges();
+
+    const form = fixture.nativeElement.querySelector('form') as HTMLFormElement;
+    form.dispatchEvent(new Event('submit'));
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelectorAll('.byte-field')).toHaveLength(1);
+    expect(fixture.nativeElement.querySelector('.byte-detail').textContent).toContain(
+      '1 (engine authoritative)',
+    );
+  });
+
   it('copies, pastes, and selects a curated transaction example', async () => {
     const loadTransactionContext = vi.fn();
     const writeText = vi.fn().mockResolvedValue(undefined);

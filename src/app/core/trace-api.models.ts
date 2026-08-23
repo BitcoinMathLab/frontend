@@ -93,6 +93,16 @@ export interface TransactionOutputContext {
   readonly output_type: OutputType | null;
 }
 
+export interface TransactionByteFieldResponse {
+  readonly id: string;
+  readonly label: string;
+  readonly group: 'header' | 'input' | 'output' | 'witness' | 'footer';
+  readonly offset: number;
+  readonly length: number;
+  readonly hex: string;
+  readonly decoded: string;
+}
+
 export interface TransactionContextResponse {
   readonly api_version: 'v1';
   readonly txid: string;
@@ -108,6 +118,7 @@ export interface TransactionContextResponse {
   readonly size_bytes: number;
   readonly weight_units: number;
   readonly virtual_size_vbytes: number;
+  readonly byte_fields?: readonly TransactionByteFieldResponse[];
   readonly outputs: readonly TransactionOutputContext[];
   readonly spent_outputs: readonly PreviousOutputContext[];
 }

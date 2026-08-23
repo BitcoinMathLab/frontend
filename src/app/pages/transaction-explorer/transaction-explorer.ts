@@ -13,7 +13,11 @@ import { finalize, Subscription } from 'rxjs';
 
 import { TraceApi } from '../../core/trace-api';
 import { TransactionContextResponse, TransactionExample } from '../../core/trace-api.models';
-import { decodeTransactionBytes, TransactionByteField } from './transaction-byte-decoder';
+import {
+  decodeTransactionBytes,
+  describeTransactionByteField,
+  TransactionByteField,
+} from './transaction-byte-decoder';
 
 const TXID_PATTERN = /^[0-9a-fA-F]{64}$/;
 const DEFAULT_TXID = '40e331b67c0fe7750bb3b1943b378bf702dce86124dc12fa5980f975db7ec930';
@@ -43,6 +47,12 @@ export class TransactionExplorer implements OnInit, OnDestroy {
     const transaction = this.result();
     if (!transaction) {
       return [];
+    }
+    if (transaction.byte_fields?.length) {
+      return transaction.byte_fields.map((field) => ({
+        ...field,
+        description: describeTransactionByteField(field),
+      }));
     }
     try {
       return decodeTransactionBytes(transaction.transaction_hex);

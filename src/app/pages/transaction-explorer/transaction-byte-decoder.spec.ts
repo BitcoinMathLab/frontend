@@ -1,4 +1,8 @@
-import { decodeTransactionBytes, TransactionDecodeError } from './transaction-byte-decoder';
+import {
+  decodeTransactionBytes,
+  describeTransactionByteField,
+  TransactionDecodeError,
+} from './transaction-byte-decoder';
 
 const LEGACY_TRANSACTION =
   '01000000' +
@@ -91,6 +95,16 @@ describe('decodeTransactionBytes', () => {
     expect(() => decodeTransactionBytes(nonCanonicalInputCount)).toThrow(
       /non-canonical CompactSize/,
     );
+  });
+
+  it('provides explanations for engine-produced field identifiers', () => {
+    expect(describeTransactionByteField({ id: 'input-0-previous-txid' })).toContain(
+      'Transaction ID',
+    );
+    expect(describeTransactionByteField({ id: 'output-1-script-pubkey' })).toContain(
+      'Locking script',
+    );
+    expect(describeTransactionByteField({ id: 'input-0-witness-1' })).toContain('witness stack');
   });
 
   it('decodes marker, flag, and witness stacks without losing byte offsets', () => {

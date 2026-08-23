@@ -296,6 +296,26 @@ export function decodeTransactionBytes(transactionHex: string): readonly Transac
   return new Decoder(transactionHex.trim().toLowerCase()).decode();
 }
 
+export function describeTransactionByteField(field: Pick<TransactionByteField, 'id'>): string {
+  if (field.id === 'version') return DESCRIPTIONS.version;
+  if (field.id === 'marker-flag') return DESCRIPTIONS.markerFlag;
+  if (field.id === 'input-count') return DESCRIPTIONS.inputCount;
+  if (field.id === 'output-count') return DESCRIPTIONS.outputCount;
+  if (field.id === 'locktime') return DESCRIPTIONS.locktime;
+  if (field.id.endsWith('-previous-txid')) return DESCRIPTIONS.previousTxid;
+  if (field.id.endsWith('-vout')) return DESCRIPTIONS.previousVout;
+  if (field.id.endsWith('-script-length') || field.id.endsWith('-length')) {
+    return DESCRIPTIONS.scriptLength;
+  }
+  if (field.id.endsWith('-script-sig')) return DESCRIPTIONS.scriptSig;
+  if (field.id.endsWith('-sequence')) return DESCRIPTIONS.sequence;
+  if (field.id.endsWith('-amount')) return DESCRIPTIONS.amount;
+  if (field.id.endsWith('-script-pubkey')) return DESCRIPTIONS.scriptPubkey;
+  if (field.id.endsWith('-witness-count')) return DESCRIPTIONS.witnessCount;
+  if (/witness-\d+$/.test(field.id)) return DESCRIPTIONS.witnessItem;
+  return 'A canonical field in the serialized Bitcoin transaction.';
+}
+
 function unsignedLittleEndian(bytes: Uint8Array): bigint {
   let value = 0n;
   for (let index = bytes.length - 1; index >= 0; index -= 1) {
