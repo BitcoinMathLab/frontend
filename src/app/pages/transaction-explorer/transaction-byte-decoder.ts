@@ -80,7 +80,7 @@ class Decoder {
         DESCRIPTIONS.previousTxid,
       );
       this.replaceDecoded(txid.id, reverseHexBytes(txid.hex));
-      this.fixed(
+      const previousVout = this.fixed(
         `input-${inputIndex}-vout`,
         `Input ${displayIndex} previous output index`,
         'input',
@@ -88,6 +88,9 @@ class Decoder {
         DESCRIPTIONS.previousVout,
         true,
       );
+      if (/^0+$/.test(txid.hex) && previousVout.decoded === '4294967295') {
+        this.replaceDecoded(previousVout.id, '4294967295 (coinbase marker)');
+      }
       const scriptLength = this.compactSize(
         `input-${inputIndex}-script-length`,
         `Input ${displayIndex} scriptSig length`,
@@ -105,7 +108,7 @@ class Decoder {
           `${scriptLength} bytes`,
         );
       }
-      this.fixed(
+      const sequence = this.fixed(
         `input-${inputIndex}-sequence`,
         `Input ${displayIndex} sequence`,
         'input',
@@ -113,6 +116,7 @@ class Decoder {
         DESCRIPTIONS.sequence,
         true,
       );
+      this.replaceDecoded(sequence.id, describeSequence(Number(sequence.decoded)));
     }
 
     const outputCount = this.compactSize(
@@ -141,7 +145,7 @@ class Decoder {
         DESCRIPTIONS.scriptLength,
       );
       if (scriptLength > 0) {
-        this.fixed(
+        const lockingScript = this.fixed(
           `output-${outputIndex}-script-pubkey`,
           `Output ${displayIndex} locking script`,
           'output',
@@ -150,6 +154,7 @@ class Decoder {
           false,
           `${scriptLength} bytes`,
         );
+        this.replaceDecoded(lockingScript.id, describeLockingScript(lockingScript.hex));
       }
     }
 
@@ -185,7 +190,8 @@ class Decoder {
       }
     }
 
-    this.fixed('locktime', 'Locktime', 'footer', 4, DESCRIPTIONS.locktime, true);
+    const locktime = this.fixed('locktime', 'Locktime', 'footer', 4, DESCRIPTIONS.locktime, true);
+    this.replaceDecoded(locktime.id, describeLocktime(Number(locktime.decoded)));
     if (this.cursor !== this.bytes.length) {
       throw new TransactionDecodeError(`Unexpected data begins at byte ${this.cursor}.`);
     }
@@ -242,6 +248,13 @@ class Decoder {
       throw new TransactionDecodeError(`${label} exceeds the supported safe integer range.`);
     }
     const numericValue = Number(value);
+    if (
+      (prefix === 0xfd && value < 0xfdn) ||
+      (prefix === 0xfe && value <= 0xffffn) ||
+      (prefix === 0xff && value <= 0xffffffffn)
+    ) {
+      throw new TransactionDecodeError(`${label} uses a non-canonical CompactSize encoding.`);
+    }
     this.fields.push({
       id,
       label,
@@ -293,4 +306,43 @@ function unsignedLittleEndian(bytes: Uint8Array): bigint {
 
 function reverseHexBytes(hex: string): string {
   return (hex.match(/../g) ?? []).reverse().join('');
+}
+
+function describeSequence(sequence: number): string {
+  if (sequence === 0xffffffff) {
+    return `${sequence} (final)`;
+  }
+  if ((sequence & 0x80000000) !== 0) {
+    return `${sequence} (relative locktime disabled)`;
+  }
+  const value = sequence & 0xffff;
+  return (sequence & 0x00400000) !== 0
+    ? `${sequence} (${value} × 512 seconds relative locktime)`
+    : `${sequence} (${value} block relative locktime)`;
+}
+
+function describeLocktime(locktime: number): string {
+  if (locktime === 0) {
+    return '0 (disabled)';
+  }
+  return locktime < 500_000_000 ? `${locktime} (block height)` : `${locktime} (Unix timestamp)`;
+}
+
+function describeLockingScript(scriptHex: string): string {
+  if (/^76a914[0-9a-f]{40}88ac$/.test(scriptHex)) {
+    return `${scriptHex.length / 2} bytes (P2PKH locking script)`;
+  }
+  if (/^a914[0-9a-f]{40}87$/.test(scriptHex)) {
+    return `${scriptHex.length / 2} bytes (P2SH locking script)`;
+  }
+  if (/^0014[0-9a-f]{40}$/.test(scriptHex)) {
+    return `${scriptHex.length / 2} bytes (P2WPKH witness program)`;
+  }
+  if (/^0020[0-9a-f]{64}$/.test(scriptHex)) {
+    return `${scriptHex.length / 2} bytes (P2WSH witness program)`;
+  }
+  if (/^5120[0-9a-f]{64}$/.test(scriptHex)) {
+    return `${scriptHex.length / 2} bytes (P2TR witness program)`;
+  }
+  return `${scriptHex.length / 2} bytes (nonstandard or unrecognized locking script)`;
 }
