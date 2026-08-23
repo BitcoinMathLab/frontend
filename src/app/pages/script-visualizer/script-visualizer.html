@@ -1,82 +1,24 @@
 <section class="visualizer-hero">
-  <div>
-    <p class="eyebrow">Interactive lab · P2PKH</p>
-    <h1>Follow one spend, one opcode at a time.</h1>
-    <p>
-      This first lab replays a known Bitcoin transaction through Bitclone. Move at your own pace or
-      let the player advance automatically.
-    </p>
-  </div>
-  <dl>
-    <div>
-      <dt>Script type</dt>
-      <dd>P2PKH</dd>
-    </div>
-    <div>
-      <dt>Mode</dt>
-      <dd>Historical example</dd>
-    </div>
-    <div>
-      <dt>Source</dt>
-      <dd>Bitclone trace engine</dd>
-    </div>
-  </dl>
+  <p class="eyebrow">Script visualizer · P2PKH MVP</p>
+  <h1>Validate one P2PKH spend.</h1>
+  <p>
+    Connect a transaction input to the previous output it spends, parse both scripts, and execute
+    every opcode while watching the stack change.
+  </p>
 </section>
 
 <section class="lab" aria-labelledby="lab-heading">
-  <div class="lab__heading">
+  <header class="lab__heading">
     <div>
-      <p class="eyebrow">Trace player</p>
-      <h2 id="lab-heading">Script execution</h2>
+      <p class="eyebrow">Input → previous output</p>
+      <h2 id="lab-heading">Spend verification</h2>
     </div>
-    <p>No keys or funds are used. This lab is educational software.</p>
-  </div>
+    <p>Educational replay from Bitclone. No keys, funds, or broadcasting.</p>
+  </header>
 
-  <div class="lesson-layout">
-    <nav class="lesson-list" aria-label="Visualizer lessons">
-      @for (lesson of lessons; track lesson.id) {
-        <button
-          type="button"
-          (click)="selectLesson(lesson)"
-          [class.lesson-list__active]="lesson.id === selectedLesson().id"
-          [attr.aria-current]="lesson.id === selectedLesson().id ? 'true' : null"
-        >
-          <span>{{ lesson.order }} · {{ lesson.scriptType }}</span>
-          <strong>{{ lesson.title }}</strong>
-          <small>{{ lesson.expectedOutcome }}</small>
-        </button>
-      }
-    </nav>
-
-    <article class="lesson-copy">
-      <div class="lesson-copy__meta">
-        <span>{{ selectedLesson().scriptType }}</span>
-        <span>{{ selectedLesson().kind === 'live' ? 'Live trace' : 'Concept' }}</span>
-      </div>
-      <h3>{{ selectedLesson().title }}</h3>
-      <p>{{ selectedLesson().summary }}</p>
-      <code>{{ selectedLesson().scriptPattern }}</code>
-      <h4>In this lesson</h4>
-      <ul>
-        @for (objective of selectedLesson().objectives; track $index) {
-          <li>{{ objective }}</li>
-        }
-      </ul>
-    </article>
-  </div>
-
-  @if (selectedLesson().kind === 'concept') {
-    <div class="concept-card">
-      <p class="eyebrow">Key connection</p>
-      <p>
-        P2PK locks directly to a public key. P2PKH first proves that the revealed public key has the
-        expected hash, then performs the same signature check. Continue to lesson 02 to see those
-        extra identity opcodes execute.
-      </p>
-    </div>
-  } @else if (loading()) {
+  @if (loading()) {
     <div class="state-card" role="status">
-      <span class="state-card__pulse" aria-hidden="true"></span> Loading the execution trace…
+      <span class="state-card__pulse" aria-hidden="true"></span> Loading the P2PKH execution trace…
     </div>
   } @else if (error()) {
     <div class="state-card state-card--error" role="alert">
@@ -87,6 +29,56 @@
       <button type="button" (click)="loadTrace()">Retry</button>
     </div>
   } @else if (response(); as result) {
-    <app-trace-player [trace]="result.trace" />
+    <div class="visualizer-workspace">
+      <aside class="spend-pair" aria-labelledby="spend-pair-heading">
+        <div class="panel-heading">
+          <p class="eyebrow">Source material</p>
+          <h2 id="spend-pair-heading">Elements being evaluated</h2>
+        </div>
+
+        <article class="spend-element spend-element--input">
+          <span class="element-tag">Current transaction · input 0</span>
+          <h3>scriptSig</h3>
+          <p>Unlocking data supplied by the spender: a signature and public key.</p>
+          <dl>
+            <div>
+              <dt>Previous txid</dt>
+              <dd>
+                <code>{{ outpoint.txid }}</code>
+              </dd>
+            </div>
+            <div>
+              <dt>vout</dt>
+              <dd>{{ outpoint.vout }}</dd>
+            </div>
+          </dl>
+          <code class="script-source">{{ result.scripts.unlocking }}</code>
+        </article>
+
+        <div class="spend-connector" aria-hidden="true">
+          <span>spends</span>
+          <strong>↓</strong>
+        </div>
+
+        <article class="spend-element spend-element--output">
+          <span class="element-tag">Previous transaction · output {{ outpoint.vout }}</span>
+          <h3>scriptPubKey</h3>
+          <p>Locking conditions created by the previous output and evaluated after scriptSig.</p>
+          <dl>
+            <div>
+              <dt>Value</dt>
+              <dd>{{ formatSats(spentOutput.amount_sats) }} sats</dd>
+            </div>
+            <div>
+              <dt>Type</dt>
+              <dd>P2PKH</dd>
+            </div>
+          </dl>
+          <code class="script-source">{{ result.scripts.locking }}</code>
+        </article>
+      </aside>
+
+      <app-trace-player [trace]="result.trace" [scripts]="result.scripts" />
+    </div>
   }
 </section>

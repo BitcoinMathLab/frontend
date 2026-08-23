@@ -6,7 +6,7 @@ import { TRACE_RESPONSE_FIXTURE } from '../../testing/trace.fixture';
 import { ScriptVisualizer } from './script-visualizer';
 
 describe('ScriptVisualizer', () => {
-  it('loads the curated P2PKH trace into the player', async () => {
+  it('loads one curated P2PKH spend into the source and execution workspace', async () => {
     const loadP2pkhTrace = vi.fn().mockReturnValue(of(TRACE_RESPONSE_FIXTURE));
     await TestBed.configureTestingModule({
       imports: [ScriptVisualizer],
@@ -17,7 +17,12 @@ describe('ScriptVisualizer', () => {
     fixture.detectChanges();
 
     expect(loadP2pkhTrace).toHaveBeenCalledOnce();
-    expect(fixture.nativeElement.textContent).toContain('A valid P2PKH spend');
+    expect(fixture.nativeElement.textContent).toContain('Validate one P2PKH spend.');
+    expect(fixture.nativeElement.textContent).toContain('Elements being evaluated');
+    expect(fixture.nativeElement.textContent).toContain('scriptSig');
+    expect(fixture.nativeElement.textContent).toContain('scriptPubKey');
+    expect(fixture.nativeElement.textContent).toContain('Previous txid');
+    expect(fixture.nativeElement.textContent).toContain('Scripts become operations');
     expect(fixture.nativeElement.textContent).toContain('Step 1 of 3');
     expect(fixture.nativeElement.textContent).toContain('Valid spend');
   });
@@ -37,41 +42,9 @@ describe('ScriptVisualizer', () => {
     expect(fixture.nativeElement.textContent).toContain('The trace API is not available.');
     expect(fixture.nativeElement.textContent).not.toContain('private network detail');
 
-    const retry = fixture.nativeElement.querySelector('.state-card button') as HTMLButtonElement;
-    retry.click();
+    (fixture.nativeElement.querySelector('.state-card button') as HTMLButtonElement).click();
     fixture.detectChanges();
-
     expect(loadP2pkhTrace).toHaveBeenCalledTimes(2);
     expect(fixture.nativeElement.textContent).toContain('Step 1 of 3');
-  });
-
-  it('switches between P2PK context and the invalid live example', async () => {
-    const invalidResponse = {
-      ...TRACE_RESPONSE_FIXTURE,
-      trace: { ...TRACE_RESPONSE_FIXTURE.trace, success: false },
-    } as const;
-    const loadP2pkhTrace = vi
-      .fn()
-      .mockReturnValueOnce(of(TRACE_RESPONSE_FIXTURE))
-      .mockReturnValueOnce(of(invalidResponse));
-    await TestBed.configureTestingModule({
-      imports: [ScriptVisualizer],
-      providers: [{ provide: TraceApi, useValue: { loadP2pkhTrace } }],
-    }).compileComponents();
-    const fixture = TestBed.createComponent(ScriptVisualizer);
-    fixture.detectChanges();
-
-    const lessonButtons = fixture.nativeElement.querySelectorAll('.lesson-list button');
-    lessonButtons[0].click();
-    fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('P2PK locks directly to a public key.');
-    expect(fixture.nativeElement.querySelector('app-trace-player')).toBeNull();
-    expect(loadP2pkhTrace).toHaveBeenCalledTimes(1);
-
-    lessonButtons[2].click();
-    fixture.detectChanges();
-    expect(loadP2pkhTrace).toHaveBeenCalledTimes(2);
-    expect(fixture.nativeElement.textContent).toContain('One changed signature byte');
-    expect(fixture.nativeElement.textContent).toContain('Invalid spend');
   });
 });

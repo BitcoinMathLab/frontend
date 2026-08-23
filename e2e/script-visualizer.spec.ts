@@ -4,30 +4,30 @@ const validResponse = {
   api_version: 'v1',
   script_type: 'P2PKH',
   input_index: 0,
-  scripts: { unlocking: '51', locking: '76', combined: '5176' },
+  scripts: { unlocking: '51', locking: '76ac', combined: '5176ac' },
   trace: {
     schema_version: 1,
-    script: '5176',
+    script: '5176ac',
     success: true,
     diagnostic: null,
     steps: [
       {
         index: 0,
         opcode: {
-          name: 'OP_1',
-          value: 81,
-          hex: '0x51',
+          name: 'OP_PUSHBYTES_1',
+          value: 1,
+          hex: '0x01',
           byte_offset: 0,
           byte_length: 1,
           raw: '51',
-          is_push: false,
-          push_data: null,
+          is_push: true,
+          push_data: '01',
         },
         stacks: {
           before: { main: { depth: 0, items: [] }, alt: { depth: 0, items: [] } },
           after: { main: { depth: 1, items: ['01'] }, alt: { depth: 0, items: [] } },
         },
-        explanation: 'Push one onto the main stack.',
+        explanation: 'Push the signature onto the main stack.',
         diagnostic: null,
       },
       {
@@ -49,70 +49,97 @@ const validResponse = {
         explanation: 'Duplicate the top stack item.',
         diagnostic: null,
       },
+      {
+        index: 2,
+        opcode: {
+          name: 'OP_CHECKSIG',
+          value: 172,
+          hex: '0xac',
+          byte_offset: 2,
+          byte_length: 1,
+          raw: 'ac',
+          is_push: false,
+          push_data: null,
+        },
+        stacks: {
+          before: {
+            main: { depth: 2, items: ['02publickey', '30signature'] },
+            alt: { depth: 0, items: [] },
+          },
+          after: { main: { depth: 1, items: ['01'] }, alt: { depth: 0, items: [] } },
+        },
+        explanation: 'Verify the signature against the transaction digest and public key.',
+        diagnostic: null,
+      },
     ],
   },
 };
 
-async function mockTraceApi(page: Page): Promise<void> {
+async function mockTraceApi(page: Page, success = true): Promise<void> {
   await page.route('**/api/v1/traces/p2pkh', async (route) => {
-    const request = route.request().postDataJSON() as { transaction_hex: string };
-    const invalidLesson = request.transaction_hex.includes('c333');
     await route.fulfill({
       contentType: 'application/json',
-      json: {
-        ...validResponse,
-        trace: {
-          ...validResponse.trace,
-          success: !invalidLesson,
-          diagnostic: invalidLesson
-            ? {
+      json: success
+        ? validResponse
+        : {
+            ...validResponse,
+            trace: {
+              ...validResponse.trace,
+              success: false,
+              diagnostic: {
                 code: 'false-final-value',
                 message: 'The final stack value is false.',
-                step_index: 1,
-                opcode_name: 'OP_DUP',
-              }
-            : null,
-        },
-      },
+                step_index: 2,
+                opcode_name: 'OP_CHECKSIG',
+              },
+            },
+          },
     });
   });
 }
 
-test('steps through the successful lesson with controls and keyboard', async ({ page }) => {
+test('connects spend elements, parsing, execution, stacks, and signature detail', async ({
+  page,
+}) => {
   await mockTraceApi(page);
-  await page.goto('/labs/script-visualizer');
+  await page.goto('/visualizer');
 
   const player = page.getByLabel('Script trace player');
-  await expect(page.locator('main')).toHaveCount(1);
-  await expect(player).toBeVisible();
-  await expect(page.getByText('Valid spend', { exact: true })).toBeVisible();
-  await expect(page.getByText('Step 1 of 2')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Validate one P2PKH spend.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Elements being evaluated' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'scriptSig' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'scriptPubKey' })).toBeVisible();
+  await expect(page.getByText('1 · scriptSig')).toBeVisible();
+  await expect(page.getByText('2 · scriptPubKey')).toBeVisible();
+  await expect(page.getByText('PUSH signature')).toBeVisible();
+  await expect(page.getByText('Step 1 of 3')).toBeVisible();
 
-  await page.getByRole('button', { name: 'Next' }).click();
-  await expect(page.getByText('Step 2 of 2')).toBeVisible();
-  await expect(page.getByRole('button', { name: /02 OP_DUP/ })).toHaveAttribute(
-    'aria-current',
-    'step',
-  );
+  await page.getByRole('button', { name: 'Next step' }).click();
+  await expect(page.getByText('Step 2 of 3')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'OP_DUP' })).toBeVisible();
+  await expect(page.getByText('Copy the top stack item and push the duplicate.')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Go to result' }).click();
+  await expect(page.getByRole('heading', { name: 'OP_CHECKSIG' })).toBeVisible();
+  await page.getByRole('button', { name: 'Open signature verification detail' }).click();
+  await expect(page.getByRole('dialog')).toContainText('How this signature is verified');
+  await expect(page.getByRole('dialog')).toContainText('30signature');
+  await page.getByRole('button', { name: 'Close detail' }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
 
   await player.press('ArrowLeft');
-  await expect(page.getByText('Step 1 of 2')).toBeVisible();
+  await expect(page.getByText('Step 2 of 3')).toBeVisible();
 });
 
-test('explains concept and failing lessons without stale player state', async ({ page }) => {
-  await mockTraceApi(page);
-  await page.goto('/labs/script-visualizer');
+test('shows a failed P2PKH result without adding another lesson surface', async ({ page }) => {
+  await mockTraceApi(page, false);
+  await page.goto('/visualizer');
 
-  await page.getByRole('button', { name: /01 · P2PK Before address hashes Context/ }).click();
-  await expect(page.getByText('P2PK locks directly to a public key.')).toBeVisible();
-  await expect(page.getByLabel('Script trace player')).toHaveCount(0);
-
-  await page.getByRole('button', { name: /03 · P2PKH One changed signature byte Invalid/ }).click();
   await expect(page.getByText('Invalid spend', { exact: true })).toBeVisible();
   await expect(page.getByLabel('Failure explanation')).toContainText(
     'The final stack value is false.',
   );
-  await expect(page.getByText('Step 1 of 2')).toBeVisible();
+  await expect(page.locator('.lesson-list')).toHaveCount(0);
 });
 
 test('recovers from an API failure and fits a supported mobile viewport', async ({ page }) => {
@@ -127,14 +154,20 @@ test('recovers from an API failure and fits a supported mobile viewport', async 
     await route.fulfill({ contentType: 'application/json', json: validResponse });
   });
 
-  await page.goto('/labs/script-visualizer');
+  await page.goto('/visualizer');
   await expect(page.getByRole('alert')).toContainText('The trace API is not available.');
   await page.getByRole('button', { name: 'Retry' }).click();
   await expect(page.getByLabel('Script trace player')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Next' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Next step' })).toBeVisible();
 
   const hasHorizontalOverflow = await page.evaluate(
     () => document.documentElement.scrollWidth > window.innerWidth,
   );
   expect(hasHorizontalOverflow).toBe(false);
+});
+
+test('redirects the former lab URL to the minimal visualizer route', async ({ page }) => {
+  await mockTraceApi(page);
+  await page.goto('/labs/script-visualizer');
+  await expect(page).toHaveURL(/\/visualizer$/);
 });

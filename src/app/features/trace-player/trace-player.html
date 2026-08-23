@@ -6,98 +6,114 @@
 >
   <header class="player__header">
     <div>
-      <p class="eyebrow">Execution player</p>
-      <p class="step-label" aria-live="polite">{{ stepLabel() }}</p>
+      <p class="eyebrow">Parser window</p>
+      <h2>Scripts become operations</h2>
     </div>
-    <span class="outcome" role="status" aria-live="polite" [class.outcome--valid]="trace().success">
+    <span class="outcome" role="status" [class.outcome--valid]="trace().success">
       {{ trace().success ? 'Valid spend' : 'Invalid spend' }}
     </span>
   </header>
 
+  <app-script-parser
+    [trace]="trace()"
+    [scripts]="scripts()"
+    [currentIndex]="currentIndex()"
+    (selectStep)="goTo($event)"
+  />
+
   @if (!trace().success && trace().diagnostic; as diagnostic) {
-    <article class="instruction" aria-label="Failure explanation">
-      <span class="instruction__number" aria-hidden="true">!</span>
-      <div>
-        <code>Why execution failed</code>
-        <p>{{ diagnostic.message }}</p>
-        <p>Diagnostic: {{ diagnostic.code }}</p>
-      </div>
-      @if (diagnostic.step_index !== null) {
-        <span class="instruction__offset">step {{ diagnostic.step_index + 1 }}</span>
-      }
+    <article class="diagnostic" aria-label="Failure explanation">
+      <strong>Why execution failed</strong>
+      <span>{{ diagnostic.message }}</span>
+      <code>{{ diagnostic.code }}</code>
     </article>
   }
 
   @if (currentStep(); as step) {
-    <article class="instruction" aria-live="polite">
-      <span class="instruction__number">{{ (step.index + 1).toString().padStart(2, '0') }}</span>
-      <div>
-        <code>{{ step.opcode.name }}</code>
+    <section class="execution-window" aria-labelledby="execution-window-heading">
+      <header class="execution-window__heading">
+        <div>
+          <p class="eyebrow">Execution window · {{ phaseLabel() }}</p>
+          <h2 id="execution-window-heading">{{ step.opcode.name }}</h2>
+        </div>
+        <span class="step-label" aria-live="polite">{{ stepLabel() }}</span>
+      </header>
+
+      <div class="operation-explanation" aria-live="polite">
         <p>{{ step.explanation }}</p>
+        <strong>{{ stackEffect() }}</strong>
+        @if (isSignatureCheck()) {
+          <button type="button" class="signature-link" (click)="signatureDetailOpen.set(true)">
+            Open signature verification detail
+          </button>
+        }
       </div>
-      <span class="instruction__offset">byte {{ step.opcode.byte_offset }}</span>
-    </article>
 
-    <app-script-bytes
-      [script]="trace().script"
-      [activeOffset]="step.opcode.byte_offset"
-      [activeLength]="step.opcode.byte_length"
-    />
+      <div class="stack-transition">
+        <div class="stack-stage">
+          <span>Before operation</span>
+          <app-stack-view
+            label="Main stack before"
+            [snapshot]="step.stacks.before.main"
+            [stepIndex]="step.index"
+          />
+        </div>
+        <div class="execution-chip" aria-hidden="true">
+          <code>{{ step.opcode.name }}</code>
+          <span>→</span>
+        </div>
+        <div class="stack-stage stack-stage--current">
+          <span>After operation · current stack</span>
+          <app-stack-view
+            label="Main stack after"
+            [snapshot]="step.stacks.after.main"
+            [stepIndex]="step.index"
+          />
+        </div>
+      </div>
 
-    <div class="execution-state">
-      <div class="stack-column">
-        <p>Before</p>
-        <app-stack-view
-          label="Main stack before"
-          [snapshot]="step.stacks.before.main"
-          [stepIndex]="step.index"
-        />
-        <app-stack-view
-          label="Alt stack before"
-          [snapshot]="step.stacks.before.alt"
-          [stepIndex]="step.index"
-        />
-      </div>
-      <div class="state-arrow" aria-hidden="true">→</div>
-      <div class="stack-column">
-        <p>After</p>
-        <app-stack-view
-          label="Main stack after"
-          [snapshot]="step.stacks.after.main"
-          [stepIndex]="step.index"
-        />
-        <app-stack-view
-          label="Alt stack after"
-          [snapshot]="step.stacks.after.alt"
-          [stepIndex]="step.index"
-        />
-      </div>
-    </div>
+      @if (showAltStack()) {
+        <div class="alt-stack-row">
+          <app-stack-view
+            label="Alt stack before"
+            [snapshot]="step.stacks.before.alt"
+            [stepIndex]="step.index"
+          />
+          <app-stack-view
+            label="Alt stack after"
+            [snapshot]="step.stacks.after.alt"
+            [stepIndex]="step.index"
+          />
+        </div>
+      }
+    </section>
   }
 
-  <nav class="timeline" aria-label="Execution timeline">
-    @for (step of trace().steps; track step.index) {
-      <button
-        type="button"
-        (click)="goTo(step.index)"
-        [class.timeline__complete]="step.index < currentIndex()"
-        [class.timeline__current]="step.index === currentIndex()"
-        [attr.aria-current]="step.index === currentIndex() ? 'step' : null"
-      >
-        <span>{{ (step.index + 1).toString().padStart(2, '0') }}</span>
-        <code>{{ step.opcode.name }}</code>
-      </button>
-    }
-  </nav>
-
-  <div class="controls" role="group" aria-label="Playback controls">
-    <button type="button" (click)="reset()" [disabled]="atStart()">Reset</button>
-    <button type="button" (click)="previous()" [disabled]="atStart()">Previous</button>
-    <button class="controls__primary" type="button" (click)="togglePlay()">
-      {{ playing() ? 'Pause' : 'Play' }}
+  <div class="vcr" role="group" aria-label="Playback controls">
+    <button type="button" (click)="reset()" [disabled]="atStart()" aria-label="Restart trace">
+      <span aria-hidden="true">⏮</span><small>Restart</small>
     </button>
-    <button type="button" (click)="next()" [disabled]="atEnd()">Next</button>
+    <button type="button" (click)="previous()" [disabled]="atStart()" aria-label="Previous step">
+      <span aria-hidden="true">◀</span><small>Previous</small>
+    </button>
+    <button class="vcr__primary" type="button" (click)="togglePlay()">
+      <span aria-hidden="true">{{ playing() ? 'Ⅱ' : '▶' }}</span
+      ><small>{{ playing() ? 'Pause' : 'Play' }}</small>
+    </button>
+    <button type="button" (click)="next()" [disabled]="atEnd()" aria-label="Next step">
+      <span aria-hidden="true">▶</span><small>Next</small>
+    </button>
+    <button type="button" (click)="finish()" [disabled]="atEnd()" aria-label="Go to result">
+      <span aria-hidden="true">⏭</span><small>Result</small>
+    </button>
   </div>
+  <p class="keyboard-help">Keyboard: ←/→ step · Space play/pause · Escape closes detail</p>
 
-  <p class="keyboard-help">Keyboard: left/right arrows step through; space plays or pauses.</p>
+  @if (signatureDetailOpen()) {
+    <app-signature-detail
+      [signature]="signature()"
+      [publicKey]="publicKey()"
+      (close)="signatureDetailOpen.set(false)"
+    />
+  }
 </section>

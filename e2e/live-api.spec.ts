@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 test('runs successful and failing lessons through the real API and engine', async ({ page }) => {
   test.skip(!process.env['BML_LIVE_API'], 'Set BML_LIVE_API=1 to run the cross-repository check.');
 
-  await page.goto('/labs/script-visualizer');
+  await page.goto('/visualizer');
 
   const player = page.getByLabel('Script trace player');
   await expect(player).toBeVisible();
@@ -22,7 +22,7 @@ test('loads a catalog example through the real API, Core, and classification eng
 }) => {
   test.skip(!process.env['BML_LIVE_API'], 'Set BML_LIVE_API=1 to run the cross-repository check.');
 
-  await page.goto('/labs/transaction-explorer');
+  await page.goto('/explorer');
   await page.getByRole('button', { name: /Early payment and change/ }).click();
   await expect(page.getByRole('textbox', { name: 'Transaction ID' })).toHaveValue(
     'fff2525b8931402dd09222c50775608f75787bd2b87e56995a7bdd30f79702c4',
@@ -46,7 +46,7 @@ test('loads genesis through the block-zero fallback with coinbase-safe metrics',
 }) => {
   test.skip(!process.env['BML_LIVE_API'], 'Set BML_LIVE_API=1 to run the cross-repository check.');
 
-  await page.goto('/labs/transaction-explorer');
+  await page.goto('/explorer');
   await page.getByRole('button', { name: /Genesis coinbase/ }).click();
   await page.getByRole('button', { name: 'Inspect transaction' }).click();
 
@@ -70,7 +70,7 @@ test('loads genesis through the block-zero fallback with coinbase-safe metrics',
 test('loads native SegWit with distinct identity and rounded virtual size', async ({ page }) => {
   test.skip(!process.env['BML_LIVE_API'], 'Set BML_LIVE_API=1 to run the cross-repository check.');
 
-  await page.goto('/labs/transaction-explorer');
+  await page.goto('/explorer');
   await page.getByRole('button', { name: /Native SegWit P2WPKH/ }).click();
   await page.getByRole('button', { name: 'Inspect transaction' }).click();
 
