@@ -34,12 +34,14 @@ export class TransactionExplorer implements OnInit, OnDestroy {
   private requestSubscription: Subscription | undefined;
   private examplesSubscription: Subscription | undefined;
   private copiedTimeout: ReturnType<typeof setTimeout> | undefined;
+  private byteCopiedTimeout: ReturnType<typeof setTimeout> | undefined;
 
   protected txid = DEFAULT_TXID;
   protected readonly loading = signal(false);
   protected readonly error = signal('');
   protected readonly result = signal<TransactionContextResponse | null>(null);
   protected readonly copied = signal(false);
+  protected readonly copiedByteFieldId = signal<string | null>(null);
   protected readonly examples = signal<readonly TransactionExample[]>([]);
   protected readonly selectedExample = signal<TransactionExample | null>(null);
   protected readonly selectedByteFieldId = signal<string | null>(null);
@@ -111,6 +113,7 @@ export class TransactionExplorer implements OnInit, OnDestroy {
         next: (response) => {
           this.result.set(response);
           this.selectedByteFieldId.set('version');
+          this.copiedByteFieldId.set(null);
         },
         error: (error: HttpErrorResponse) => this.error.set(this.messageFor(error)),
       });
@@ -123,6 +126,7 @@ export class TransactionExplorer implements OnInit, OnDestroy {
     this.error.set('');
     this.result.set(null);
     this.copied.set(false);
+    this.copiedByteFieldId.set(null);
     this.selectedExample.set(null);
     this.selectedByteFieldId.set(null);
   }
@@ -197,6 +201,21 @@ export class TransactionExplorer implements OnInit, OnDestroy {
     }
   }
 
+  protected async copyByteField(field: TransactionByteField): Promise<void> {
+    if (!navigator.clipboard) {
+      this.error.set('Clipboard access is not available in this browser.');
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(field.hex);
+      this.copiedByteFieldId.set(field.id);
+      clearTimeout(this.byteCopiedTimeout);
+      this.byteCopiedTimeout = setTimeout(() => this.copiedByteFieldId.set(null), 1_500);
+    } catch {
+      this.error.set('The selected transaction bytes could not be copied to the clipboard.');
+    }
+  }
+
   protected handleByteFieldKeydown(event: KeyboardEvent, currentIndex: number): void {
     const fields = this.byteFields();
     if (!['Home', 'End', 'ArrowLeft', 'ArrowUp', 'ArrowRight', 'ArrowDown'].includes(event.key)) {
@@ -226,6 +245,7 @@ export class TransactionExplorer implements OnInit, OnDestroy {
     this.requestSubscription?.unsubscribe();
     this.examplesSubscription?.unsubscribe();
     clearTimeout(this.copiedTimeout);
+    clearTimeout(this.byteCopiedTimeout);
   }
 
   private replaceInput(txid: string, example: TransactionExample | null = null): void {
@@ -235,6 +255,7 @@ export class TransactionExplorer implements OnInit, OnDestroy {
     this.error.set('');
     this.result.set(null);
     this.copied.set(false);
+    this.copiedByteFieldId.set(null);
     this.selectedExample.set(example);
     this.selectedByteFieldId.set(null);
   }

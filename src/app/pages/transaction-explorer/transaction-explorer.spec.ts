@@ -104,6 +104,12 @@ function traceApiWith(loadTransactionContext: ReturnType<typeof vi.fn>) {
 describe('TransactionExplorer', () => {
   it('loads and presents transaction context', async () => {
     const loadTransactionContext = vi.fn().mockReturnValue(of(RESPONSE));
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    const previousClipboard = Object.getOwnPropertyDescriptor(navigator, 'clipboard');
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    });
     await TestBed.configureTestingModule({
       imports: [TransactionExplorer],
       providers: [{ provide: TraceApi, useValue: traceApiWith(loadTransactionContext) }],
@@ -166,6 +172,14 @@ describe('TransactionExplorer', () => {
     expect(fixture.nativeElement.querySelector('.byte-detail').textContent).toContain(
       'Output 2 amount',
     );
+    const copyBytes = fixture.nativeElement.querySelector(
+      '[aria-label="Copy Output 2 amount bytes"]',
+    ) as HTMLButtonElement;
+    copyBytes.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(writeText).toHaveBeenCalledWith('d007000000000000');
+    expect(copyBytes.textContent).toContain('Copied');
 
     const selectedOutputField = fixture.nativeElement.querySelector(
       '.byte-field--active',
@@ -195,6 +209,12 @@ describe('TransactionExplorer', () => {
 
     expect((fixture.nativeElement.querySelector('input') as HTMLInputElement).value).toBe('');
     expect(fixture.nativeElement.querySelector('.result')).toBeNull();
+
+    if (previousClipboard) {
+      Object.defineProperty(navigator, 'clipboard', previousClipboard);
+    } else {
+      delete (navigator as { clipboard?: Clipboard }).clipboard;
+    }
   });
 
   it('prefers canonical byte fields returned by the engine API', async () => {

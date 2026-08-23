@@ -253,7 +253,16 @@
             @if (selectedByteField(); as field) {
               <aside class="byte-detail" aria-live="polite">
                 <p class="eyebrow">Selected field</p>
-                <h4>{{ field.label }}</h4>
+                <div class="byte-detail__title">
+                  <h4>{{ field.label }}</h4>
+                  <button
+                    type="button"
+                    [attr.aria-label]="'Copy ' + field.label + ' bytes'"
+                    (click)="copyByteField(field)"
+                  >
+                    {{ copiedByteFieldId() === field.id ? 'Copied' : 'Copy bytes' }}
+                  </button>
+                </div>
                 <dl>
                   <div>
                     <dt>Byte range</dt>
