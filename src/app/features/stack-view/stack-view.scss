@@ -101,3 +101,13 @@ header span {
     transform: translateY(-0.35rem);
   }
 }
+
+@media (max-width: 44rem) {
+  .stack-view {
+    grid-template-rows: auto minmax(8rem, 1fr);
+  }
+
+  .stack-view__items {
+    min-height: 8rem;
+  }
+}

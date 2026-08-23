@@ -1,20 +1,33 @@
 .stack-workbench {
   display: grid;
+  min-width: 0;
+  min-height: 100%;
   border: 1px solid var(--color-graphite);
-  border-radius: 0.7rem;
-  background: rgba(12, 17, 26, 0.82);
+  border-radius: 0.6rem;
+  background: var(--color-surface);
   gap: 0.85rem;
-  padding: 0.9rem;
+  padding: 0.85rem;
 }
 
-.stack-workbench__header h3,
-.stack-workbench__header p {
+.stack-workbench__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.stack-workbench__header h2 {
   margin: 0;
-}
-
-.stack-workbench__header h3 {
   color: var(--color-paper);
   font-size: 0.9rem;
+}
+
+.stack-workbench__header span {
+  color: var(--color-text-subtle);
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  text-align: right;
+  text-transform: uppercase;
 }
 
 .stack-columns,

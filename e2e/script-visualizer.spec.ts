@@ -105,20 +105,33 @@ test('connects spend elements, parsing, execution, stacks, and signature detail'
   await page.goto('/visualizer');
 
   const player = page.getByLabel('Script trace player');
-  await expect(page.getByRole('heading', { name: 'Validate one P2PKH spend.' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Elements being evaluated' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'scriptSig' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'scriptPubKey' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Watch Bitcoin Script execute.' })).toBeVisible();
+  await expect(page.getByLabel('Loaded transaction context')).toContainText('P2PKH spend loaded');
+  await expect(page.getByRole('heading', { name: 'Script flow' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Stack state' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Execution details' })).toBeVisible();
+  await expect(
+    page.getByLabel('Loaded transaction context').locator('details'),
+  ).not.toHaveAttribute('open', '');
+  const columnCount = await page
+    .locator('.visualizer-grid')
+    .evaluate(
+      (element) => getComputedStyle(element).gridTemplateColumns.split(' ').filter(Boolean).length,
+    );
+  expect(columnCount).toBe(3);
+  const controlsBox = await page.getByLabel('Playback controls').boundingBox();
+  const workspaceBox = await page.locator('.visualizer-grid').boundingBox();
+  expect(controlsBox?.y).toBeLessThan(workspaceBox?.y ?? 0);
   await expect(page.getByText('1 · scriptSig')).toBeVisible();
   await expect(page.getByText('2 · scriptPubKey')).toBeVisible();
   await expect(page.getByText('PUSH signature')).toBeVisible();
-  await expect(page.getByText('Step 1 of 3')).toBeVisible();
+  await expect(page.getByLabel('Execution status').getByText('Step 1 of 3')).toBeVisible();
 
   await page.getByRole('button', { name: 'Next step' }).click();
-  await expect(page.getByText('Step 2 of 3')).toBeVisible();
+  await expect(page.getByLabel('Execution status').getByText('Step 2 of 3')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'OP_DUP', exact: true })).toBeVisible();
   await expect(page.getByText('Copy the top stack item and push the duplicate.')).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Stack state after OP_DUP' })).toBeVisible();
+  await expect(page.getByLabel('Stack state')).toContainText('after OP_DUP');
   await expect(page.getByLabel('Stack movement').getByText('+ true')).toBeVisible();
   await expect(page.getByLabel('Alt stack').getByText('empty')).toBeVisible();
 
@@ -131,7 +144,7 @@ test('connects spend elements, parsing, execution, stacks, and signature detail'
   await expect(page.getByRole('dialog')).toHaveCount(0);
 
   await player.press('ArrowLeft');
-  await expect(page.getByText('Step 2 of 3')).toBeVisible();
+  await expect(page.getByLabel('Execution status').getByText('Step 2 of 3')).toBeVisible();
 });
 
 test('shows a failed P2PKH result without adding another lesson surface', async ({ page }) => {

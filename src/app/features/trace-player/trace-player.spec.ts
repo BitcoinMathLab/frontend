@@ -37,7 +37,7 @@ describe('TracePlayer', () => {
   it('parses scriptSig before scriptPubKey and starts with backward controls disabled', () => {
     const compiled = fixture.nativeElement as HTMLElement;
 
-    expect(compiled.textContent).toContain('Scripts become operations');
+    expect(compiled.textContent).toContain('Script flow');
     expect(compiled.textContent).toContain('1 · scriptSig');
     expect(compiled.textContent).toContain('2 · scriptPubKey');
     expect(compiled.textContent).toContain('PUSH signature');
@@ -101,9 +101,9 @@ describe('TracePlayer', () => {
     control('Go to result').click();
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).toContain('Execution window');
-    expect(fixture.nativeElement.textContent).toContain('Stack visualizer');
-    expect(fixture.nativeElement.textContent).toContain('Stack state after OP_ADD');
+    expect(fixture.nativeElement.textContent).toContain('Execution details');
+    expect(fixture.nativeElement.textContent).toContain('Stack state');
+    expect(fixture.nativeElement.textContent).toContain('after OP_ADD');
     expect(fixture.nativeElement.textContent).toContain('Main stack');
     expect(fixture.nativeElement.textContent).toContain('Alt stack');
     expect(fixture.nativeElement.textContent).toContain('Consumed');

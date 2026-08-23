@@ -1,21 +1,10 @@
 <section class="visualizer-hero">
-  <p class="eyebrow">Script visualizer · P2PKH MVP</p>
-  <h1>Validate one P2PKH spend.</h1>
-  <p>
-    Connect a transaction input to the previous output it spends, parse both scripts, and execute
-    every opcode while watching the stack change.
-  </p>
+  <p class="eyebrow">P2PKH script visualizer</p>
+  <h1>Watch Bitcoin Script execute.</h1>
+  <p>Follow the script flow, stack state, and current operation one step at a time.</p>
 </section>
 
-<section class="lab" aria-labelledby="lab-heading">
-  <header class="lab__heading">
-    <div>
-      <p class="eyebrow">Input → previous output</p>
-      <h2 id="lab-heading">Spend verification</h2>
-    </div>
-    <p>Educational replay from Bitclone. No keys, funds, or broadcasting.</p>
-  </header>
-
+<section class="lab" aria-label="P2PKH spend verification">
   @if (loading()) {
     <div class="state-card" role="status">
       <span class="state-card__pulse" aria-hidden="true"></span> Loading the P2PKH execution trace…
@@ -29,56 +18,43 @@
       <button type="button" (click)="loadTrace()">Retry</button>
     </div>
   } @else if (response(); as result) {
-    <div class="visualizer-workspace">
-      <aside class="spend-pair" aria-labelledby="spend-pair-heading">
-        <div class="panel-heading">
-          <p class="eyebrow">Source material</p>
-          <h2 id="spend-pair-heading">Elements being evaluated</h2>
+    <aside class="spend-context" aria-label="Loaded transaction context">
+      <div class="spend-context__title">
+        <span class="context-status" aria-hidden="true"></span>
+        <div>
+          <strong>P2PKH spend loaded</strong>
+          <span>Input 0 → previous output {{ outpoint.vout }}</span>
         </div>
-
-        <article class="spend-element spend-element--input">
-          <span class="element-tag">Current transaction · input 0</span>
-          <h3>scriptSig</h3>
-          <p>Unlocking data supplied by the spender: a signature and public key.</p>
-          <dl>
-            <div>
-              <dt>Previous txid</dt>
-              <dd>
-                <code>{{ outpoint.txid }}</code>
-              </dd>
-            </div>
-            <div>
-              <dt>vout</dt>
-              <dd>{{ outpoint.vout }}</dd>
-            </div>
-          </dl>
-          <code class="script-source">{{ result.scripts.unlocking }}</code>
-        </article>
-
-        <div class="spend-connector" aria-hidden="true">
-          <span>spends</span>
-          <strong>↓</strong>
+      </div>
+      <dl>
+        <div>
+          <dt>Outpoint</dt>
+          <dd>
+            <code>{{ outpoint.txid.slice(0, 12) }}…:{{ outpoint.vout }}</code>
+          </dd>
         </div>
+        <div>
+          <dt>Value</dt>
+          <dd>{{ formatSats(spentOutput.amount_sats) }} sats</dd>
+        </div>
+        <div>
+          <dt>Type</dt>
+          <dd>P2PKH</dd>
+        </div>
+      </dl>
+      <details>
+        <summary>Raw scripts</summary>
+        <div class="raw-scripts">
+          <label
+            >scriptSig <code>{{ result.scripts.unlocking }}</code></label
+          >
+          <label
+            >scriptPubKey <code>{{ result.scripts.locking }}</code></label
+          >
+        </div>
+      </details>
+    </aside>
 
-        <article class="spend-element spend-element--output">
-          <span class="element-tag">Previous transaction · output {{ outpoint.vout }}</span>
-          <h3>scriptPubKey</h3>
-          <p>Locking conditions created by the previous output and evaluated after scriptSig.</p>
-          <dl>
-            <div>
-              <dt>Value</dt>
-              <dd>{{ formatSats(spentOutput.amount_sats) }} sats</dd>
-            </div>
-            <div>
-              <dt>Type</dt>
-              <dd>P2PKH</dd>
-            </div>
-          </dl>
-          <code class="script-source">{{ result.scripts.locking }}</code>
-        </article>
-      </aside>
-
-      <app-trace-player [trace]="result.trace" [scripts]="result.scripts" />
-    </div>
+    <app-trace-player [trace]="result.trace" [scripts]="result.scripts" />
   }
 </section>

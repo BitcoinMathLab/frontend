@@ -17,12 +17,14 @@ describe('ScriptVisualizer', () => {
     fixture.detectChanges();
 
     expect(loadP2pkhTrace).toHaveBeenCalledOnce();
-    expect(fixture.nativeElement.textContent).toContain('Validate one P2PKH spend.');
-    expect(fixture.nativeElement.textContent).toContain('Elements being evaluated');
+    expect(fixture.nativeElement.textContent).toContain('Watch Bitcoin Script execute.');
+    expect(fixture.nativeElement.textContent).toContain('P2PKH spend loaded');
+    expect(fixture.nativeElement.textContent).toContain('Raw scripts');
     expect(fixture.nativeElement.textContent).toContain('scriptSig');
     expect(fixture.nativeElement.textContent).toContain('scriptPubKey');
-    expect(fixture.nativeElement.textContent).toContain('Previous txid');
-    expect(fixture.nativeElement.textContent).toContain('Scripts become operations');
+    expect(fixture.nativeElement.textContent).toContain('Script flow');
+    expect(fixture.nativeElement.textContent).toContain('Stack state');
+    expect(fixture.nativeElement.textContent).toContain('Execution details');
     expect(fixture.nativeElement.textContent).toContain('Step 1 of 3');
     expect(fixture.nativeElement.textContent).toContain('Valid spend');
   });

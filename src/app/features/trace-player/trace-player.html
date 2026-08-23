@@ -4,73 +4,118 @@
   (keydown)="handleKeydown($event)"
   aria-label="Script trace player"
 >
-  <header class="player__header">
-    <div>
-      <p class="eyebrow">Parser window</p>
-      <h2>Scripts become operations</h2>
+  <div class="controls-bar">
+    <div class="vcr" role="group" aria-label="Playback controls">
+      <button
+        type="button"
+        (click)="reset()"
+        [disabled]="atStart()"
+        aria-label="Restart trace"
+        title="Restart"
+      >
+        <span aria-hidden="true">↺</span>
+      </button>
+      <button
+        type="button"
+        (click)="previous()"
+        [disabled]="atStart()"
+        aria-label="Previous step"
+        title="Previous step"
+      >
+        <span aria-hidden="true">◀</span>
+      </button>
+      <button class="vcr__primary" type="button" (click)="togglePlay()">
+        <span aria-hidden="true">{{ playing() ? 'Ⅱ' : '▶' }}</span>
+        <small>{{ playing() ? 'Pause' : 'Play' }}</small>
+      </button>
+      <button
+        type="button"
+        (click)="next()"
+        [disabled]="atEnd()"
+        aria-label="Next step"
+        title="Next step"
+      >
+        <span aria-hidden="true">▶</span>
+      </button>
+      <button
+        type="button"
+        (click)="finish()"
+        [disabled]="atEnd()"
+        aria-label="Go to result"
+        title="Jump to result"
+      >
+        <span aria-hidden="true">⇥</span>
+      </button>
     </div>
-    <span class="outcome" role="status" [class.outcome--valid]="trace().success">
-      {{ trace().success ? 'Valid spend' : 'Invalid spend' }}
-    </span>
-  </header>
 
-  <app-script-parser
-    [trace]="trace()"
-    [scripts]="scripts()"
-    [currentIndex]="currentIndex()"
-    (selectStep)="goTo($event)"
-  />
-
-  @if (!trace().success && trace().diagnostic; as diagnostic) {
-    <article class="diagnostic" aria-label="Failure explanation">
-      <strong>Why execution failed</strong>
-      <span>{{ diagnostic.message }}</span>
-      <code>{{ diagnostic.code }}</code>
-    </article>
-  }
+    <div class="execution-status" aria-label="Execution status">
+      <span class="step-label" aria-live="polite">{{ stepLabel() }}</span>
+      <span class="outcome" role="status" [class.outcome--valid]="trace().success">
+        {{ trace().success ? 'Valid spend' : 'Invalid spend' }}
+      </span>
+    </div>
+  </div>
+  <div class="progress-track" aria-label="Execution progress">
+    <span [style.width.%]="progressPercent()"></span>
+  </div>
 
   @if (currentStep(); as step) {
-    <section class="execution-window" aria-labelledby="execution-window-heading">
-      <header class="execution-window__heading">
-        <div>
-          <p class="eyebrow">Execution window · {{ phaseLabel() }}</p>
-          <h2 id="execution-window-heading">{{ step.opcode.name }}</h2>
-        </div>
-        <span class="step-label" aria-live="polite">{{ stepLabel() }}</span>
-      </header>
+    <div class="visualizer-grid">
+      <section class="visual-pane flow-pane" aria-labelledby="flow-pane-heading">
+        <header class="pane-header">
+          <h2 id="flow-pane-heading">Script flow</h2>
+          <span>scriptSig → scriptPubKey</span>
+        </header>
+        <app-script-parser
+          [trace]="trace()"
+          [scripts]="scripts()"
+          [currentIndex]="currentIndex()"
+          (selectStep)="goTo($event)"
+        />
+      </section>
 
-      <div class="operation-explanation" aria-live="polite">
-        <p>{{ step.explanation }}</p>
-        <strong>{{ stackEffect() }}</strong>
+      <app-stack-workbench [step]="step" />
+
+      <section class="visual-pane execution-pane" aria-labelledby="execution-pane-heading">
+        <header class="pane-header">
+          <h2 id="execution-pane-heading">Execution details</h2>
+          <span>{{ phaseLabel() }}</span>
+        </header>
+
+        <article class="current-operation">
+          <span class="operation-category">Current operation</span>
+          <h3>{{ step.opcode.name }}</h3>
+          <p>{{ step.explanation }}</p>
+        </article>
+
+        <dl class="detail-list">
+          <div>
+            <dt>Stack effect</dt>
+            <dd>{{ stackEffect() }}</dd>
+          </div>
+          <div>
+            <dt>Position</dt>
+            <dd>{{ stepLabel() }}</dd>
+          </div>
+        </dl>
+
         @if (isSignatureCheck()) {
           <button type="button" class="signature-link" (click)="signatureDetailOpen.set(true)">
             Open signature verification detail
           </button>
         }
-      </div>
 
-      <app-stack-workbench [step]="step" />
-    </section>
+        @if (!trace().success && trace().diagnostic; as diagnostic) {
+          <article class="diagnostic" aria-label="Failure explanation">
+            <strong>Why execution failed</strong>
+            <span>{{ diagnostic.message }}</span>
+            <code>{{ diagnostic.code }}</code>
+          </article>
+        }
+      </section>
+    </div>
   }
 
-  <div class="vcr" role="group" aria-label="Playback controls">
-    <button type="button" (click)="reset()" [disabled]="atStart()" aria-label="Restart trace">
-      <span aria-hidden="true">⏮</span><small>Restart</small>
-    </button>
-    <button type="button" (click)="previous()" [disabled]="atStart()" aria-label="Previous step">
-      <span aria-hidden="true">◀</span><small>Previous</small>
-    </button>
-    <button class="vcr__primary" type="button" (click)="togglePlay()">
-      <span aria-hidden="true">{{ playing() ? 'Ⅱ' : '▶' }}</span
-      ><small>{{ playing() ? 'Pause' : 'Play' }}</small>
-    </button>
-    <button type="button" (click)="next()" [disabled]="atEnd()" aria-label="Next step">
-      <span aria-hidden="true">▶</span><small>Next</small>
-    </button>
-    <button type="button" (click)="finish()" [disabled]="atEnd()" aria-label="Go to result">
-      <span aria-hidden="true">⏭</span><small>Result</small>
-    </button>
-  </div>
   <p class="keyboard-help">Keyboard: ←/→ step · Space play/pause · Escape closes detail</p>
 
   @if (signatureDetailOpen()) {
