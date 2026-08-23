@@ -19,10 +19,13 @@ describe('Docs', () => {
     const compiled = fixture.nativeElement as HTMLElement;
 
     expect(compiled.querySelector('#architecture')).toBeTruthy();
+    expect(compiled.querySelector('#explorer')).toBeTruthy();
     expect(compiled.querySelector('#principles')).toBeTruthy();
     expect(compiled.querySelector('#scope')).toBeTruthy();
     expect(compiled.querySelectorAll('#faq details')).toHaveLength(5);
     expect(compiled.textContent).toContain('Three repositories, explicit responsibilities.');
     expect(compiled.textContent).toContain('Bitcoin Core remains the production source of truth');
+    expect(compiled.textContent).toContain('Follow bytes from serialization to meaning.');
+    expect(compiled.textContent).toContain('confirmed mainnet transactions available');
   });
 });

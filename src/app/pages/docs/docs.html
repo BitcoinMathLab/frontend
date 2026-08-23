@@ -7,6 +7,9 @@
   </p>
   <div class="hero-actions">
     <a class="button button--primary" routerLink="/labs/script-visualizer">Open the visualizer</a>
+    <a class="button button--secondary" routerLink="/labs/transaction-explorer"
+      >Open the explorer</a
+    >
     <a class="button button--secondary" href="https://github.com/BitcoinMathLab"
       >Browse the source</a
     >
@@ -17,6 +20,7 @@
   <nav class="contents" aria-label="Documentation contents">
     <p class="eyebrow">On this page</p>
     <a href="#overview">Overview</a>
+    <a href="#explorer">Transaction explorer</a>
     <a href="#architecture">Architecture</a>
     <a href="#principles">Development principles</a>
     <a href="#scope">MVP scope</a>
@@ -34,8 +38,49 @@
         replace a fully validating Bitcoin node.
       </p>
       <p>
-        The first release follows one historical pay-to-public-key-hash spend. It includes a valid
-        example, a deliberately altered signature, and a conceptual bridge from P2PK to P2PKH.
+        The first release follows one historical pay-to-public-key-hash spend. The growing explorer
+        can also retrieve confirmed mainnet transactions from Bitcoin Core and divide their
+        serialization into inspectable fields without accepting or broadcasting transaction data.
+      </p>
+    </section>
+
+    <section id="explorer" aria-labelledby="explorer-heading">
+      <p class="eyebrow">Transaction explorer</p>
+      <h2 id="explorer-heading">Follow bytes from serialization to meaning.</h2>
+      <p>
+        Enter any confirmed mainnet transaction ID, or begin with a verified educational fixture.
+        Bitcoin Core supplies the transaction and its previous outputs; the explorer then presents
+        input spend paths, created outputs, value and fee totals, identifiers, and SegWit-aware size
+        metrics.
+      </p>
+      <ol class="principles">
+        <li>
+          <strong>Choose a byte range.</strong>
+          <span
+            >The inspector maps version, CompactSize counts, outpoints, scripts, sequences, amounts,
+            witness items, and locktime to exact zero-based byte offsets.</span
+          >
+        </li>
+        <li>
+          <strong>Read the decoded value.</strong>
+          <span
+            >Little-endian integers, reversed transaction IDs, standard locking programs, sequence
+            semantics, and locktime meaning are explained beside the selected bytes.</span
+          >
+        </li>
+        <li>
+          <strong>Keep node authority clear.</strong>
+          <span
+            >The browser explains canonical bytes returned by the product API. Bitcoin Core remains
+            the source for mainnet transaction data and the product never requests private
+            keys.</span
+          >
+        </li>
+      </ol>
+      <p>
+        A transaction must already be known to the connected node. The explorer cannot find
+        unconfirmed data absent from that node, recover deleted transactions, or prove that an
+        arbitrary script is spendable merely by recognizing its template.
       </p>
     </section>
 
@@ -124,15 +169,17 @@
             <li>Successful and failing execution traces</li>
             <li>Main and alternate stack snapshots</li>
             <li>Opcode explanations and serialized-byte highlighting</li>
+            <li>Confirmed mainnet transaction lookup and educational fixtures</li>
+            <li>Legacy and SegWit transaction byte inspection</li>
             <li>Keyboard and supported mobile playback</li>
           </ul>
         </div>
         <div>
           <h3>Later releases</h3>
           <ul>
-            <li>Arbitrary transaction lookup</li>
-            <li>SegWit, Taproot, P2SH, and additional standard templates</li>
             <li>An editable professional Script workspace</li>
+            <li>Arbitrary script construction and transaction mutation</li>
+            <li>Saved sessions and shareable debugging traces</li>
             <li>Accounts, saved work, and commercial features</li>
             <li>Bitcoin node or wallet functionality</li>
           </ul>
@@ -178,8 +225,9 @@
         <details>
           <summary>Can I analyze any transaction?</summary>
           <p>
-            Not in the first release. Real transaction lookup and broader script classification are
-            planned after the curated visualizer is reliable in production.
+            You can look up confirmed mainnet transactions available to the connected Bitcoin Core
+            node. The explorer decodes transaction structure and recognized standard spend paths;
+            arbitrary script editing and professional debugging remain later work.
           </p>
         </details>
       </div>
