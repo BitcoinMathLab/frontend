@@ -10,11 +10,11 @@ import {
 import { ExecutionTrace, P2pkhTraceResponse, TraceStep } from '../../core/trace-api.models';
 import { ScriptParser } from '../script-parser/script-parser';
 import { SignatureDetail } from '../signature-detail/signature-detail';
-import { StackView } from '../stack-view/stack-view';
+import { StackWorkbench } from '../stack-workbench/stack-workbench';
 
 @Component({
   selector: 'app-trace-player',
-  imports: [ScriptParser, SignatureDetail, StackView],
+  imports: [ScriptParser, SignatureDetail, StackWorkbench],
   templateUrl: './trace-player.html',
   styleUrl: './trace-player.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -50,10 +50,6 @@ export class TracePlayer implements OnDestroy {
   protected readonly publicKey = computed(
     () => this.currentStep()?.stacks.before.main.items[0] ?? 'Unavailable in this trace',
   );
-  protected readonly showAltStack = computed(() => {
-    const step = this.currentStep();
-    return Boolean(step?.stacks.before.alt.depth || step?.stacks.after.alt.depth);
-  });
 
   private timer: ReturnType<typeof setInterval> | undefined;
 

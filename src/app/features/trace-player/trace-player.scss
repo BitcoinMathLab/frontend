@@ -128,55 +128,6 @@
   padding: 0.45rem 0.65rem;
 }
 
-.stack-transition {
-  display: grid;
-  align-items: center;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  gap: 0.6rem;
-}
-
-.stack-stage {
-  display: grid;
-  min-width: 0;
-  gap: 0.4rem;
-}
-
-.stack-stage > span {
-  color: var(--color-text-subtle);
-  font-family: var(--font-mono);
-  font-size: 0.6rem;
-  text-align: center;
-  text-transform: uppercase;
-}
-
-.stack-stage--current > app-stack-view {
-  display: block;
-  border-radius: 0.9rem;
-  box-shadow: 0 0 0 2px rgba(245, 165, 36, 0.22);
-}
-
-.execution-chip {
-  display: grid;
-  justify-items: center;
-  color: var(--color-amber);
-  gap: 0.25rem;
-}
-
-.execution-chip code {
-  max-width: 7rem;
-  color: var(--color-amber);
-  font-size: 0.58rem;
-  overflow-wrap: anywhere;
-  text-align: center;
-}
-
-.alt-stack-row {
-  display: grid;
-  margin-top: 0.75rem;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
-}
-
 .vcr {
   display: flex;
   align-items: stretch;
@@ -232,15 +183,6 @@
 }
 
 @media (max-width: 44rem) {
-  .stack-transition {
-    grid-template-columns: 1fr;
-  }
-
-  .execution-chip span {
-    transform: rotate(90deg);
-    text-align: center;
-  }
-
   .vcr button {
     min-width: 0;
     flex: 1 1 0;

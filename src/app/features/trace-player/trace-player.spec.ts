@@ -97,15 +97,19 @@ describe('TracePlayer', () => {
     expect(fixture.nativeElement.textContent).toContain('Pause');
   });
 
-  it('shows the operation between before and current stack snapshots', () => {
+  it('shows the current stack workbench and per-operation movement', () => {
     control('Go to result').click();
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('Execution window');
-    expect(fixture.nativeElement.textContent).toContain('Before operation');
-    expect(fixture.nativeElement.textContent).toContain('After operation · current stack');
-    expect(fixture.nativeElement.textContent).toContain('Main stack before');
-    expect(fixture.nativeElement.textContent).toContain('Main stack after');
+    expect(fixture.nativeElement.textContent).toContain('Stack visualizer');
+    expect(fixture.nativeElement.textContent).toContain('Stack state after OP_ADD');
+    expect(fixture.nativeElement.textContent).toContain('Main stack');
+    expect(fixture.nativeElement.textContent).toContain('Alt stack');
+    expect(fixture.nativeElement.textContent).toContain('Consumed');
+    expect(fixture.nativeElement.textContent).toContain('− data');
+    expect(fixture.nativeElement.textContent).toContain('Produced');
+    expect(fixture.nativeElement.textContent).toContain('+ data');
   });
 
   it('opens and closes detailed signature verification from OP_CHECKSIG', () => {

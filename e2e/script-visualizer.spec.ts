@@ -116,11 +116,14 @@ test('connects spend elements, parsing, execution, stacks, and signature detail'
 
   await page.getByRole('button', { name: 'Next step' }).click();
   await expect(page.getByText('Step 2 of 3')).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'OP_DUP' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'OP_DUP', exact: true })).toBeVisible();
   await expect(page.getByText('Copy the top stack item and push the duplicate.')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Stack state after OP_DUP' })).toBeVisible();
+  await expect(page.getByLabel('Stack movement').getByText('+ true')).toBeVisible();
+  await expect(page.getByLabel('Alt stack').getByText('empty')).toBeVisible();
 
   await page.getByRole('button', { name: 'Go to result' }).click();
-  await expect(page.getByRole('heading', { name: 'OP_CHECKSIG' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'OP_CHECKSIG', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Open signature verification detail' }).click();
   await expect(page.getByRole('dialog')).toContainText('How this signature is verified');
   await expect(page.getByRole('dialog')).toContainText('30signature');

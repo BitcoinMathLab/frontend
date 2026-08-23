@@ -49,43 +49,7 @@
         }
       </div>
 
-      <div class="stack-transition">
-        <div class="stack-stage">
-          <span>Before operation</span>
-          <app-stack-view
-            label="Main stack before"
-            [snapshot]="step.stacks.before.main"
-            [stepIndex]="step.index"
-          />
-        </div>
-        <div class="execution-chip" aria-hidden="true">
-          <code>{{ step.opcode.name }}</code>
-          <span>→</span>
-        </div>
-        <div class="stack-stage stack-stage--current">
-          <span>After operation · current stack</span>
-          <app-stack-view
-            label="Main stack after"
-            [snapshot]="step.stacks.after.main"
-            [stepIndex]="step.index"
-          />
-        </div>
-      </div>
-
-      @if (showAltStack()) {
-        <div class="alt-stack-row">
-          <app-stack-view
-            label="Alt stack before"
-            [snapshot]="step.stacks.before.alt"
-            [stepIndex]="step.index"
-          />
-          <app-stack-view
-            label="Alt stack after"
-            [snapshot]="step.stacks.after.alt"
-            [stepIndex]="step.index"
-          />
-        </div>
-      }
+      <app-stack-workbench [step]="step" />
     </section>
   }
 
