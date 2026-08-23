@@ -7,6 +7,8 @@ test('runs successful and failing lessons through the real API and engine', asyn
 
   const player = page.getByLabel('Script trace player');
   await expect(player).toBeVisible();
+  await expect(page.getByText('Valid spend', { exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Go to result' }).click();
   await expect(page.getByText('Valid spend', { exact: true })).toBeVisible();
   await expect(page.getByLabel('Execution timeline').getByRole('button')).toHaveCount(7);
   await expect(page.getByRole('button', { name: /07 OP_CHECKSIG/ })).toBeVisible();
