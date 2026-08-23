@@ -26,6 +26,7 @@ describe('Docs', () => {
     expect(compiled.textContent).toContain('Three repositories, explicit responsibilities.');
     expect(compiled.textContent).toContain('Bitcoin Core remains the production source of truth');
     expect(compiled.textContent).toContain('Follow bytes from serialization to meaning.');
+    expect(compiled.textContent).toContain('Copy bytes always places the complete');
     expect(compiled.textContent).toContain('confirmed mainnet transactions available');
   });
 });
