@@ -166,6 +166,26 @@ describe('TransactionExplorer', () => {
     expect(fixture.nativeElement.querySelector('.byte-detail').textContent).toContain(
       'Output 2 amount',
     );
+
+    const selectedOutputField = fixture.nativeElement.querySelector(
+      '.byte-field--active',
+    ) as HTMLButtonElement;
+    selectedOutputField.focus();
+    selectedOutputField.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.byte-detail').textContent).toContain('Locktime');
+    expect(document.activeElement).toBe(
+      fixture.nativeElement
+        .querySelectorAll('.byte-field')
+        .item(fixture.nativeElement.querySelectorAll('.byte-field').length - 1),
+    );
+
+    (document.activeElement as HTMLButtonElement).dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Home', bubbles: true }),
+    );
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.byte-detail').textContent).toContain('Version');
+    expect(document.activeElement).toBe(fixture.nativeElement.querySelector('.byte-field'));
     expect(fixture.nativeElement.textContent).toContain('Fixture verified');
 
     const clear = fixture.nativeElement.querySelector('.clear-button') as HTMLButtonElement;

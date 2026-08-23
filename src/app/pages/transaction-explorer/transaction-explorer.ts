@@ -197,6 +197,31 @@ export class TransactionExplorer implements OnInit, OnDestroy {
     }
   }
 
+  protected handleByteFieldKeydown(event: KeyboardEvent, currentIndex: number): void {
+    const fields = this.byteFields();
+    if (!['Home', 'End', 'ArrowLeft', 'ArrowUp', 'ArrowRight', 'ArrowDown'].includes(event.key)) {
+      return;
+    }
+    event.preventDefault();
+    const targetIndex =
+      event.key === 'Home'
+        ? 0
+        : event.key === 'End'
+          ? fields.length - 1
+          : event.key === 'ArrowLeft' || event.key === 'ArrowUp'
+            ? Math.max(0, currentIndex - 1)
+            : Math.min(fields.length - 1, currentIndex + 1);
+    if (targetIndex === currentIndex) {
+      return;
+    }
+
+    this.selectedByteFieldId.set(fields[targetIndex].id);
+    const buttons = (
+      event.currentTarget as HTMLElement
+    ).parentElement?.querySelectorAll<HTMLButtonElement>('.byte-field');
+    buttons?.item(targetIndex).focus();
+  }
+
   ngOnDestroy(): void {
     this.requestSubscription?.unsubscribe();
     this.examplesSubscription?.unsubscribe();

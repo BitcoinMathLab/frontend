@@ -223,7 +223,8 @@
         </div>
         @if (byteFields().length) {
           <p class="byte-inspector__help">
-            Select a byte range to see its offset, decoded value, and role in the transaction.
+            Select a byte range to see its offset, decoded value, and role in the transaction. Use
+            the arrow keys to move one field at a time, or Home and End to jump to either end.
           </p>
           <div class="byte-inspector__layout">
             <div class="byte-stream" aria-label="Decoded transaction byte ranges">
@@ -242,6 +243,7 @@
                     (field.offset + field.length - 1)
                   "
                   (click)="selectByteField(field)"
+                  (keydown)="handleByteFieldKeydown($event, $index)"
                 >
                   <span>{{ field.label }}</span>
                   <code>{{ field.hex }}</code>
