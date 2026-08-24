@@ -1,82 +1,12 @@
 <section class="visualizer-hero">
-  <div>
-    <p class="eyebrow">Interactive lab · P2PKH</p>
-    <h1>Follow one spend, one opcode at a time.</h1>
-    <p>
-      This first lab replays a known Bitcoin transaction through Bitclone. Move at your own pace or
-      let the player advance automatically.
-    </p>
-  </div>
-  <dl>
-    <div>
-      <dt>Script type</dt>
-      <dd>P2PKH</dd>
-    </div>
-    <div>
-      <dt>Mode</dt>
-      <dd>Historical example</dd>
-    </div>
-    <div>
-      <dt>Source</dt>
-      <dd>Bitclone trace engine</dd>
-    </div>
-  </dl>
+  <p class="eyebrow">P2PKH script visualizer</p>
+  <h1>Watch Bitcoin Script execute.</h1>
 </section>
 
-<section class="lab" aria-labelledby="lab-heading">
-  <div class="lab__heading">
-    <div>
-      <p class="eyebrow">Trace player</p>
-      <h2 id="lab-heading">Script execution</h2>
-    </div>
-    <p>No keys or funds are used. This lab is educational software.</p>
-  </div>
-
-  <div class="lesson-layout">
-    <nav class="lesson-list" aria-label="Visualizer lessons">
-      @for (lesson of lessons; track lesson.id) {
-        <button
-          type="button"
-          (click)="selectLesson(lesson)"
-          [class.lesson-list__active]="lesson.id === selectedLesson().id"
-          [attr.aria-current]="lesson.id === selectedLesson().id ? 'true' : null"
-        >
-          <span>{{ lesson.order }} · {{ lesson.scriptType }}</span>
-          <strong>{{ lesson.title }}</strong>
-          <small>{{ lesson.expectedOutcome }}</small>
-        </button>
-      }
-    </nav>
-
-    <article class="lesson-copy">
-      <div class="lesson-copy__meta">
-        <span>{{ selectedLesson().scriptType }}</span>
-        <span>{{ selectedLesson().kind === 'live' ? 'Live trace' : 'Concept' }}</span>
-      </div>
-      <h3>{{ selectedLesson().title }}</h3>
-      <p>{{ selectedLesson().summary }}</p>
-      <code>{{ selectedLesson().scriptPattern }}</code>
-      <h4>In this lesson</h4>
-      <ul>
-        @for (objective of selectedLesson().objectives; track $index) {
-          <li>{{ objective }}</li>
-        }
-      </ul>
-    </article>
-  </div>
-
-  @if (selectedLesson().kind === 'concept') {
-    <div class="concept-card">
-      <p class="eyebrow">Key connection</p>
-      <p>
-        P2PK locks directly to a public key. P2PKH first proves that the revealed public key has the
-        expected hash, then performs the same signature check. Continue to lesson 02 to see those
-        extra identity opcodes execute.
-      </p>
-    </div>
-  } @else if (loading()) {
+<section class="lab" aria-label="P2PKH spend verification">
+  @if (loading()) {
     <div class="state-card" role="status">
-      <span class="state-card__pulse" aria-hidden="true"></span> Loading the execution trace…
+      <span class="state-card__pulse" aria-hidden="true"></span> Loading the P2PKH execution trace…
     </div>
   } @else if (error()) {
     <div class="state-card state-card--error" role="alert">
@@ -87,6 +17,42 @@
       <button type="button" (click)="loadTrace()">Retry</button>
     </div>
   } @else if (response(); as result) {
-    <app-trace-player [trace]="result.trace" />
+    <aside class="spend-context" aria-label="Loaded transaction context">
+      <div class="spend-context__title">
+        <div>
+          <strong>P2PKH example</strong>
+          <span>Input 0 → output {{ outpoint.vout }}</span>
+        </div>
+      </div>
+      <dl>
+        <div>
+          <dt>Outpoint</dt>
+          <dd>
+            <code>{{ outpoint.txid.slice(0, 12) }}…:{{ outpoint.vout }}</code>
+          </dd>
+        </div>
+        <div>
+          <dt>Value</dt>
+          <dd>{{ formatSats(spentOutput.amount_sats) }} sats</dd>
+        </div>
+        <div>
+          <dt>Type</dt>
+          <dd>P2PKH</dd>
+        </div>
+      </dl>
+      <details>
+        <summary>Raw scripts</summary>
+        <div class="raw-scripts">
+          <label
+            >scriptSig <code>{{ result.scripts.unlocking }}</code></label
+          >
+          <label
+            >scriptPubKey <code>{{ result.scripts.locking }}</code></label
+          >
+        </div>
+      </details>
+    </aside>
+
+    <app-trace-player [trace]="result.trace" [scripts]="result.scripts" />
   }
 </section>

@@ -1,27 +1,26 @@
 import { routes } from './app.routes';
 
 describe('application routes', () => {
-  it('defines each public page and a fallback route', () => {
+  it('defines five public pages, legacy redirects, and a fallback route', () => {
     expect(routes.map((route) => route.path)).toEqual([
       '',
+      'visualizer',
+      'explorer',
+      'about',
       'labs/script-visualizer',
       'labs/transaction-explorer',
-      'about',
-      'docs',
-      'roadmap',
-      'blog',
-      'blog/:slug',
       'contact',
       '**',
     ]);
   });
 
-  it('provides a unique document title for every route', () => {
-    const titles = routes
-      .filter((route) => route.path !== 'blog/:slug')
-      .map((route) => route.title);
+  it('provides a unique document title for every rendered route', () => {
+    const renderedRoutes = routes.filter((route) => !route.redirectTo);
+    const titles = renderedRoutes.map((route) => route.title);
     expect(titles.every((title) => typeof title === 'string' && title.length > 0)).toBe(true);
     expect(new Set(titles).size).toBe(titles.length);
-    expect(typeof routes.find((route) => route.path === 'blog/:slug')?.title).toBe('function');
+    expect(routes.find((route) => route.path === 'labs/script-visualizer')?.redirectTo).toBe(
+      'visualizer',
+    );
   });
 });

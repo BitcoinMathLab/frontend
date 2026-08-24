@@ -1,6 +1,6 @@
 # Transaction Explorer QA
 
-The transaction explorer at `/labs/transaction-explorer` retrieves transaction context through the backend without
+The transaction explorer at `/explorer` retrieves transaction context through the backend without
 exposing Bitcoin Core credentials to the browser. It displays the transaction ID, raw byte count, coinbase status, raw
 hex, every created output, each input's ordered previous output, and the standard output/spend-path classification
 supplied by Bitclone.
@@ -30,7 +30,7 @@ With the backend, Core tunnel, and frontend running, verify the full catalog pat
 1. Start the backend with its Bitcoin Core RPC environment configured.
 2. Confirm both `initialblockdownload` and `txindex.synced` are false/true respectively: initial block download must be
    complete and the transaction index must be synchronized.
-3. Start the frontend with `npm start` and open http://localhost:4200/labs/transaction-explorer.
+3. Start the frontend with `npm start` and open http://localhost:4200/explorer.
 4. Use a confirmed mainnet transaction that remains available to the Core node. The prefilled transaction ID is the
    story fixture.
 

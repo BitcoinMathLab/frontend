@@ -20,11 +20,11 @@ The public-site foundation currently includes:
 Story 2.3 adds Cloudflare Pages deployment assets, production metadata and security headers, and optional Sentry browser
 monitoring.
 
-The visualizer at `/labs/script-visualizer` loads curated P2PKH spends from the Bitcoin Math Lab backend. It includes
+The visualizer at `/visualizer` loads a curated P2PKH spend from the Bitcoin Math Lab backend. It includes
 guided successful and failing lessons, before/after stacks, byte and opcode highlighting, a timeline, playback controls,
 and keyboard navigation.
 
-The transaction explorer at `/labs/transaction-explorer` validates a mainnet transaction ID and loads its raw bytes and
+The transaction explorer at `/explorer` validates a mainnet transaction ID and loads its raw bytes and
 ordered previous-output context from the backend's Bitcoin Core connection. See the
 [transaction explorer QA guide](docs/transaction-explorer.md) for setup and story validation.
 

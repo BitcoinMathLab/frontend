@@ -29,6 +29,7 @@ p {
 .footer-links {
   display: flex;
   align-items: flex-start;
+  flex-wrap: wrap;
   gap: 1.1rem;
 }
 
@@ -55,5 +56,9 @@ p {
   .footer-meta {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .footer-links {
+    row-gap: 0.65rem;
   }
 }

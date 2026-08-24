@@ -91,7 +91,7 @@ test('loads a transaction and displays its ordered spend context', async ({ page
     origin: 'http://127.0.0.1:4200',
   });
   await mockTransactionApi(page);
-  await page.goto('/labs/transaction-explorer');
+  await page.goto('/explorer');
 
   await page.getByRole('button', { name: /Early payment and change/ }).click();
   await expect(page.getByRole('textbox', { name: 'Transaction ID' })).toHaveValue(TXID);
@@ -157,7 +157,7 @@ test('validates transaction IDs before sending a request', async ({ page }) => {
     requests += 1;
     await route.abort();
   });
-  await page.goto('/labs/transaction-explorer');
+  await page.goto('/explorer');
 
   await expect(page.getByRole('button', { name: 'Copy transaction ID' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Paste transaction ID' })).toBeVisible();
@@ -185,7 +185,7 @@ test('explains Core availability safely and fits a mobile viewport', async ({ pa
       json: { detail: { code: 'bitcoin-core-unavailable', message: 'safe API message' } },
     });
   });
-  await page.goto('/labs/transaction-explorer');
+  await page.goto('/explorer');
 
   await page.getByRole('button', { name: 'Inspect transaction' }).click();
 

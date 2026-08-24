@@ -1,28 +1,28 @@
 import { expect, test } from '@playwright/test';
 
-test('runs successful and failing lessons through the real API and engine', async ({ page }) => {
+test('runs the curated lesson through the real API and engine', async ({ page }) => {
   test.skip(!process.env['BML_LIVE_API'], 'Set BML_LIVE_API=1 to run the cross-repository check.');
 
-  await page.goto('/labs/script-visualizer');
+  await page.goto('/visualizer');
 
   const player = page.getByLabel('Script trace player');
   await expect(player).toBeVisible();
+  await expect(page.getByText('Valid spend', { exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Go to result' }).click();
   await expect(page.getByText('Valid spend', { exact: true })).toBeVisible();
-  await expect(page.getByLabel('Execution timeline').getByRole('button')).toHaveCount(7);
-  await expect(page.getByRole('button', { name: /07 OP_CHECKSIG/ })).toBeVisible();
-
-  await page.getByRole('button', { name: /03 · P2PKH One changed signature byte Invalid/ }).click();
-  await expect(page.getByText('Invalid spend', { exact: true })).toBeVisible();
-  await expect(page.getByLabel('Failure explanation')).toContainText('false-final-value');
-  await expect(page.getByLabel('Execution timeline').getByRole('button')).toHaveCount(7);
+  await expect(page.getByRole('heading', { name: 'OP_CHECKSIG', exact: true })).toBeVisible();
 });
 
 test('loads a catalog example through the real API, Core, and classification engine', async ({
   page,
 }) => {
   test.skip(!process.env['BML_LIVE_API'], 'Set BML_LIVE_API=1 to run the cross-repository check.');
+  test.skip(
+    !process.env['BML_LIVE_CORE'],
+    'Set BML_LIVE_CORE=1 when Bitcoin Core RPC is available.',
+  );
 
-  await page.goto('/labs/transaction-explorer');
+  await page.goto('/explorer');
   await page.getByRole('button', { name: /Early payment and change/ }).click();
   await expect(page.getByRole('textbox', { name: 'Transaction ID' })).toHaveValue(
     'fff2525b8931402dd09222c50775608f75787bd2b87e56995a7bdd30f79702c4',
@@ -45,8 +45,12 @@ test('loads genesis through the block-zero fallback with coinbase-safe metrics',
   page,
 }) => {
   test.skip(!process.env['BML_LIVE_API'], 'Set BML_LIVE_API=1 to run the cross-repository check.');
+  test.skip(
+    !process.env['BML_LIVE_CORE'],
+    'Set BML_LIVE_CORE=1 when Bitcoin Core RPC is available.',
+  );
 
-  await page.goto('/labs/transaction-explorer');
+  await page.goto('/explorer');
   await page.getByRole('button', { name: /Genesis coinbase/ }).click();
   await page.getByRole('button', { name: 'Inspect transaction' }).click();
 
@@ -69,8 +73,12 @@ test('loads genesis through the block-zero fallback with coinbase-safe metrics',
 
 test('loads native SegWit with distinct identity and rounded virtual size', async ({ page }) => {
   test.skip(!process.env['BML_LIVE_API'], 'Set BML_LIVE_API=1 to run the cross-repository check.');
+  test.skip(
+    !process.env['BML_LIVE_CORE'],
+    'Set BML_LIVE_CORE=1 when Bitcoin Core RPC is available.',
+  );
 
-  await page.goto('/labs/transaction-explorer');
+  await page.goto('/explorer');
   await page.getByRole('button', { name: /Native SegWit P2WPKH/ }).click();
   await page.getByRole('button', { name: 'Inspect transaction' }).click();
 
