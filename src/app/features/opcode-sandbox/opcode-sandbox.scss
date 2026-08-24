@@ -4,7 +4,7 @@
 }
 .sandbox-controls {
   display: grid;
-  grid-template-columns: minmax(12rem, 1fr) 10rem auto auto auto;
+  grid-template-columns: minmax(12rem, 1fr) 10rem repeat(4, auto);
   align-items: end;
   gap: 0.55rem;
   padding: 0.75rem;
@@ -110,6 +110,17 @@ header button {
   color: var(--color-error);
   padding: 0.25rem;
 }
+.reorder {
+  display: flex;
+  align-items: stretch;
+}
+.reorder button {
+  min-width: 2rem;
+  min-height: 2rem;
+  border-radius: 0;
+  padding: 0.25rem;
+  text-align: center;
+}
 .execution {
   display: grid;
   grid-template-columns: 1fr auto auto auto;
@@ -155,9 +166,12 @@ header button {
 }
 .edit-items {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
   margin-top: 0.55rem;
   gap: 0.35rem;
+}
+.edit-items article {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
 }
 .edit-items button {
   min-width: 0;

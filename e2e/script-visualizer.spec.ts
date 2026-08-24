@@ -279,6 +279,24 @@ test('builds and executes an editable OP_DUP sandbox state', async ({ page }) =>
   await sandbox.getByRole('button', { name: 'Add data' }).click();
   await expect(sandbox.getByText('OP_PUSHBYTES_2')).toBeVisible();
 
+  await sandbox.getByLabel('Hex data').fill('cc');
+  await sandbox.getByRole('button', { name: 'Add data' }).click();
+  await sandbox.getByRole('button', { name: 'OP_PUSHBYTES_1 cc' }).click();
+  await expect(page.getByRole('dialog')).toContainText('Script data push');
+  await expect(page.getByRole('dialog')).toContainText('01cc');
+  await page.getByRole('button', { name: 'Close data detail' }).click();
+
+  await sandbox.getByRole('button', { name: 'Move flow item earlier' }).last().click();
+  await expect(sandbox.locator('.flow-items article:not(.opcode) strong')).toHaveText([
+    'OP_PUSHBYTES_1',
+    'OP_PUSHBYTES_2',
+  ]);
+  await sandbox.getByRole('button', { name: 'Undo' }).click();
+  await expect(sandbox.locator('.flow-items article:not(.opcode) strong')).toHaveText([
+    'OP_PUSHBYTES_2',
+    'OP_PUSHBYTES_1',
+  ]);
+
   await sandbox.getByText('a1b2c3d4', { exact: true }).last().click();
   await expect(page.getByRole('dialog')).toContainText('4 bytes');
   await page.getByRole('button', { name: 'Close data detail' }).click();

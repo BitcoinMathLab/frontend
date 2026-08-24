@@ -89,6 +89,15 @@ describe('OpcodeSandbox', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('OP_PUSHBYTES_2');
+    (fixture.nativeElement.querySelector('.flow-items .inspect') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[role="dialog"]').textContent).toContain(
+      'Script data push',
+    );
+    expect(fixture.nativeElement.querySelector('[role="dialog"]').textContent).toContain('02aabb');
+    (
+      fixture.nativeElement.querySelector('[aria-label="Close data detail"]') as HTMLButtonElement
+    ).click();
     [...fixture.nativeElement.querySelectorAll('button')]
       .find((button: HTMLButtonElement) => button.textContent?.includes('Run OP_DUP'))
       ?.click();
@@ -160,5 +169,47 @@ describe('OpcodeSandbox', () => {
     expect(
       fixture.nativeElement.querySelector('[aria-label="Main stack result"]').textContent,
     ).toContain('a1b2c3d4');
+  });
+
+  it('reorders editable stack values and undoes the change', async () => {
+    const traceOpcode = vi.fn().mockReturnValue(of(response));
+    await TestBed.configureTestingModule({
+      imports: [OpcodeSandbox],
+      providers: [{ provide: TraceApi, useValue: { traceOpcode } }],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(OpcodeSandbox);
+    fixture.detectChanges();
+
+    const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+    input.value = '0102';
+    input.dispatchEvent(new Event('input'));
+    [...fixture.nativeElement.querySelectorAll('button')]
+      .find((button: HTMLButtonElement) => button.textContent?.includes('Add data'))
+      ?.click();
+    fixture.detectChanges();
+
+    (
+      fixture.nativeElement.querySelector(
+        '[aria-label="Move main stack item away from top"]',
+      ) as HTMLButtonElement
+    ).click();
+    [...fixture.nativeElement.querySelectorAll('button')]
+      .find((button: HTMLButtonElement) => button.textContent?.includes('Run OP_DUP'))
+      ?.click();
+    fixture.detectChanges();
+    expect(traceOpcode).toHaveBeenLastCalledWith(
+      expect.objectContaining({ main_stack: ['a1b2c3d4', '0102'] }),
+    );
+
+    [...fixture.nativeElement.querySelectorAll('button')]
+      .find((button: HTMLButtonElement) => button.textContent?.includes('Undo'))
+      ?.click();
+    [...fixture.nativeElement.querySelectorAll('button')]
+      .find((button: HTMLButtonElement) => button.textContent?.includes('Run OP_DUP'))
+      ?.click();
+    fixture.detectChanges();
+    expect(traceOpcode).toHaveBeenLastCalledWith(
+      expect.objectContaining({ main_stack: ['0102', 'a1b2c3d4'] }),
+    );
   });
 });

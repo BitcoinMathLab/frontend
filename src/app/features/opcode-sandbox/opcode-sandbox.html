@@ -14,6 +14,7 @@
     </label>
     <button type="button" (click)="randomize()">Random</button>
     <button type="button" (click)="addData()">Add data</button>
+    <button type="button" (click)="undo()" [disabled]="history().length === 0">Undo</button>
     <button type="button" class="reset" (click)="reset()">Reset sandbox</button>
   </div>
 
@@ -30,11 +31,35 @@
           <button
             type="button"
             class="inspect"
-            (click)="inspect('Script flow', value, pushOpcode(value))"
+            (click)="inspect('Script flow item ' + ($index + 1), value, true)"
           >
             <strong>{{ pushOpcode(value) }}</strong
             ><code>{{ value }}</code>
           </button>
+          <span
+            class="reorder"
+            role="group"
+            [attr.aria-label]="'Reorder flow item ' + ($index + 1)"
+          >
+            <button
+              type="button"
+              (click)="move('flow', $index, -1)"
+              [disabled]="$first"
+              aria-label="Move flow item earlier"
+              title="Move earlier"
+            >
+              ←
+            </button>
+            <button
+              type="button"
+              (click)="move('flow', $index, 1)"
+              [disabled]="$last"
+              aria-label="Move flow item later"
+              title="Move later"
+            >
+              →
+            </button>
+          </span>
           <button
             type="button"
             class="remove"
@@ -89,17 +114,46 @@
       />
       <div class="edit-items">
         @for (value of mainStack(); track $index) {
-          <button type="button" (click)="inspect('Initial main stack', value)">
-            <code>{{ value }}</code>
-          </button>
-          <button
-            type="button"
-            class="remove"
-            (click)="remove('main', $index)"
-            aria-label="Remove main stack item"
-          >
-            ×
-          </button>
+          <article>
+            <button
+              type="button"
+              (click)="inspect('Initial main stack item ' + ($index + 1), value)"
+            >
+              <code>{{ value }}</code>
+            </button>
+            <span
+              class="reorder"
+              role="group"
+              [attr.aria-label]="'Reorder main stack item ' + ($index + 1)"
+            >
+              <button
+                type="button"
+                (click)="move('main', $index, -1)"
+                [disabled]="$first"
+                aria-label="Move main stack item toward top"
+                title="Move toward top"
+              >
+                ↑
+              </button>
+              <button
+                type="button"
+                (click)="move('main', $index, 1)"
+                [disabled]="$last"
+                aria-label="Move main stack item away from top"
+                title="Move away from top"
+              >
+                ↓
+              </button>
+            </span>
+            <button
+              type="button"
+              class="remove"
+              (click)="remove('main', $index)"
+              aria-label="Remove main stack item"
+            >
+              ×
+            </button>
+          </article>
         }
       </div>
     </section>
@@ -118,17 +172,46 @@
       />
       <div class="edit-items">
         @for (value of altStack(); track $index) {
-          <button type="button" (click)="inspect('Initial alt stack', value)">
-            <code>{{ value }}</code>
-          </button>
-          <button
-            type="button"
-            class="remove"
-            (click)="remove('alt', $index)"
-            aria-label="Remove alt stack item"
-          >
-            ×
-          </button>
+          <article>
+            <button
+              type="button"
+              (click)="inspect('Initial alt stack item ' + ($index + 1), value)"
+            >
+              <code>{{ value }}</code>
+            </button>
+            <span
+              class="reorder"
+              role="group"
+              [attr.aria-label]="'Reorder alt stack item ' + ($index + 1)"
+            >
+              <button
+                type="button"
+                (click)="move('alt', $index, -1)"
+                [disabled]="$first"
+                aria-label="Move alt stack item toward top"
+                title="Move toward top"
+              >
+                ↑
+              </button>
+              <button
+                type="button"
+                (click)="move('alt', $index, 1)"
+                [disabled]="$last"
+                aria-label="Move alt stack item away from top"
+                title="Move away from top"
+              >
+                ↓
+              </button>
+            </span>
+            <button
+              type="button"
+              class="remove"
+              (click)="remove('alt', $index)"
+              aria-label="Remove alt stack item"
+            >
+              ×
+            </button>
+          </article>
         }
       </div>
     </section>
@@ -162,6 +245,22 @@
             <dt>Type</dt>
             <dd>{{ detail.type }}</dd>
           </div>
+          <div>
+            <dt>Script boolean</dt>
+            <dd>{{ detail.truthiness }}</dd>
+          </div>
+          <div>
+            <dt>Text</dt>
+            <dd>{{ detail.text }}</dd>
+          </div>
+          @if (detail.scriptEncoding) {
+            <div>
+              <dt>Canonical push</dt>
+              <dd>
+                <code>{{ detail.scriptEncoding }}</code>
+              </dd>
+            </div>
+          }
           <div>
             <dt>Hex</dt>
             <dd>
