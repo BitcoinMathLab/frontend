@@ -13,6 +13,25 @@ test('runs the curated lesson through the real API and engine', async ({ page })
   await expect(page.getByRole('heading', { name: 'OP_CHECKSIG', exact: true })).toBeVisible();
 });
 
+test('runs editable OP_DUP success and failure through the real API and engine', async ({
+  page,
+}) => {
+  test.skip(!process.env['BML_LIVE_API'], 'Set BML_LIVE_API=1 to run the cross-repository check.');
+
+  await page.goto('/visualizer');
+  await page.getByRole('button', { name: 'OP_DUP sandbox' }).click();
+  const sandbox = page.getByLabel('OP_DUP sandbox');
+
+  await sandbox.getByRole('button', { name: 'Run OP_DUP' }).click();
+  await expect(sandbox).toContainText('Executed');
+  await expect(sandbox.getByLabel('Main stack result').locator('.stack-item')).toHaveCount(2);
+
+  await sandbox.getByRole('button', { name: 'Clear' }).nth(1).click();
+  await sandbox.getByRole('button', { name: 'Run OP_DUP' }).click();
+  await expect(sandbox).toContainText('Stopped');
+  await expect(sandbox.getByLabel('Execution diagnostic')).toContainText('execution-error');
+});
+
 test('loads a catalog example through the real API, Core, and classification engine', async ({
   page,
 }) => {
