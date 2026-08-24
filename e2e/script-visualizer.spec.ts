@@ -102,7 +102,8 @@ async function mockOpcodeApi(page: Page): Promise<void> {
   await page.route('**/api/v1/traces/opcode', async (route) => {
     const request = route.request().postDataJSON();
     const initial = request.main_stack as string[];
-    const top = (request.flow_data as string[]).at(-1) ?? initial[0];
+    const beforeDup = [...(request.flow_data as string[])].reverse().concat(initial);
+    const top = beforeDup[0];
     const diagnostic = top
       ? null
       : {
@@ -142,11 +143,11 @@ async function mockOpcodeApi(page: Page): Promise<void> {
                   },
                   stacks: {
                     before: {
-                      main: { depth: initial.length, items: initial },
+                      main: { depth: beforeDup.length, items: beforeDup },
                       alt: { depth: request.alt_stack.length, items: request.alt_stack },
                     },
                     after: {
-                      main: { depth: initial.length + 2, items: [top, top, ...initial] },
+                      main: { depth: beforeDup.length + 1, items: [top, ...beforeDup] },
                       alt: { depth: request.alt_stack.length, items: request.alt_stack },
                     },
                   },
@@ -304,7 +305,10 @@ test('builds and executes an editable OP_DUP sandbox state', async ({ page }) =>
 
   await sandbox.getByRole('button', { name: 'Run OP_DUP' }).click();
   await expect(sandbox).toContainText('Executed');
-  await expect(sandbox.getByLabel('Main stack result').locator('.stack-item')).toHaveCount(3);
+  await expect(sandbox.getByLabel('Main stack result').locator('.stack-item')).toHaveCount(4);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
 
   await sandbox.getByRole('button', { name: 'Reset sandbox' }).click();
   await sandbox.getByRole('button', { name: 'Remove main stack item' }).click();
@@ -317,6 +321,5 @@ test('builds and executes an editable OP_DUP sandbox state', async ({ page }) =>
   await expect(sandbox.getByLabel('Execution diagnostic')).toHaveCount(0);
   await expect(sandbox.getByLabel('Main stack result').locator('.stack-item')).toHaveCount(1);
 
-  await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
 });
