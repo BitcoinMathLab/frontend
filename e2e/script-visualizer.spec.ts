@@ -106,7 +106,7 @@ async function mockOpcodeApi(page: Page): Promise<void> {
     const diagnostic = top
       ? null
       : {
-          code: 'stack-underflow',
+          code: 'execution-error',
           message: 'OP_DUP requires one main-stack item.',
           step_index: 0,
           opcode_name: 'OP_DUP',
@@ -284,7 +284,8 @@ test('builds and executes an editable OP_DUP sandbox state', async ({ page }) =>
   await sandbox.getByRole('button', { name: 'OP_PUSHBYTES_1 cc' }).click();
   await expect(page.getByRole('dialog')).toContainText('Script data push');
   await expect(page.getByRole('dialog')).toContainText('01cc');
-  await page.getByRole('button', { name: 'Close data detail' }).click();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
 
   await sandbox.getByRole('button', { name: 'Move flow item earlier' }).last().click();
   await expect(sandbox.locator('.flow-items article:not(.opcode) strong')).toHaveText([
@@ -309,7 +310,7 @@ test('builds and executes an editable OP_DUP sandbox state', async ({ page }) =>
   await sandbox.getByRole('button', { name: 'Remove main stack item' }).click();
   await sandbox.getByRole('button', { name: 'Run OP_DUP' }).click();
   await expect(sandbox).toContainText('Stopped');
-  await expect(sandbox.getByLabel('Execution diagnostic')).toContainText('stack-underflow');
+  await expect(sandbox.getByLabel('Execution diagnostic')).toContainText('execution-error');
 
   await sandbox.getByRole('button', { name: 'Reset sandbox' }).click();
   await expect(sandbox).toContainText('Ready');

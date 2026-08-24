@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  HostListener,
   inject,
   OnDestroy,
   signal,
@@ -132,6 +133,11 @@ export class OpcodeSandbox implements OnDestroy {
     });
   }
 
+  @HostListener('document:keydown.escape')
+  protected closeDetail(): void {
+    this.selectedDetail.set(null);
+  }
+
   protected pushOpcode(value: string): string {
     const bytes = value.length / 2;
     if (bytes <= 75) return `OP_PUSHBYTES_${bytes}`;
@@ -158,7 +164,6 @@ export class OpcodeSandbox implements OnDestroy {
   }
 
   protected reset(): void {
-    this.requestSubscription?.unsubscribe();
     this.rememberState();
     this.dataHex.set(DEFAULT_DATA);
     this.destination.set('main');
@@ -187,6 +192,9 @@ export class OpcodeSandbox implements OnDestroy {
   }
 
   private resetResult(): void {
+    this.requestSubscription?.unsubscribe();
+    this.requestSubscription = undefined;
+    this.running.set(false);
     this.response.set(null);
     this.error.set('');
   }

@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 
 import { TraceApi } from '../../core/trace-api';
 import { OpcodeTraceResponse } from '../../core/trace-api.models';
@@ -59,7 +59,7 @@ const failedResponse: OpcodeTraceResponse = {
     success: false,
     steps: [],
     diagnostic: {
-      code: 'stack-underflow',
+      code: 'execution-error',
       message: 'OP_DUP requires one main-stack item.',
       step_index: 0,
       opcode_name: 'OP_DUP',
@@ -158,7 +158,7 @@ describe('OpcodeSandbox', () => {
     expect(fixture.nativeElement.textContent).toContain('Stopped');
     expect(
       fixture.nativeElement.querySelector('[aria-label="Execution diagnostic"]').textContent,
-    ).toContain('stack-underflow');
+    ).toContain('execution-error');
 
     [...fixture.nativeElement.querySelectorAll('button')]
       .find((button: HTMLButtonElement) => button.textContent?.includes('Reset sandbox'))
@@ -211,5 +211,31 @@ describe('OpcodeSandbox', () => {
     expect(traceOpcode).toHaveBeenLastCalledWith(
       expect.objectContaining({ main_stack: ['0102', 'a1b2c3d4'] }),
     );
+  });
+
+  it('cancels a pending execution when the editable state changes', async () => {
+    const pending = new Subject<OpcodeTraceResponse>();
+    await TestBed.configureTestingModule({
+      imports: [OpcodeSandbox],
+      providers: [{ provide: TraceApi, useValue: { traceOpcode: () => pending } }],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(OpcodeSandbox);
+    fixture.detectChanges();
+
+    [...fixture.nativeElement.querySelectorAll('button')]
+      .find((button: HTMLButtonElement) => button.textContent?.includes('Run OP_DUP'))
+      ?.click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Running');
+
+    [...fixture.nativeElement.querySelectorAll('button')]
+      .find((button: HTMLButtonElement) => button.textContent?.includes('Add data'))
+      ?.click();
+    fixture.detectChanges();
+    pending.next(response);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Ready');
+    expect(fixture.nativeElement.textContent).not.toContain('Executed');
   });
 });
