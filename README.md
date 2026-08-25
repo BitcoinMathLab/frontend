@@ -99,7 +99,8 @@ After deploying both services, run the release smoke check against the public fr
     BML_E2E_BASE_URL=https://bitcoinmathlab.com BML_PRODUCTION_SMOKE=1 BML_LIVE_API=1 npm run test:smoke:production
 
 `BML_E2E_BASE_URL` tells Playwright to use an existing deployment instead of starting local servers. The check verifies
-public navigation, route metadata, HTTPS security headers, and current Visualizer and Explorer entry points.
+public navigation, route metadata, HTTPS security headers, current Visualizer and Explorer entry points, and the P2PKH
+walkthrough through the deployed API.
 
 See the [deployment runbook](docs/deployment.md) for Cloudflare Pages configuration, release verification, and rollback.
 

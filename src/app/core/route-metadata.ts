@@ -18,19 +18,19 @@ const STATIC_METADATA: Readonly<Record<string, PageMetadata>> = Object.freeze({
   '/': {
     title: 'Bitcoin Math Lab — See Bitcoin execute',
     description:
-      'Trace Bitcoin scripts step by step, inspect stack transitions, and understand why execution succeeds or fails.',
+      'Trace a P2PKH spend step by step, inspect stack transitions, and see how a Bitcoin input unlocks a previous output.',
     type: 'website',
   },
   '/visualizer': {
     title: 'Script Visualizer — Bitcoin Math Lab',
     description:
-      'Step through valid and invalid P2PKH spends with synchronized opcodes, serialized bytes, and stack snapshots.',
+      'Follow one P2PKH spend from empty stacks through scriptSig and scriptPubKey, with inspectable instructions and a final verdict.',
     type: 'website',
   },
   '/explorer': {
     title: 'Transaction Explorer — Bitcoin Math Lab',
     description:
-      'Load a Bitcoin transaction and inspect its raw bytes, inputs, and previous outputs through a local Bitcoin Core node.',
+      'Load a Bitcoin transaction and inspect its inputs, outputs, classifications, values, size metrics, and decoded byte ranges.',
     type: 'website',
   },
   '/about': {
