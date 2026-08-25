@@ -72,8 +72,10 @@ export class TracePlayer implements OnDestroy {
   protected readonly operationDetail = computed(() => {
     const step = this.selectedOperation();
     if (!step) return null;
+    if (step.opcode.is_push)
+      return describePushedData(step, this.trace(), this.scripts().unlocking);
     return {
-      kind: step.opcode.is_push ? 'Data instruction' : 'Opcode',
+      kind: 'Opcode',
       name: step.opcode.name,
       summary: describeStackEffect(step),
       requirement: describeRequirement(step),
@@ -195,8 +197,6 @@ export class TracePlayer implements OnDestroy {
 }
 
 function describeRequirement(step: TraceStep): string {
-  if (step.opcode.is_push)
-    return 'Adds data to the stack. It does not require an existing stack item.';
   switch (step.opcode.name) {
     case 'OP_DUP':
     case 'OP_HASH160':
@@ -207,6 +207,60 @@ function describeRequirement(step: TraceStep): string {
     default:
       return 'Stack requirements depend on the opcode and the values available at this step.';
   }
+}
+
+function describePushedData(
+  step: TraceStep,
+  trace: ExecutionTrace,
+  unlockingScript: string,
+): {
+  readonly kind: string;
+  readonly name: string;
+  readonly summary: string;
+  readonly requirement: string;
+} {
+  const unlockingLength = unlockingScript.length / 2;
+  const isUnlockingData = step.opcode.byte_offset < unlockingLength;
+  const unlockingPushes = trace.steps.filter(
+    (candidate) => candidate.opcode.is_push && candidate.opcode.byte_offset < unlockingLength,
+  );
+  const unlockingPosition = unlockingPushes.findIndex(
+    (candidate) => candidate.index === step.index,
+  );
+
+  if (isUnlockingData && unlockingPosition === 0) {
+    return {
+      kind: 'Signature data',
+      name: 'Transaction signature',
+      summary:
+        'A DER-encoded ECDSA signature plus a hash-type byte. OP_CHECKSIG uses it to test authorization for this spend.',
+      requirement: 'This data instruction pushes the signature onto the empty stack.',
+    };
+  }
+  if (isUnlockingData && unlockingPosition === 1) {
+    return {
+      kind: 'Public-key data',
+      name: 'Public key',
+      summary:
+        'A SEC-encoded secp256k1 public key. Its HASH160 must match the hash committed by the previous output.',
+      requirement: 'This data instruction pushes the public key above the signature.',
+    };
+  }
+  if (!isUnlockingData) {
+    return {
+      kind: 'Hash data',
+      name: 'Expected public-key hash',
+      summary:
+        'The 20-byte HASH160 committed by the previous output. OP_EQUALVERIFY compares it with the public key hash calculated during execution.',
+      requirement: 'This data instruction pushes the expected hash for the comparison.',
+    };
+  }
+  return {
+    kind: 'Pushed data',
+    name: step.opcode.name,
+    summary: 'A value encoded directly inside the Bitcoin Script.',
+    requirement: 'This data instruction adds the value without consuming an existing stack item.',
+  };
 }
 
 function describeStackEffect(step: TraceStep | undefined): string {

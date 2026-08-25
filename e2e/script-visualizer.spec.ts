@@ -135,6 +135,14 @@ test('connects spend elements, parsing, execution, stacks, and signature detail'
   await expect(page.getByLabel('Main stack')).toContainText('Empty stack');
   await expect(page.getByText('Valid spend', { exact: true })).toHaveCount(0);
 
+  const signatureDataButton = page.getByRole('button', { name: 'PUSH signature' });
+  await signatureDataButton.click();
+  await expect(page.getByRole('dialog')).toContainText('Signature data');
+  await expect(page.getByRole('dialog')).toContainText('DER-encoded ECDSA signature');
+  await page.getByRole('dialog').press('Escape');
+  await expect(signatureDataButton).toBeFocused();
+  await expect(page.getByLabel('Execution status')).toContainText('Ready · step 0 of 3');
+
   const opDupButton = page.getByRole('button', { name: 'OP_DUP' });
   await opDupButton.click();
   const operationDialog = page.getByRole('dialog');

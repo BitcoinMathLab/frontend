@@ -194,6 +194,20 @@ describe('TracePlayer', () => {
     expect(fixture.nativeElement.textContent).toContain('Empty stack');
   });
 
+  it('explains the role of pushed P2PKH data without advancing', () => {
+    const signature = [...fixture.nativeElement.querySelectorAll('.operation-list button')].find(
+      (button: HTMLButtonElement) => button.textContent?.includes('PUSH signature'),
+    ) as HTMLButtonElement;
+    signature.click();
+    fixture.detectChanges();
+
+    const dialog = fixture.nativeElement.querySelector('[role="dialog"]') as HTMLElement;
+    expect(dialog.textContent).toContain('Signature data');
+    expect(dialog.textContent).toContain('DER-encoded ECDSA signature');
+    expect(dialog.textContent).toContain('pushes the signature onto the empty stack');
+    expect(fixture.nativeElement.textContent).toContain('Ready · step 0 of 3');
+  });
+
   it('explains the safe diagnostic for a failed trace', () => {
     fixture.componentRef.setInput('trace', {
       ...TRACE_FIXTURE,
