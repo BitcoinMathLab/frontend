@@ -5,8 +5,6 @@ import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-import { findBlogPost } from './blog-posts';
-
 const SITE_ORIGIN = 'https://bitcoinmathlab.com';
 const SOCIAL_IMAGE = `${SITE_ORIGIN}/assets/bitcoin-math-lab-social.png`;
 
@@ -20,43 +18,25 @@ const STATIC_METADATA: Readonly<Record<string, PageMetadata>> = Object.freeze({
   '/': {
     title: 'Bitcoin Math Lab — See Bitcoin execute',
     description:
-      'Trace Bitcoin scripts step by step, inspect stack transitions, and understand why execution succeeds or fails.',
+      'Trace a P2PKH spend step by step, inspect stack transitions, and see how a Bitcoin input unlocks a previous output.',
     type: 'website',
   },
-  '/labs/script-visualizer': {
+  '/visualizer': {
     title: 'Script Visualizer — Bitcoin Math Lab',
     description:
-      'Step through valid and invalid P2PKH spends with synchronized opcodes, serialized bytes, and stack snapshots.',
+      'Follow one P2PKH spend from empty stacks through scriptSig and scriptPubKey, with inspectable instructions and a final verdict.',
     type: 'website',
   },
-  '/labs/transaction-explorer': {
+  '/explorer': {
     title: 'Transaction Explorer — Bitcoin Math Lab',
     description:
-      'Load a Bitcoin transaction and inspect its raw bytes, inputs, and previous outputs through a local Bitcoin Core node.',
+      'Load a Bitcoin transaction and inspect its inputs, outputs, classifications, values, size metrics, and decoded byte ranges.',
     type: 'website',
   },
   '/about': {
     title: 'About — Bitcoin Math Lab',
     description:
       'Learn why Bitcoin Math Lab makes scripts, transactions, and consensus decisions visible through inspectable software.',
-    type: 'website',
-  },
-  '/docs': {
-    title: 'Documentation — Bitcoin Math Lab',
-    description:
-      'Understand the Bitcoin Math Lab architecture, repository responsibilities, development principles, MVP scope, and FAQ.',
-    type: 'website',
-  },
-  '/roadmap': {
-    title: 'Roadmap — Bitcoin Math Lab',
-    description:
-      'Follow the Bitcoin Math Lab release path from one reliable P2PKH lesson to real transaction analysis and professional tools.',
-    type: 'website',
-  },
-  '/blog': {
-    title: 'Blog — Bitcoin Math Lab',
-    description:
-      'Read how Bitcoin Math Lab, Bitclone, and the Script Visualizer are designed and built in public.',
     type: 'website',
   },
   '/contact': {
@@ -77,17 +57,6 @@ export function metadataForPath(path: string): PageMetadata {
   const staticMetadata = STATIC_METADATA[path];
   if (staticMetadata) return staticMetadata;
 
-  const blogMatch = /^\/blog\/([^/]+)$/.exec(path);
-  if (blogMatch) {
-    const post = findBlogPost(blogMatch[1]);
-    if (post) {
-      return {
-        title: `${post.title} — Bitcoin Math Lab`,
-        description: post.summary,
-        type: 'article',
-      };
-    }
-  }
   return NOT_FOUND_METADATA;
 }
 

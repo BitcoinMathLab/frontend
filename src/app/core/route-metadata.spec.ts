@@ -1,22 +1,19 @@
 import { metadataForPath } from './route-metadata';
 
 describe('route metadata catalog', () => {
-  it('describes primary product and documentation routes', () => {
+  it('describes the five public routes', () => {
     expect(metadataForPath('/').title).toBe('Bitcoin Math Lab — See Bitcoin execute');
-    expect(metadataForPath('/labs/script-visualizer').description).toContain('P2PKH');
-    expect(metadataForPath('/labs/transaction-explorer').description).toContain('previous outputs');
-    expect(metadataForPath('/docs').description).toContain('architecture');
+    expect(metadataForPath('/visualizer').description).toContain('empty stacks');
+    expect(metadataForPath('/visualizer').description).not.toContain('valid and invalid');
+    expect(metadataForPath('/explorer').description).toContain('decoded byte ranges');
+    expect(metadataForPath('/about').title).toBe('About — Bitcoin Math Lab');
+    expect(metadataForPath('/contact').title).toBe('Contact — Bitcoin Math Lab');
   });
 
-  it('publishes article metadata for known slugs', () => {
-    const metadata = metadataForPath('/blog/inside-script-visualizer');
-
-    expect(metadata.type).toBe('article');
-    expect(metadata.title).toBe('Inside the Script Visualizer — Bitcoin Math Lab');
-  });
-
-  it('does not substitute metadata for unknown paths or articles', () => {
+  it('does not substitute metadata for removed or unknown paths', () => {
     expect(metadataForPath('/blog/not-published').title).toBe('Page not found — Bitcoin Math Lab');
+    expect(metadataForPath('/roadmap').title).toBe('Page not found — Bitcoin Math Lab');
+    expect(metadataForPath('/docs').title).toBe('Page not found — Bitcoin Math Lab');
     expect(metadataForPath('/not-a-route').description).toContain('could not be found');
   });
 });

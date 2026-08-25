@@ -7,6 +7,7 @@ import {
   P2pkhTraceRequest,
   P2pkhTraceResponse,
   TransactionContextResponse,
+  TransactionExamplesResponse,
 } from './trace-api.models';
 
 @Injectable({ providedIn: 'root' })
@@ -21,6 +22,12 @@ export class TraceApi {
   loadTransactionContext(txid: string): Observable<TransactionContextResponse> {
     return this.http.get<TransactionContextResponse>(
       `${this.apiBaseUrl}/api/v1/transactions/${txid}/context`,
+    );
+  }
+
+  loadTransactionExamples(): Observable<TransactionExamplesResponse> {
+    return this.http.get<TransactionExamplesResponse>(
+      `${this.apiBaseUrl}/api/v1/transactions/examples`,
     );
   }
 }

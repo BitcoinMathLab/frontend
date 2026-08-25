@@ -19,8 +19,9 @@ describe('Home', () => {
     expect(milestones).toHaveLength(3);
     expect(compiled.textContent).toContain('October 12');
     expect(compiled.textContent).toContain('Integrated visualizer');
-    expect(compiled.querySelector('a[routerlink="/roadmap"]')).toBeTruthy();
-    expect(compiled.querySelector('a[routerlink="/blog/mvp-trace-to-browser"]')).toBeTruthy();
+    expect(compiled.querySelector('a[routerlink="/visualizer"]')).toBeTruthy();
+    expect(compiled.querySelector('a[routerlink="/roadmap"]')).toBeNull();
+    expect(compiled.querySelector('a[routerlink^="/blog"]')).toBeNull();
   });
 
   it('provides a prefilled email signup action', () => {
@@ -34,5 +35,29 @@ describe('Home', () => {
       'subject=Bitcoin%20Math%20Lab%20launch%20updates',
     );
     expect(signup?.getAttribute('href')).toContain('early-access%20list');
+  });
+
+  it('keeps the static trace preview neutral until the final step', () => {
+    const fixture = TestBed.createComponent(Home);
+    fixture.detectChanges();
+    const preview = fixture.nativeElement.querySelector('.trace-card') as HTMLElement;
+
+    expect(preview.textContent).toContain('Step 4 of 7');
+    expect(preview.textContent).toContain('OP_HASH160');
+    expect(preview.textContent).toContain('In progress');
+    expect(preview.textContent).not.toContain('Valid');
+    expect(preview.querySelectorAll('.timeline span')).toHaveLength(7);
+  });
+
+  it('describes only the learning experience available in the MVP', () => {
+    const fixture = TestBed.createComponent(Home);
+    fixture.detectChanges();
+    const content = fixture.nativeElement.textContent as string;
+
+    expect(content).toContain('Trace a P2PKH spend step by step');
+    expect(content).toContain('Inspect each rule');
+    expect(content).toContain('guided walkthrough');
+    expect(content).not.toContain('make every Bitcoin transaction work');
+    expect(content).not.toContain('guided lessons');
   });
 });

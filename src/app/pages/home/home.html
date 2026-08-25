@@ -3,11 +3,11 @@
     <p class="eyebrow">Interactive Bitcoin education</p>
     <h1>See Bitcoin <span>execute.</span></h1>
     <p class="hero__lede">
-      Trace scripts step by step. Watch the stack change. Understand the rules that make every
-      Bitcoin transaction work.
+      Trace a P2PKH spend step by step. Watch the stack change. See how an input proves it can spend
+      a previous output.
     </p>
     <div class="hero__actions">
-      <a class="button button--primary" routerLink="/labs/script-visualizer">Try the visualizer</a>
+      <a class="button button--primary" routerLink="/visualizer">Try the visualizer</a>
       <a class="button button--secondary" href="https://github.com/BitcoinMathLab"
         >View on GitHub</a
       >
@@ -21,26 +21,28 @@
   <div class="trace-card" aria-label="Preview of a Bitcoin script execution trace">
     <div class="trace-card__header">
       <span>P2PKH execution</span>
-      <span class="status">Step 3 of 5</span>
+      <span class="status">Step 4 of 7</span>
     </div>
     <div class="opcode-row">
-      <span class="step-number">03</span>
+      <span class="step-number">04</span>
       <div>
-        <strong>OP_EQUALVERIFY</strong>
-        <p>Confirm the public key matches the locking script.</p>
+        <strong>OP_HASH160</strong>
+        <p>Hash the duplicated public key before comparing it.</p>
       </div>
-      <span class="valid">Valid</span>
+      <span class="running">In progress</span>
     </div>
     <div class="stack">
       <div class="stack__label">Main stack</div>
-      <code>76a914…88ac</code>
-      <code>03b2f1…9a42</code>
-      <code class="stack__active">TRUE</code>
+      <code>signature</code>
+      <code>public key</code>
+      <code class="stack__active">HASH160(public key)</code>
     </div>
     <div class="timeline" aria-hidden="true">
       <span class="complete"></span>
       <span class="complete"></span>
+      <span class="complete"></span>
       <span class="current"></span>
+      <span></span>
       <span></span>
       <span></span>
     </div>
@@ -72,10 +74,10 @@
     </article>
     <article>
       <span class="feature-number">03</span>
-      <h3>Understand failures</h3>
+      <h3>Inspect each rule</h3>
       <p>
-        Compare valid and invalid spends with diagnostics written for learners, not only
-        implementers.
+        Open concise explanations of each opcode, signature, public key, and expected hash without
+        leaving the walkthrough.
       </p>
     </article>
   </div>
@@ -94,7 +96,7 @@
     <article>
       <span class="feature-number">Now</span>
       <h3>Integrated visualizer</h3>
-      <p>The engine, API, guided lessons, and real-browser contract now run together.</p>
+      <p>The engine, API, guided walkthrough, and real-browser contract now run together.</p>
     </article>
     <article>
       <span class="feature-number">Next</span>
@@ -107,11 +109,8 @@
       <p>Visitors can navigate a complete visual lesson on desktop or mobile.</p>
     </article>
   </div>
-  <a class="text-link" routerLink="/roadmap"
-    >Read the eight-week roadmap <span aria-hidden="true">→</span></a
-  >
-  <a class="text-link" routerLink="/blog/mvp-trace-to-browser"
-    >Read the latest progress report <span aria-hidden="true">→</span></a
+  <a class="text-link" routerLink="/visualizer"
+    >Open the P2PKH execution lab <span aria-hidden="true">→</span></a
   >
 </section>
 
@@ -126,7 +125,7 @@
       behavior, tracing, and analysis. Bitcoin Core remains the production blockchain source of
       truth.
     </p>
-    <a class="text-link" routerLink="/docs"
+    <a class="text-link" routerLink="/about"
       >How the project fits together <span aria-hidden="true">→</span></a
     >
   </div>
@@ -138,7 +137,7 @@
     <h2 id="launch-signup-title">Follow BML to launch.</h2>
     <p>
       Ask to receive occasional progress updates and an invitation when the Script Visualizer is
-      ready to try.
+      ready for public launch.
     </p>
   </div>
   <div class="launch-signup__action">

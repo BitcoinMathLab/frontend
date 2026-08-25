@@ -11,7 +11,7 @@ opcode, byte, stack, and failure-state visualization.
 The public-site foundation currently includes:
 
 - a strict, standalone Angular 21 application;
-- lazy-loaded Home, About, Roadmap, Blog, and Contact routes;
+- lazy-loaded Home, Visualizer, Explorer, About, and Contact routes;
 - shared responsive navigation and footer;
 - Bitcoin Math Lab brand assets and design tokens;
 - keyboard focus, skip-link, reduced-motion, and mobile foundations; and
@@ -20,12 +20,14 @@ The public-site foundation currently includes:
 Story 2.3 adds Cloudflare Pages deployment assets, production metadata and security headers, and optional Sentry browser
 monitoring.
 
-The visualizer at `/labs/script-visualizer` loads curated P2PKH spends from the Bitcoin Math Lab backend. It includes
-guided successful and failing lessons, before/after stacks, byte and opcode highlighting, a timeline, playback controls,
-and keyboard navigation.
+The visualizer at `/visualizer` loads one curated P2PKH spend from the Bitcoin Math Lab backend. It starts before
+execution with empty stacks, then connects the script flow, semantic main/alternate stacks, and current operation through
+playback and keyboard controls. Script elements open focused explanations without moving the trace, and the spend verdict
+appears only after the final step.
 
-The transaction explorer at `/labs/transaction-explorer` validates a mainnet transaction ID and loads its raw bytes and
-ordered previous-output context from the backend's Bitcoin Core connection. See the
+The transaction explorer at `/explorer` validates a mainnet transaction ID and loads its raw bytes, created and spent
+outputs, classifications, value/fee summary, size metrics, and guided byte ranges from the backend's Bitcoin Core
+connection. See the
 [transaction explorer QA guide](docs/transaction-explorer.md) for setup and story validation.
 
 Public routes publish route-specific descriptions, canonical URLs, and Open Graph/Twitter metadata. Add every new
@@ -97,8 +99,8 @@ After deploying both services, run the release smoke check against the public fr
     BML_E2E_BASE_URL=https://bitcoinmathlab.com BML_PRODUCTION_SMOKE=1 BML_LIVE_API=1 npm run test:smoke:production
 
 `BML_E2E_BASE_URL` tells Playwright to use an existing deployment instead of starting local servers. The check verifies
-public navigation, route metadata, HTTPS security headers, and successful and failing Script Visualizer lessons through
-the deployed API.
+public navigation, route metadata, HTTPS security headers, current Visualizer and Explorer entry points, and the P2PKH
+walkthrough through the deployed API.
 
 See the [deployment runbook](docs/deployment.md) for Cloudflare Pages configuration, release verification, and rollback.
 

@@ -63,24 +63,78 @@ export interface P2pkhTraceResponse {
   readonly trace: ExecutionTrace;
 }
 
+export type OutputType = 'P2PK' | 'P2PKH' | 'P2MS' | 'P2SH' | 'P2WPKH' | 'P2WSH' | 'P2TR';
+
 export interface PreviousOutputContext {
   readonly txid: string;
   readonly vout: number;
   readonly amount_sats: number;
   readonly script_pubkey_hex: string;
+  readonly output_type: OutputType | null;
+  readonly spend_type:
+    | 'P2PK'
+    | 'P2PKH'
+    | 'P2SH'
+    | 'P2SH-P2WPKH'
+    | 'P2SH-P2WSH'
+    | 'P2WPKH'
+    | 'P2WSH'
+    | 'P2TR-KEY-PATH'
+    | 'P2TR-SCRIPT-PATH'
+    | 'UNKNOWN';
+  readonly is_nested: boolean;
+  readonly redeem_script_hex: string | null;
 }
 
 export interface TransactionOutputContext {
   readonly vout: number;
   readonly amount_sats: number;
   readonly script_pubkey_hex: string;
+  readonly output_type: OutputType | null;
+}
+
+export interface TransactionByteFieldResponse {
+  readonly id: string;
+  readonly label: string;
+  readonly group: 'header' | 'input' | 'output' | 'witness' | 'footer';
+  readonly offset: number;
+  readonly length: number;
+  readonly hex: string;
+  readonly decoded: string;
 }
 
 export interface TransactionContextResponse {
   readonly api_version: 'v1';
   readonly txid: string;
+  readonly wtxid: string;
   readonly transaction_hex: string;
+  readonly version: number;
+  readonly locktime: number;
+  readonly is_segwit: boolean;
   readonly is_coinbase: boolean;
+  readonly total_input_sats: number;
+  readonly total_output_sats: number;
+  readonly fee_sats: number | null;
+  readonly size_bytes: number;
+  readonly weight_units: number;
+  readonly virtual_size_vbytes: number;
+  readonly byte_fields?: readonly TransactionByteFieldResponse[];
   readonly outputs: readonly TransactionOutputContext[];
   readonly spent_outputs: readonly PreviousOutputContext[];
+}
+
+export interface TransactionExample {
+  readonly slug: string;
+  readonly title: string;
+  readonly description: string;
+  readonly txid: string;
+  readonly input_count: number;
+  readonly output_count: number;
+  readonly expected_spend_types: readonly string[];
+  readonly concepts: readonly string[];
+}
+
+export interface TransactionExamplesResponse {
+  readonly api_version: 'v1';
+  readonly examples: readonly TransactionExample[];
 }

@@ -1,0 +1,37 @@
+<div class="parser-window" aria-label="Parsed P2PKH scripts">
+  <section class="script-lane">
+    <header><strong>scriptSig</strong><span>runs first</span></header>
+    <div class="operation-list">
+      @for (operation of unlockingOperations(); track operation.step.index) {
+        <button
+          type="button"
+          (click)="inspectStep.emit(operation.step.index)"
+          [class.operation--current]="operation.step.index === currentIndex()"
+          [class.operation--complete]="operation.step.index < currentIndex()"
+          [attr.aria-current]="operation.step.index === currentIndex() ? 'step' : null"
+        >
+          <span aria-hidden="true">●</span><code>{{ operation.label }}</code>
+        </button>
+      }
+    </div>
+  </section>
+
+  <div class="parse-arrow" aria-hidden="true">→</div>
+
+  <section class="script-lane">
+    <header><strong>scriptPubKey</strong><span>runs second</span></header>
+    <div class="operation-list">
+      @for (operation of lockingOperations(); track operation.step.index) {
+        <button
+          type="button"
+          (click)="inspectStep.emit(operation.step.index)"
+          [class.operation--current]="operation.step.index === currentIndex()"
+          [class.operation--complete]="operation.step.index < currentIndex()"
+          [attr.aria-current]="operation.step.index === currentIndex() ? 'step' : null"
+        >
+          <span aria-hidden="true">●</span><code>{{ operation.label }}</code>
+        </button>
+      }
+    </div>
+  </section>
+</div>

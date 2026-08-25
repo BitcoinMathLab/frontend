@@ -70,7 +70,7 @@ cannot use.
 ## Rollback
 
 Rollback is required when navigation or metadata checks fail, required security headers are missing, the browser cannot
-reach the API, either guided lesson fails, or monitoring shows a release regression.
+reach the API, the P2PKH walkthrough cannot load or reach its final result, or monitoring shows a release regression.
 
 1. Restore the last known-good Pages deployment using Cloudflare's deployment rollback control.
 2. If the failure is in the API, restore the backend image first, then restore or retain the compatible frontend.
