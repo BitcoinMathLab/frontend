@@ -21,26 +21,28 @@
   <div class="trace-card" aria-label="Preview of a Bitcoin script execution trace">
     <div class="trace-card__header">
       <span>P2PKH execution</span>
-      <span class="status">Step 3 of 5</span>
+      <span class="status">Step 4 of 7</span>
     </div>
     <div class="opcode-row">
-      <span class="step-number">03</span>
+      <span class="step-number">04</span>
       <div>
-        <strong>OP_EQUALVERIFY</strong>
-        <p>Confirm the public key matches the locking script.</p>
+        <strong>OP_HASH160</strong>
+        <p>Hash the duplicated public key before comparing it.</p>
       </div>
-      <span class="valid">Valid</span>
+      <span class="running">In progress</span>
     </div>
     <div class="stack">
       <div class="stack__label">Main stack</div>
-      <code>76a914…88ac</code>
-      <code>03b2f1…9a42</code>
-      <code class="stack__active">TRUE</code>
+      <code>signature</code>
+      <code>public key</code>
+      <code class="stack__active">HASH160(public key)</code>
     </div>
     <div class="timeline" aria-hidden="true">
       <span class="complete"></span>
       <span class="complete"></span>
+      <span class="complete"></span>
       <span class="current"></span>
+      <span></span>
       <span></span>
       <span></span>
     </div>

@@ -36,4 +36,16 @@ describe('Home', () => {
     );
     expect(signup?.getAttribute('href')).toContain('early-access%20list');
   });
+
+  it('keeps the static trace preview neutral until the final step', () => {
+    const fixture = TestBed.createComponent(Home);
+    fixture.detectChanges();
+    const preview = fixture.nativeElement.querySelector('.trace-card') as HTMLElement;
+
+    expect(preview.textContent).toContain('Step 4 of 7');
+    expect(preview.textContent).toContain('OP_HASH160');
+    expect(preview.textContent).toContain('In progress');
+    expect(preview.textContent).not.toContain('Valid');
+    expect(preview.querySelectorAll('.timeline span')).toHaveLength(7);
+  });
 });
