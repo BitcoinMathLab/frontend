@@ -1,0 +1,46 @@
+<div class="signature-backdrop" role="presentation" (click)="close.emit()">
+  <section
+    #dialog
+    class="signature-detail"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="signature-detail-heading"
+    aria-describedby="signature-detail-summary"
+    tabindex="-1"
+    (click)="$event.stopPropagation()"
+    (keydown)="handleKeydown($event)"
+  >
+    <header>
+      <div>
+        <p class="eyebrow">OP_CHECKSIG detail</p>
+        <h2 id="signature-detail-heading">How this signature is verified</h2>
+      </div>
+      <button type="button" (click)="close.emit()" aria-label="Close detail">×</button>
+    </header>
+    <ol>
+      <li><strong>Build the message.</strong> Serialize the legacy signature preimage.</li>
+      <li><strong>Hash it.</strong> Apply SHA-256 twice to create the 32-byte digest.</li>
+      <li><strong>Decode the signature.</strong> Read DER integers r and s plus the hash type.</li>
+      <li><strong>Decode the public key.</strong> Recover the secp256k1 curve point.</li>
+      <li><strong>Verify ECDSA.</strong> Check the signature equation and push true or false.</li>
+    </ol>
+    <dl>
+      <div>
+        <dt>Signature</dt>
+        <dd>
+          <code>{{ signature() }}</code>
+        </dd>
+      </div>
+      <div>
+        <dt>Public key</dt>
+        <dd>
+          <code>{{ publicKey() }}</code>
+        </dd>
+      </div>
+    </dl>
+    <p id="signature-detail-summary">
+      The MVP explains this boundary in place. A future cryptography lab can expose each scalar,
+      point multiplication, and comparison without changing the trace-player contract.
+    </p>
+  </section>
+</div>

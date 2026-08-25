@@ -1,7 +1,5 @@
 import { Routes } from '@angular/router';
 
-import { findBlogPost } from './core/blog-posts';
-
 export const routes: Routes = [
   {
     path: '',
@@ -9,13 +7,13 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/home/home').then((page) => page.Home),
   },
   {
-    path: 'labs/script-visualizer',
+    path: 'visualizer',
     title: 'Script Visualizer — Bitcoin Math Lab',
     loadComponent: () =>
       import('./pages/script-visualizer/script-visualizer').then((page) => page.ScriptVisualizer),
   },
   {
-    path: 'labs/transaction-explorer',
+    path: 'explorer',
     title: 'Transaction Explorer — Bitcoin Math Lab',
     loadComponent: () =>
       import('./pages/transaction-explorer/transaction-explorer').then(
@@ -28,27 +26,14 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/about/about').then((page) => page.About),
   },
   {
-    path: 'docs',
-    title: 'Documentation — Bitcoin Math Lab',
-    loadComponent: () => import('./pages/docs/docs').then((page) => page.Docs),
+    path: 'labs/script-visualizer',
+    redirectTo: 'visualizer',
+    pathMatch: 'full',
   },
   {
-    path: 'roadmap',
-    title: 'Roadmap — Bitcoin Math Lab',
-    loadComponent: () => import('./pages/roadmap/roadmap').then((page) => page.Roadmap),
-  },
-  {
-    path: 'blog',
-    title: 'Blog — Bitcoin Math Lab',
-    loadComponent: () => import('./pages/blog/blog').then((page) => page.Blog),
-  },
-  {
-    path: 'blog/:slug',
-    title: (route) => {
-      const post = findBlogPost(route.paramMap.get('slug'));
-      return post ? `${post.title} — Bitcoin Math Lab` : 'Article not found — Bitcoin Math Lab';
-    },
-    loadComponent: () => import('./pages/blog-post/blog-post').then((page) => page.BlogPost),
+    path: 'labs/transaction-explorer',
+    redirectTo: 'explorer',
+    pathMatch: 'full',
   },
   {
     path: 'contact',

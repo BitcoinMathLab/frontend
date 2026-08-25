@@ -1,232 +1,79 @@
+:host {
+  display: block;
+  min-height: 100%;
+  background:
+    radial-gradient(circle at 18% 5%, rgba(245, 165, 36, 0.13), transparent 27rem),
+    radial-gradient(circle at 82% 28%, rgba(74, 144, 226, 0.09), transparent 30rem);
+}
+
 .visualizer-hero,
 .lab {
-  width: min(100% - 2rem, 72rem);
+  width: min(100% - 2rem, 84rem);
   margin-inline: auto;
 }
 
 .visualizer-hero {
-  display: grid;
-  gap: clamp(2rem, 7vw, 6rem);
-  grid-template-columns: minmax(0, 1.35fr) minmax(16rem, 0.65fr);
-  padding-block: clamp(4.5rem, 10vw, 8rem) clamp(3rem, 7vw, 5rem);
+  padding-block: clamp(3rem, 7vw, 5.5rem) clamp(2rem, 4vw, 3rem);
+  text-align: center;
 }
 
-h1 {
-  max-width: 13ch;
-  margin: 0.75rem 0 1.35rem;
-  font-size: clamp(3rem, 7vw, 6rem);
-  letter-spacing: -0.065em;
-  line-height: 0.94;
-}
-
-.visualizer-hero > div > p:last-child,
-.lab__heading > p,
-.state-card p {
-  color: var(--color-text-muted);
-  line-height: 1.7;
-}
-
-.visualizer-hero > div > p:last-child {
-  max-width: 42rem;
-  font-size: 1.08rem;
-}
-
-dl {
-  align-self: end;
+.visualizer-hero .eyebrow {
   margin: 0;
-  border-block: 1px solid var(--color-graphite);
+  color: var(--color-amber);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 
-dl div {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  border-bottom: 1px solid var(--color-graphite);
-  padding-block: 0.9rem;
+.visualizer-hero h1 {
+  max-width: 16ch;
+  margin: 0.65rem auto 0;
+  color: #fff;
+  font-size: clamp(2.7rem, 6vw, 5.4rem);
+  letter-spacing: -0.055em;
+  line-height: 0.98;
+  text-wrap: balance;
 }
 
-dl div:last-child {
-  border-bottom: 0;
-}
-
-dt,
-dd {
-  font-size: 0.8rem;
-}
-
-dt {
-  color: var(--color-text-subtle);
-}
-
-dd {
-  margin: 0;
-  color: var(--color-paper);
-  font-family: var(--font-mono);
-  text-align: right;
+.hero-intro {
+  max-width: 36rem;
+  margin: 1.1rem auto 0;
+  color: #cbd5e1;
+  font-size: clamp(1.05rem, 2vw, 1.25rem);
+  line-height: 1.5;
 }
 
 .lab {
-  padding-bottom: clamp(5rem, 10vw, 8rem);
-}
-
-.lab__heading {
-  display: flex;
-  margin-bottom: 1.4rem;
-  align-items: end;
-  justify-content: space-between;
-  gap: 2rem;
-}
-
-.lab__heading h2 {
-  margin: 0.45rem 0 0;
-  font-size: clamp(2rem, 5vw, 3.25rem);
-  letter-spacing: -0.04em;
-}
-
-.lab__heading > p {
-  max-width: 25rem;
-  margin: 0;
-  font-size: 0.82rem;
-  text-align: right;
-}
-
-.lesson-layout {
-  display: grid;
-  margin-bottom: 1.5rem;
-  border: 1px solid var(--color-graphite);
-  border-radius: 1.1rem;
-  background: rgba(16, 21, 31, 0.72);
-  grid-template-columns: minmax(14rem, 0.72fr) minmax(0, 1.28fr);
-  overflow: hidden;
-}
-
-.lesson-list {
-  display: grid;
-  align-content: start;
-  border-right: 1px solid var(--color-graphite);
-}
-
-.lesson-list button {
-  display: grid;
-  position: relative;
-  border: 0;
-  border-bottom: 1px solid var(--color-graphite);
-  background: transparent;
-  cursor: pointer;
-  gap: 0.45rem;
-  padding: 1rem;
-  text-align: left;
-}
-
-.lesson-list button:hover,
-.lesson-list button.lesson-list__active {
-  background: rgba(101, 167, 255, 0.07);
-}
-
-.lesson-list button.lesson-list__active::before {
-  position: absolute;
-  width: 0.2rem;
-  background: var(--color-amber);
-  content: '';
-  inset: 0 auto 0 0;
-}
-
-.lesson-list span,
-.lesson-list small,
-.lesson-copy__meta {
-  color: var(--color-text-subtle);
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
-  text-transform: uppercase;
-}
-
-.lesson-list strong {
-  color: var(--color-paper);
-  font-size: 0.88rem;
-}
-
-.lesson-list small {
-  color: var(--color-blue);
-}
-
-.lesson-copy {
-  min-width: 0;
-  padding: clamp(1.25rem, 4vw, 2rem);
-}
-
-.lesson-copy h3 {
-  margin: 0.75rem 0;
-  font-size: clamp(1.6rem, 4vw, 2.3rem);
-  letter-spacing: -0.04em;
-}
-
-.lesson-copy > p,
-.lesson-copy li,
-.concept-card > p:last-child {
-  color: var(--color-text-muted);
-  line-height: 1.65;
-}
-
-.lesson-copy > code {
-  display: block;
-  overflow-x: auto;
-  margin-block: 1.2rem;
-  border: 1px solid var(--color-graphite);
-  border-radius: 0.55rem;
-  background: var(--color-canvas);
-  color: var(--color-amber);
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  padding: 0.8rem;
-}
-
-.lesson-copy h4 {
-  margin: 1.25rem 0 0.5rem;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-}
-
-.lesson-copy ul {
-  display: grid;
-  margin: 0;
-  gap: 0.35rem;
-  padding-left: 1.2rem;
-}
-
-.lesson-copy li {
-  font-size: 0.8rem;
-}
-
-.concept-card {
-  border: 1px solid rgba(101, 167, 255, 0.35);
-  border-radius: 1.1rem;
-  background: rgba(101, 167, 255, 0.06);
-  padding: clamp(1.25rem, 4vw, 2rem);
-}
-
-.concept-card > p:last-child {
-  max-width: 52rem;
-  margin: 0.65rem 0 0;
+  padding-bottom: clamp(4rem, 8vw, 7rem);
 }
 
 .state-card {
   display: flex;
   min-height: 14rem;
-  border: 1px solid var(--color-graphite);
-  border-radius: 1.25rem;
-  background: var(--color-surface);
   align-items: center;
   justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 1rem;
+  background: rgba(15, 23, 42, 0.86);
+  box-shadow: 0 1.25rem 4rem rgba(0, 0, 0, 0.22);
   gap: 0.8rem;
-  color: var(--color-text-muted);
+  color: #d7e0eb;
+  font-size: 1rem;
+}
+
+.state-card p {
+  margin: 0.35rem 0 0;
+  color: #b7c2d0;
+  line-height: 1.55;
 }
 
 .state-card__pulse {
-  width: 0.65rem;
-  height: 0.65rem;
+  width: 0.7rem;
+  height: 0.7rem;
   border-radius: 50%;
   background: var(--color-amber);
-  box-shadow: 0 0 1rem rgba(245, 165, 36, 0.65);
+  box-shadow: 0 0 1.25rem rgba(245, 165, 36, 0.6);
 }
 
 .state-card--error {
@@ -234,46 +81,30 @@ dd {
   padding: 1.5rem;
 }
 
-.state-card strong {
-  color: var(--color-paper);
-}
-
-.state-card p {
-  margin: 0.35rem 0 0;
-}
-
 .state-card button {
   min-height: 2.75rem;
   border: 0;
-  border-radius: 0.55rem;
+  border-radius: 0.65rem;
   background: var(--color-amber);
-  color: var(--color-canvas);
+  color: #111827;
   cursor: pointer;
-  font-weight: 750;
+  font: inherit;
+  font-weight: 800;
   padding: 0.7rem 1rem;
 }
 
-@media (max-width: 46rem) {
+@media (max-width: 36rem) {
   .visualizer-hero {
-    grid-template-columns: 1fr;
-  }
-
-  .lab__heading {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 0.7rem;
-  }
-
-  .lab__heading > p {
     text-align: left;
   }
 
-  .lesson-layout {
-    grid-template-columns: 1fr;
+  .visualizer-hero h1,
+  .hero-intro {
+    margin-inline: 0;
   }
 
-  .lesson-list {
-    border-right: 0;
-    border-bottom: 1px solid var(--color-graphite);
+  .state-card--error {
+    align-items: stretch;
+    flex-direction: column;
   }
 }

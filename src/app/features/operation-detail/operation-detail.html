@@ -1,0 +1,22 @@
+<div class="backdrop" role="presentation" (click)="close.emit()">
+  <section
+    #dialog
+    class="dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="operation-detail-title"
+    aria-describedby="operation-detail-summary operation-detail-requirement"
+    tabindex="-1"
+    (click)="$event.stopPropagation()"
+    (keydown)="handleKeydown($event)"
+  >
+    <button type="button" aria-label="Close operation detail" (click)="close.emit()">×</button>
+    <span>{{ detail().kind }}</span>
+    <h2 id="operation-detail-title">{{ detail().name }}</h2>
+    <p id="operation-detail-summary">{{ detail().summary }}</p>
+    <div class="requirement">
+      <strong>Stack requirement</strong>
+      <p id="operation-detail-requirement">{{ detail().requirement }}</p>
+    </div>
+  </section>
+</div>

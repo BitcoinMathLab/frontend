@@ -7,34 +7,10 @@
     <loc>https://bitcoinmathlab.com/about</loc>
   </url>
   <url>
-    <loc>https://bitcoinmathlab.com/docs</loc>
+    <loc>https://bitcoinmathlab.com/visualizer</loc>
   </url>
   <url>
-    <loc>https://bitcoinmathlab.com/roadmap</loc>
-  </url>
-  <url>
-    <loc>https://bitcoinmathlab.com/blog</loc>
-  </url>
-  <url>
-    <loc>https://bitcoinmathlab.com/blog/why-bitcoin-math-lab</loc>
-  </url>
-  <url>
-    <loc>https://bitcoinmathlab.com/blog/mvp-trace-to-browser</loc>
-  </url>
-  <url>
-    <loc>https://bitcoinmathlab.com/blog/why-build-bitclone</loc>
-  </url>
-  <url>
-    <loc>https://bitcoinmathlab.com/blog/inside-script-visualizer</loc>
-  </url>
-  <url>
-    <loc>https://bitcoinmathlab.com/blog/from-one-trace-to-a-platform</loc>
-  </url>
-  <url>
-    <loc>https://bitcoinmathlab.com/labs/script-visualizer</loc>
-  </url>
-  <url>
-    <loc>https://bitcoinmathlab.com/labs/transaction-explorer</loc>
+    <loc>https://bitcoinmathlab.com/explorer</loc>
   </url>
   <url>
     <loc>https://bitcoinmathlab.com/contact</loc>

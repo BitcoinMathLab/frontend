@@ -28,15 +28,11 @@ test('verifies the deployed public shell, metadata, and security headers', async
     expect(headers['strict-transport-security']).toBeTruthy();
   }
 
-  await page.goto('/docs');
-  await expect(page).toHaveTitle(/Documentation/);
-  await expect(
-    page.getByRole('heading', { name: 'How Bitcoin Math Lab fits together.' }),
-  ).toBeVisible();
+  await page.goto('/visualizer');
+  await expect(page).toHaveTitle('Script Visualizer — Bitcoin Math Lab');
+  await expect(page.getByRole('heading', { name: /Validate one P2PKH spend/ })).toBeVisible();
 
-  await page.goto('/blog');
-  await expect(page).toHaveTitle('Blog — Bitcoin Math Lab');
-  await expect(
-    page.getByRole('heading', { name: 'Building Bitcoin Math Lab in public.' }),
-  ).toBeVisible();
+  await page.goto('/explorer');
+  await expect(page).toHaveTitle('Transaction Explorer — Bitcoin Math Lab');
+  await expect(page.getByRole('heading', { name: /Inspect a Bitcoin transaction/ })).toBeVisible();
 });

@@ -70,12 +70,19 @@ nav a.active {
 
   nav {
     width: 100%;
-    overflow-x: auto;
-    padding-bottom: 0.15rem;
-    scrollbar-width: none;
+    justify-content: space-between;
+    gap: 0;
   }
 
-  nav::-webkit-scrollbar {
-    display: none;
+  nav a {
+    font-size: 0.82rem;
+    padding: 0.55rem 0.35rem;
+  }
+}
+
+@media (max-width: 25rem) {
+  nav a {
+    font-size: 0.76rem;
+    padding-inline: 0.25rem;
   }
 }
