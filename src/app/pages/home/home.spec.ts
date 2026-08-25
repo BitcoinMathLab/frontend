@@ -48,4 +48,16 @@ describe('Home', () => {
     expect(preview.textContent).not.toContain('Valid');
     expect(preview.querySelectorAll('.timeline span')).toHaveLength(7);
   });
+
+  it('describes only the learning experience available in the MVP', () => {
+    const fixture = TestBed.createComponent(Home);
+    fixture.detectChanges();
+    const content = fixture.nativeElement.textContent as string;
+
+    expect(content).toContain('Trace a P2PKH spend step by step');
+    expect(content).toContain('Inspect each rule');
+    expect(content).toContain('guided walkthrough');
+    expect(content).not.toContain('make every Bitcoin transaction work');
+    expect(content).not.toContain('guided lessons');
+  });
 });
