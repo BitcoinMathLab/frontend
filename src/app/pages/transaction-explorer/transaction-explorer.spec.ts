@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
-import { of, throwError } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 
 import { TraceApi } from '../../core/trace-api';
 import {
@@ -102,6 +102,38 @@ function traceApiWith(loadTransactionContext: ReturnType<typeof vi.fn>) {
 }
 
 describe('TransactionExplorer', () => {
+  it('cancels a pending lookup when the transaction ID changes', async () => {
+    const pending = new Subject<TransactionContextResponse>();
+    const loadTransactionContext = vi.fn().mockReturnValue(pending);
+    await TestBed.configureTestingModule({
+      imports: [TransactionExplorer],
+      providers: [{ provide: TraceApi, useValue: traceApiWith(loadTransactionContext) }],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(TransactionExplorer);
+    fixture.detectChanges();
+
+    const form = fixture.nativeElement.querySelector('form') as HTMLFormElement;
+    form.dispatchEvent(new Event('submit'));
+    fixture.detectChanges();
+    expect(loadTransactionContext).toHaveBeenCalledWith(TXID);
+    expect(fixture.nativeElement.textContent).toContain(
+      'Asking Bitcoin Core for transaction context',
+    );
+
+    (fixture.componentInstance as unknown as { inputChanged(txid: string): void }).inputChanged(
+      'b'.repeat(64),
+    );
+    fixture.detectChanges();
+
+    expect(pending.observers).toHaveLength(0);
+    expect(fixture.nativeElement.textContent).not.toContain(
+      'Asking Bitcoin Core for transaction context',
+    );
+    pending.next(RESPONSE);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.result')).toBeNull();
+  });
+
   it('loads and presents transaction context', async () => {
     const loadTransactionContext = vi.fn().mockReturnValue(of(RESPONSE));
     const writeText = vi.fn().mockResolvedValue(undefined);

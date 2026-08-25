@@ -171,7 +171,17 @@ export class TransactionExplorer implements OnInit, OnDestroy {
   }
 
   protected inputChanged(txid: string): void {
-    if (this.selectedExample()?.txid !== txid.trim().toLowerCase()) {
+    const normalizedTxid = txid.trim().toLowerCase();
+    this.requestSubscription?.unsubscribe();
+    this.requestSubscription = undefined;
+    this.loading.set(false);
+    this.error.set('');
+    if (this.result()?.txid !== normalizedTxid) {
+      this.result.set(null);
+      this.selectedByteFieldId.set(null);
+      this.copiedByteFieldId.set(null);
+    }
+    if (this.selectedExample()?.txid !== normalizedTxid) {
       this.selectedExample.set(null);
     }
   }

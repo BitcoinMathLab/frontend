@@ -172,6 +172,32 @@ test('validates transaction IDs before sending a request', async ({ page }) => {
   expect(requests).toBe(0);
 });
 
+test('discards a pending lookup when the transaction ID changes', async ({ page }) => {
+  let releaseRequest: (() => void) | undefined;
+  await page.route('**/api/v1/transactions/**', async (route) => {
+    if (route.request().url().endsWith('/transactions/examples')) {
+      await route.fulfill({ contentType: 'application/json', json: EXAMPLES_RESPONSE });
+      return;
+    }
+    await new Promise<void>((resolve) => {
+      releaseRequest = resolve;
+    });
+    await route.fulfill({ contentType: 'application/json', json: { txid: TXID } }).catch(() => {});
+  });
+  await page.goto('/explorer');
+
+  await page.getByRole('button', { name: 'Inspect transaction' }).click();
+  await expect(page.getByRole('status')).toContainText('Asking Bitcoin Core');
+  await page.getByRole('textbox', { name: 'Transaction ID' }).fill('b'.repeat(64));
+
+  await expect(page.getByRole('status')).toHaveCount(0);
+  releaseRequest?.();
+  await page.waitForTimeout(100);
+  await expect(page.getByRole('heading', { name: 'Transaction context', exact: true })).toHaveCount(
+    0,
+  );
+});
+
 test('explains Core availability safely and fits a mobile viewport', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.route('**/api/v1/transactions/**', async (route) => {
