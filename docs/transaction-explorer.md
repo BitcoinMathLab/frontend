@@ -1,9 +1,9 @@
 # Transaction Explorer QA
 
 The transaction explorer at `/explorer` retrieves transaction context through the backend without
-exposing Bitcoin Core credentials to the browser. It displays the transaction ID, raw byte count, coinbase status, raw
-hex, every created output, each input's ordered previous output, and the standard output/spend-path classification
-supplied by Bitclone.
+exposing Bitcoin Core credentials to the browser. It displays transaction identity and format, size/weight/vsize,
+value and fee summaries, every created output, each input's ordered previous output, standard output/spend-path
+classification, and guided raw-byte ranges supplied by Bitclone.
 
 The explorer loads its verified example catalog from `/api/v1/transactions/examples`. Each concept card selects a
 confirmed mainnet txid and states the expected input/output shape before the learner inspects it.
@@ -62,8 +62,8 @@ successful historical lookup until synchronization finishes.
   the viewport without page-level horizontal scrolling.
 - **Accessibility:** Use the keyboard to focus the input and submit button. Expect visible focus, a labeled textbox,
   announced loading status, and announced validation/API errors.
-- **Regression:** Open the Script Visualizer and its valid and invalid lessons. Expect its trace loading and controls to
-  remain unchanged.
+- **Regression:** Open the Script Visualizer. Expect empty stacks at step 0, script items that open information without
+  advancing, working playback controls, and a spend verdict only at the final step.
 
 Record one of `Accepted`, `Accepted with follow-up`, or `Changes requested` in the PR review. Do not paste the Core RPC
 cookie, password, tunnel command, or private infrastructure details into the review.
