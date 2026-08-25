@@ -8,13 +8,14 @@ import {
 } from '@angular/core';
 
 import { ExecutionTrace, P2pkhTraceResponse, TraceStep } from '../../core/trace-api.models';
+import { OperationDetail } from '../operation-detail/operation-detail';
 import { ScriptParser } from '../script-parser/script-parser';
 import { SignatureDetail } from '../signature-detail/signature-detail';
 import { StackWorkbench } from '../stack-workbench/stack-workbench';
 
 @Component({
   selector: 'app-trace-player',
-  imports: [ScriptParser, SignatureDetail, StackWorkbench],
+  imports: [OperationDetail, ScriptParser, SignatureDetail, StackWorkbench],
   templateUrl: './trace-player.html',
   styleUrl: './trace-player.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -23,28 +24,38 @@ export class TracePlayer implements OnDestroy {
   readonly trace = input.required<ExecutionTrace>();
   readonly scripts = input.required<P2pkhTraceResponse['scripts']>();
 
-  protected readonly currentIndex = signal(0);
+  protected readonly currentIndex = signal(-1);
   protected readonly playing = signal(false);
   protected readonly signatureDetailOpen = signal(false);
-  protected readonly currentStep = computed(() => this.trace().steps[this.currentIndex()]);
-  protected readonly atStart = computed(() => this.currentIndex() === 0);
-  protected readonly atEnd = computed(
-    () => this.currentIndex() >= Math.max(this.trace().steps.length - 1, 0),
+  protected readonly selectedOperation = signal<TraceStep | null>(null);
+  protected readonly currentStep = computed(() =>
+    this.currentIndex() < 0 ? undefined : this.trace().steps[this.currentIndex()],
   );
-  protected readonly stepLabel = computed(
-    () => `Step ${this.currentIndex() + 1} of ${this.trace().steps.length}`,
+  protected readonly atStart = computed(() => this.currentIndex() < 0);
+  protected readonly atEnd = computed(
+    () => this.currentIndex() >= 0 && this.currentIndex() >= this.trace().steps.length - 1,
+  );
+  protected readonly stepLabel = computed(() =>
+    this.atStart()
+      ? `Ready · step 0 of ${this.trace().steps.length}`
+      : `Step ${this.currentIndex() + 1} of ${this.trace().steps.length}`,
   );
   protected readonly progressPercent = computed(() => {
     const count = this.trace().steps.length;
-    return count ? ((this.currentIndex() + 1) / count) * 100 : 0;
+    return count && this.currentIndex() >= 0
+      ? Math.round(((this.currentIndex() + 1) / count) * 100)
+      : 0;
   });
   protected readonly outcomeLabel = computed(() => {
+    if (this.atStart()) return 'Ready to run';
     if (!this.atEnd()) return 'In progress';
     return this.trace().success ? 'Valid spend' : 'Invalid spend';
   });
   protected readonly phaseLabel = computed(() => {
+    if (this.atStart()) return 'Waiting to begin';
     const unlockingLength = this.scripts().unlocking.length / 2;
-    return this.currentStep()?.opcode.byte_offset < unlockingLength
+    const step = this.currentStep();
+    return step && step.opcode.byte_offset < unlockingLength
       ? 'Executing scriptSig first'
       : 'Executing scriptPubKey';
   });
@@ -58,12 +69,23 @@ export class TracePlayer implements OnDestroy {
   protected readonly publicKey = computed(
     () => this.currentStep()?.stacks.before.main.items[0] ?? 'Unavailable in this trace',
   );
+  protected readonly operationDetail = computed(() => {
+    const step = this.selectedOperation();
+    if (!step) return null;
+    return {
+      kind: step.opcode.is_push ? 'Data instruction' : 'Opcode',
+      name: step.opcode.name,
+      summary: describeStackEffect(step),
+      requirement: describeRequirement(step),
+    };
+  });
 
   private timer: ReturnType<typeof setInterval> | undefined;
+  private returnFocus: HTMLElement | null = null;
 
   protected previous(): void {
     this.pause();
-    this.currentIndex.update((index) => Math.max(index - 1, 0));
+    this.currentIndex.update((index) => Math.max(index - 1, -1));
   }
 
   protected next(): void {
@@ -74,7 +96,8 @@ export class TracePlayer implements OnDestroy {
   protected reset(): void {
     this.pause();
     this.signatureDetailOpen.set(false);
-    this.currentIndex.set(0);
+    this.selectedOperation.set(null);
+    this.currentIndex.set(-1);
   }
 
   protected finish(): void {
@@ -82,10 +105,27 @@ export class TracePlayer implements OnDestroy {
     this.currentIndex.set(Math.max(this.trace().steps.length - 1, 0));
   }
 
-  protected goTo(index: number): void {
+  protected inspectOperation(index: number): void {
     this.pause();
     this.signatureDetailOpen.set(false);
-    this.currentIndex.set(index);
+    this.rememberFocus();
+    this.selectedOperation.set(this.trace().steps[index] ?? null);
+  }
+
+  protected openSignatureDetail(): void {
+    this.pause();
+    this.rememberFocus();
+    this.signatureDetailOpen.set(true);
+  }
+
+  protected closeOperationDetail(): void {
+    this.selectedOperation.set(null);
+    this.restoreFocus();
+  }
+
+  protected closeSignatureDetail(): void {
+    this.signatureDetailOpen.set(false);
+    this.restoreFocus();
   }
 
   protected togglePlay(): void {
@@ -93,16 +133,21 @@ export class TracePlayer implements OnDestroy {
       this.pause();
       return;
     }
-    if (this.atEnd()) this.currentIndex.set(0);
+    if (this.atEnd()) this.currentIndex.set(-1);
     this.signatureDetailOpen.set(false);
+    this.selectedOperation.set(null);
     this.playing.set(true);
-    this.timer = setInterval(() => this.advance(), 900);
+    this.advance();
+    if (this.playing()) this.timer = setInterval(() => this.advance(), 1000);
   }
 
   protected handleKeydown(event: KeyboardEvent): void {
-    if (event.key === 'Escape' && this.signatureDetailOpen()) {
+    if (event.key === 'Escape' && (this.signatureDetailOpen() || this.selectedOperation())) {
       event.preventDefault();
-      this.signatureDetailOpen.set(false);
+      if (this.signatureDetailOpen()) this.closeSignatureDetail();
+      else this.closeOperationDetail();
+    } else if (this.signatureDetailOpen() || this.selectedOperation()) {
+      return;
     } else if (event.key === 'ArrowLeft') {
       event.preventDefault();
       this.previous();
@@ -135,6 +180,32 @@ export class TracePlayer implements OnDestroy {
       this.timer = undefined;
     }
     this.playing.set(false);
+  }
+
+  private rememberFocus(): void {
+    this.returnFocus =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  }
+
+  private restoreFocus(): void {
+    const target = this.returnFocus;
+    this.returnFocus = null;
+    queueMicrotask(() => target?.focus());
+  }
+}
+
+function describeRequirement(step: TraceStep): string {
+  if (step.opcode.is_push)
+    return 'Adds data to the stack. It does not require an existing stack item.';
+  switch (step.opcode.name) {
+    case 'OP_DUP':
+    case 'OP_HASH160':
+      return 'Requires at least one stack item. Execution stops if the stack is empty.';
+    case 'OP_EQUALVERIFY':
+    case 'OP_CHECKSIG':
+      return 'Requires two stack items. Execution stops when the required values are missing.';
+    default:
+      return 'Stack requirements depend on the opcode and the values available at this step.';
   }
 }
 

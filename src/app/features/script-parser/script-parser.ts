@@ -18,7 +18,7 @@ export class ScriptParser {
   readonly trace = input.required<ExecutionTrace>();
   readonly scripts = input.required<P2pkhTraceResponse['scripts']>();
   readonly currentIndex = input.required<number>();
-  readonly selectStep = output<number>();
+  readonly inspectStep = output<number>();
 
   protected readonly operations = computed<readonly ParsedOperation[]>(() => {
     const unlockingLength = this.scripts().unlocking.length / 2;

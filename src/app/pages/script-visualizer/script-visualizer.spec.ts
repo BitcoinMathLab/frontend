@@ -17,16 +17,17 @@ describe('ScriptVisualizer', () => {
     fixture.detectChanges();
 
     expect(loadP2pkhTrace).toHaveBeenCalledOnce();
-    expect(fixture.nativeElement.textContent).toContain('Watch Bitcoin Script execute.');
-    expect(fixture.nativeElement.textContent).toContain('P2PKH example');
-    expect(fixture.nativeElement.textContent).toContain('Raw scripts');
+    expect(fixture.nativeElement.textContent).toContain('See the stack come alive.');
     expect(fixture.nativeElement.textContent).toContain('scriptSig');
     expect(fixture.nativeElement.textContent).toContain('scriptPubKey');
-    expect(fixture.nativeElement.textContent).toContain('Script flow');
+    expect(fixture.nativeElement.textContent).toContain('Script');
     expect(fixture.nativeElement.textContent).toContain('Stack state');
-    expect(fixture.nativeElement.textContent).toContain('Execution details');
-    expect(fixture.nativeElement.textContent).toContain('Step 1 of 3');
-    expect(fixture.nativeElement.textContent).toContain('In progress');
+    expect(fixture.nativeElement.textContent).toContain('Execution');
+    expect(fixture.nativeElement.textContent).toContain('Ready · step 0 of 3');
+    expect(fixture.nativeElement.textContent).toContain('Empty stack');
+    expect(fixture.nativeElement.textContent).not.toContain('Outpoint');
+    expect(fixture.nativeElement.textContent).not.toContain('Value');
+    expect(fixture.nativeElement.textContent).not.toContain('OP_DUP sandbox');
     expect(fixture.nativeElement.textContent).not.toContain('Valid spend');
   });
 
@@ -42,12 +43,12 @@ describe('ScriptVisualizer', () => {
 
     const fixture = TestBed.createComponent(ScriptVisualizer);
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('The trace API is not available.');
+    expect(fixture.nativeElement.textContent).toContain('The walkthrough could not load.');
     expect(fixture.nativeElement.textContent).not.toContain('private network detail');
 
     (fixture.nativeElement.querySelector('.state-card button') as HTMLButtonElement).click();
     fixture.detectChanges();
     expect(loadP2pkhTrace).toHaveBeenCalledTimes(2);
-    expect(fixture.nativeElement.textContent).toContain('Step 1 of 3');
+    expect(fixture.nativeElement.textContent).toContain('Ready · step 0 of 3');
   });
 });

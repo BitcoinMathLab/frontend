@@ -34,23 +34,33 @@ describe('TracePlayer', () => {
     return match;
   }
 
-  it('parses scriptSig before scriptPubKey and starts with backward controls disabled', () => {
+  it('starts before step one with empty stacks and backward controls disabled', () => {
     const compiled = fixture.nativeElement as HTMLElement;
 
-    expect(compiled.textContent).toContain('Script flow');
-    expect(compiled.textContent).toContain('1 · scriptSig');
-    expect(compiled.textContent).toContain('2 · scriptPubKey');
+    expect(compiled.textContent).toContain('Script');
+    expect(compiled.textContent).toContain('scriptSig');
+    expect(compiled.textContent).toContain('scriptPubKey');
     expect(compiled.textContent).toContain('PUSH signature');
     expect(compiled.textContent).toContain('OP_ADD');
-    expect(compiled.textContent).toContain('Step 1 of 3');
+    expect(compiled.textContent).toContain('Ready · step 0 of 3');
+    expect(compiled.textContent).toContain('Ready to run');
+    expect(compiled.textContent).toContain('Empty stack');
+    expect(compiled.querySelector('[role="progressbar"]')?.getAttribute('aria-valuenow')).toBe('0');
     expect(control('Restart trace').disabled).toBe(true);
     expect(control('Previous step').disabled).toBe(true);
     expect(control('Next step').disabled).toBe(false);
   });
 
   it('moves forward, backward, jumps to the result, and resets', () => {
-    expect(fixture.nativeElement.textContent).toContain('In progress');
+    expect(fixture.nativeElement.textContent).toContain('Ready to run');
     expect(fixture.nativeElement.textContent).not.toContain('Valid spend');
+
+    control('Next step').click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Step 1 of 3');
+    expect(
+      fixture.nativeElement.querySelector('[role="progressbar"]')?.getAttribute('aria-valuenow'),
+    ).toBe('33');
 
     control('Next step').click();
     fixture.detectChanges();
@@ -67,8 +77,8 @@ describe('TracePlayer', () => {
 
     control('Restart trace').click();
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('Step 1 of 3');
-    expect(fixture.nativeElement.textContent).toContain('In progress');
+    expect(fixture.nativeElement.textContent).toContain('Ready · step 0 of 3');
+    expect(fixture.nativeElement.textContent).toContain('Ready to run');
   });
 
   it('plays to the final step and pauses automatically', () => {
@@ -80,7 +90,7 @@ describe('TracePlayer', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Pause');
 
-    vi.advanceTimersByTime(1_800);
+    vi.advanceTimersByTime(2_000);
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Step 3 of 3');
     expect(fixture.nativeElement.textContent).toContain('Play');
@@ -89,6 +99,10 @@ describe('TracePlayer', () => {
 
   it('supports arrow and space keyboard controls', () => {
     const player = fixture.nativeElement.querySelector('.player') as HTMLElement;
+    player.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Step 1 of 3');
+
     player.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Step 2 of 3');
@@ -106,7 +120,7 @@ describe('TracePlayer', () => {
     control('Go to result').click();
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).toContain('Execution details');
+    expect(fixture.nativeElement.textContent).toContain('Execution');
     expect(fixture.nativeElement.textContent).toContain('Stack state');
     expect(fixture.nativeElement.textContent).toContain('after OP_ADD');
     expect(fixture.nativeElement.textContent).toContain('Main stack');
@@ -155,6 +169,31 @@ describe('TracePlayer', () => {
     expect(fixture.nativeElement.querySelector('[role="dialog"]')).toBeNull();
   });
 
+  it('opens opcode information without advancing the walkthrough', () => {
+    fixture.componentRef.setInput('trace', {
+      ...TRACE_FIXTURE,
+      steps: TRACE_FIXTURE.steps.map((step, index) =>
+        index === 1
+          ? { ...step, opcode: { ...step.opcode, name: 'OP_DUP', is_push: false } }
+          : step,
+      ),
+    });
+    fixture.detectChanges();
+
+    const opcode = [...fixture.nativeElement.querySelectorAll('.operation-list button')].find(
+      (button: HTMLButtonElement) => button.textContent?.includes('OP_DUP'),
+    ) as HTMLButtonElement;
+    opcode.click();
+    fixture.detectChanges();
+
+    const dialog = fixture.nativeElement.querySelector('[role="dialog"]') as HTMLElement;
+    expect(dialog.textContent).toContain('Opcode');
+    expect(dialog.textContent).toContain('Copy the top stack item');
+    expect(dialog.textContent).toContain('Execution stops if the stack is empty');
+    expect(fixture.nativeElement.textContent).toContain('Ready · step 0 of 3');
+    expect(fixture.nativeElement.textContent).toContain('Empty stack');
+  });
+
   it('explains the safe diagnostic for a failed trace', () => {
     fixture.componentRef.setInput('trace', {
       ...TRACE_FIXTURE,
@@ -166,6 +205,8 @@ describe('TracePlayer', () => {
         opcode_name: 'OP_ADD',
       },
     });
+    fixture.detectChanges();
+    control('Go to result').click();
     fixture.detectChanges();
 
     const explanation = fixture.nativeElement.querySelector(

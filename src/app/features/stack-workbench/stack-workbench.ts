@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
-import { TraceStep } from '../../core/trace-api.models';
+import { StackSnapshot, TraceStep } from '../../core/trace-api.models';
 import { StackView } from '../stack-view/stack-view';
 
 interface MovementItem {
@@ -16,9 +16,17 @@ interface MovementItem {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StackWorkbench {
-  readonly step = input.required<TraceStep>();
+  readonly step = input<TraceStep | null>(null);
 
-  protected readonly movement = computed(() => stackMovement(this.step()));
+  protected readonly movement = computed(() =>
+    this.step() ? stackMovement(this.step() as TraceStep) : { consumed: [], produced: [] },
+  );
+  protected readonly mainStack = computed<StackSnapshot>(
+    () => this.step()?.stacks.after.main ?? { depth: 0, items: [] },
+  );
+  protected readonly altStack = computed<StackSnapshot>(
+    () => this.step()?.stacks.after.alt ?? { depth: 0, items: [] },
+  );
 }
 
 function stackMovement(step: TraceStep): { consumed: MovementItem[]; produced: MovementItem[] } {

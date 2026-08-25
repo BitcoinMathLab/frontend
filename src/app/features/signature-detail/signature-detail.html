@@ -1,9 +1,14 @@
-<div class="signature-backdrop" role="presentation">
+<div class="signature-backdrop" role="presentation" (click)="close.emit()">
   <section
+    #dialog
     class="signature-detail"
     role="dialog"
     aria-modal="true"
     aria-labelledby="signature-detail-heading"
+    aria-describedby="signature-detail-summary"
+    tabindex="-1"
+    (click)="$event.stopPropagation()"
+    (keydown)="handleKeydown($event)"
   >
     <header>
       <div>
@@ -33,7 +38,7 @@
         </dd>
       </div>
     </dl>
-    <p>
+    <p id="signature-detail-summary">
       The MVP explains this boundary in place. A future cryptography lab can expose each scalar,
       point multiplication, and comparison without changing the trace-player contract.
     </p>

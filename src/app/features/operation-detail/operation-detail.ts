@@ -8,15 +8,21 @@ import {
   viewChild,
 } from '@angular/core';
 
+export interface OperationDetailContent {
+  readonly kind: string;
+  readonly name: string;
+  readonly summary: string;
+  readonly requirement: string;
+}
+
 @Component({
-  selector: 'app-signature-detail',
-  templateUrl: './signature-detail.html',
-  styleUrl: './signature-detail.scss',
+  selector: 'app-operation-detail',
+  templateUrl: './operation-detail.html',
+  styleUrl: './operation-detail.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SignatureDetail implements AfterViewInit {
-  readonly signature = input.required<string>();
-  readonly publicKey = input.required<string>();
+export class OperationDetail implements AfterViewInit {
+  readonly detail = input.required<OperationDetailContent>();
   readonly close = output<void>();
   private readonly dialog = viewChild.required<ElementRef<HTMLElement>>('dialog');
 

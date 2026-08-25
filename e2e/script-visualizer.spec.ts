@@ -105,14 +105,10 @@ test('connects spend elements, parsing, execution, stacks, and signature detail'
   await page.goto('/visualizer');
 
   const player = page.getByLabel('Script trace player');
-  await expect(page.getByRole('heading', { name: 'Watch Bitcoin Script execute.' })).toBeVisible();
-  await expect(page.getByLabel('Loaded transaction context')).toContainText('P2PKH example');
-  await expect(page.getByRole('heading', { name: 'Script flow' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'See the stack come alive.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Script', exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Stack state' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Execution details' })).toBeVisible();
-  await expect(
-    page.getByLabel('Loaded transaction context').locator('details'),
-  ).not.toHaveAttribute('open', '');
+  await expect(page.getByRole('heading', { name: 'Execution', exact: true })).toBeVisible();
   const columnCount = await page
     .locator('.visualizer-grid')
     .evaluate(
@@ -131,29 +127,51 @@ test('connects spend elements, parsing, execution, stacks, and signature detail'
     ),
   ).toBeLessThan(2);
   await expect(page.getByText('Keyboard:', { exact: false })).toHaveCount(0);
-  await expect(page.getByText('1 · scriptSig')).toBeVisible();
-  await expect(page.getByText('2 · scriptPubKey')).toBeVisible();
+  await expect(page.getByText('scriptSig', { exact: true })).toBeVisible();
+  await expect(page.getByText('scriptPubKey', { exact: true })).toBeVisible();
   await expect(page.getByText('PUSH signature')).toBeVisible();
-  await expect(page.getByLabel('Execution status').getByText('Step 1 of 3')).toBeVisible();
-  await expect(page.getByLabel('Execution status')).toContainText('In progress');
+  await expect(page.getByLabel('Execution status')).toContainText('Ready · step 0 of 3');
+  await expect(page.getByLabel('Execution status')).toContainText('Ready to run');
+  await expect(page.getByLabel('Main stack')).toContainText('Empty stack');
   await expect(page.getByText('Valid spend', { exact: true })).toHaveCount(0);
 
+  const opDupButton = page.getByRole('button', { name: 'OP_DUP' });
+  await opDupButton.click();
+  const operationDialog = page.getByRole('dialog');
+  await expect(operationDialog).toBeFocused();
+  await expect(operationDialog).toContainText('Opcode');
+  await expect(operationDialog).toContainText('Execution stops if the stack is empty');
+  await expect(page.getByLabel('Execution status')).toContainText('Ready · step 0 of 3');
+  await operationDialog.press('Escape');
+  await expect(operationDialog).toHaveCount(0);
+  await expect(opDupButton).toBeFocused();
+
+  await page.getByRole('button', { name: 'Play' }).click();
+  await expect(page.getByLabel('Execution status').getByText('Step 1 of 3')).toBeVisible();
+  await expect(page.getByLabel('Main stack').locator('.stack-item')).toHaveCount(1);
+  await page.getByRole('button', { name: 'Pause' }).click();
   await page.getByRole('button', { name: 'Next step' }).click();
   await expect(page.getByLabel('Execution status').getByText('Step 2 of 3')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'OP_DUP', exact: true })).toBeVisible();
   await expect(page.getByText('Copy the top stack item and push the duplicate.')).toBeVisible();
   await expect(page.getByLabel('Stack state')).toContainText('after OP_DUP');
   await expect(page.getByLabel('Stack movement').getByText('+ true')).toBeVisible();
-  await expect(page.getByLabel('Alt stack').getByText('empty')).toBeVisible();
+  await expect(page.getByLabel('Alt stack').getByText('Empty stack')).toBeVisible();
 
   await page.getByRole('button', { name: 'Go to result' }).click();
   await expect(page.getByText('Valid spend', { exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'OP_CHECKSIG', exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'Open signature verification detail' }).click();
-  await expect(page.getByRole('dialog')).toContainText('How this signature is verified');
-  await expect(page.getByRole('dialog')).toContainText('30signature');
-  await page.getByRole('button', { name: 'Close detail' }).click();
-  await expect(page.getByRole('dialog')).toHaveCount(0);
+  const signatureButton = page.getByRole('button', {
+    name: 'Open signature verification detail',
+  });
+  await signatureButton.click();
+  const signatureDialog = page.getByRole('dialog');
+  await expect(signatureDialog).toBeFocused();
+  await expect(signatureDialog).toContainText('How this signature is verified');
+  await expect(signatureDialog).toContainText('30signature');
+  await signatureDialog.press('Escape');
+  await expect(signatureDialog).toHaveCount(0);
+  await expect(signatureButton).toBeFocused();
 
   await player.press('ArrowLeft');
   await expect(page.getByLabel('Execution status').getByText('Step 2 of 3')).toBeVisible();
@@ -163,7 +181,7 @@ test('shows a failed P2PKH result without adding another lesson surface', async 
   await mockTraceApi(page, false);
   await page.goto('/visualizer');
 
-  await expect(page.getByText('In progress', { exact: true })).toBeVisible();
+  await expect(page.getByText('Ready to run', { exact: true })).toBeVisible();
   await expect(page.getByText('Invalid spend', { exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: 'Go to result' }).click();
   await expect(page.getByText('Invalid spend', { exact: true })).toBeVisible();
@@ -186,10 +204,14 @@ test('recovers from an API failure and fits a supported mobile viewport', async 
   });
 
   await page.goto('/visualizer');
-  await expect(page.getByRole('alert')).toContainText('The trace API is not available.');
-  await page.getByRole('button', { name: 'Retry' }).click();
+  await expect(page.getByRole('alert')).toContainText('The walkthrough could not load.');
+  await page.getByRole('button', { name: 'Try again' }).click();
   await expect(page.getByLabel('Script trace player')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Next step' })).toBeVisible();
+  await expect(page.getByRole('progressbar', { name: 'Execution progress' })).toHaveAttribute(
+    'aria-valuenow',
+    '0',
+  );
 
   const hasHorizontalOverflow = await page.evaluate(
     () => document.documentElement.scrollWidth > window.innerWidth,

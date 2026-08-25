@@ -69,19 +69,20 @@ nav a.active {
   }
 
   nav {
-    flex-wrap: wrap;
     width: 100%;
-    gap: 0.2rem;
+    justify-content: space-between;
+    gap: 0;
   }
 
   nav a {
-    padding: 0.55rem 0.65rem;
+    font-size: 0.82rem;
+    padding: 0.55rem 0.35rem;
   }
 }
 
 @media (max-width: 25rem) {
   nav a {
-    font-size: 0.82rem;
-    padding-inline: 0.55rem;
+    font-size: 0.76rem;
+    padding-inline: 0.25rem;
   }
 }

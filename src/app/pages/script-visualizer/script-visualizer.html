@@ -1,58 +1,23 @@
 <section class="visualizer-hero">
-  <p class="eyebrow">P2PKH script visualizer</p>
-  <h1>Watch Bitcoin Script execute.</h1>
+  <p class="eyebrow">Bitcoin Script · P2PKH</p>
+  <h1>See the stack come alive.</h1>
+  <p class="hero-intro">Press Play. Watch each instruction change the stack.</p>
 </section>
 
 <section class="lab" aria-label="P2PKH spend verification">
   @if (loading()) {
     <div class="state-card" role="status">
-      <span class="state-card__pulse" aria-hidden="true"></span> Loading the P2PKH execution trace…
+      <span class="state-card__pulse" aria-hidden="true"></span> Preparing the walkthrough…
     </div>
   } @else if (error()) {
     <div class="state-card state-card--error" role="alert">
       <div>
-        <strong>The trace API is not available.</strong>
-        <p>Start the local backend or try the request again.</p>
+        <strong>The walkthrough could not load.</strong>
+        <p>Start the local backend, then try again.</p>
       </div>
-      <button type="button" (click)="loadTrace()">Retry</button>
+      <button type="button" (click)="loadTrace()">Try again</button>
     </div>
   } @else if (response(); as result) {
-    <aside class="spend-context" aria-label="Loaded transaction context">
-      <div class="spend-context__title">
-        <div>
-          <strong>P2PKH example</strong>
-          <span>Input 0 → output {{ outpoint.vout }}</span>
-        </div>
-      </div>
-      <dl>
-        <div>
-          <dt>Outpoint</dt>
-          <dd>
-            <code>{{ outpoint.txid.slice(0, 12) }}…:{{ outpoint.vout }}</code>
-          </dd>
-        </div>
-        <div>
-          <dt>Value</dt>
-          <dd>{{ formatSats(spentOutput.amount_sats) }} sats</dd>
-        </div>
-        <div>
-          <dt>Type</dt>
-          <dd>P2PKH</dd>
-        </div>
-      </dl>
-      <details>
-        <summary>Raw scripts</summary>
-        <div class="raw-scripts">
-          <label
-            >scriptSig <code>{{ result.scripts.unlocking }}</code></label
-          >
-          <label
-            >scriptPubKey <code>{{ result.scripts.locking }}</code></label
-          >
-        </div>
-      </details>
-    </aside>
-
     <app-trace-player [trace]="result.trace" [scripts]="result.scripts" />
   }
 </section>

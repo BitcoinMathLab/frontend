@@ -28,7 +28,7 @@ describe('StackView', () => {
     fixture.componentRef.setInput('stepIndex', 0);
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).toContain('empty');
+    expect(fixture.nativeElement.textContent).toContain('Empty stack');
   });
 
   it('gives recognizable Bitcoin values distinct semantic treatments', async () => {

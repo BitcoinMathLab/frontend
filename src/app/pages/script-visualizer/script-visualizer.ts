@@ -12,11 +12,6 @@ import { CURATED_P2PKH_REQUEST } from '../../core/curated-p2pkh';
 import { TraceApi } from '../../core/trace-api';
 import { P2pkhTraceResponse } from '../../core/trace-api.models';
 import { TracePlayer } from '../../features/trace-player/trace-player';
-import { decodeTransactionBytes } from '../transaction-explorer/transaction-byte-decoder';
-
-const transactionFields = decodeTransactionBytes(CURATED_P2PKH_REQUEST.transaction_hex);
-const previousTxid = transactionFields.find((field) => field.id === 'input-0-previous-txid');
-const previousVout = transactionFields.find((field) => field.id === 'input-0-vout');
 
 @Component({
   selector: 'app-script-visualizer',
@@ -32,11 +27,6 @@ export class ScriptVisualizer implements OnInit, OnDestroy {
   protected readonly response = signal<P2pkhTraceResponse | null>(null);
   protected readonly loading = signal(true);
   protected readonly error = signal(false);
-  protected readonly outpoint = {
-    txid: previousTxid?.decoded ?? 'Unavailable',
-    vout: previousVout?.decoded ?? 'Unavailable',
-  };
-  protected readonly spentOutput = CURATED_P2PKH_REQUEST.spent_outputs[0];
 
   ngOnInit(): void {
     this.loadTrace();
@@ -53,10 +43,6 @@ export class ScriptVisualizer implements OnInit, OnDestroy {
         next: (response) => this.response.set(response),
         error: () => this.error.set(true),
       });
-  }
-
-  protected formatSats(amount: number): string {
-    return new Intl.NumberFormat('en-CA').format(amount);
   }
 
   ngOnDestroy(): void {

@@ -19,6 +19,78 @@
   background: var(--color-canvas);
 }
 
+// Shared motion and focus treatment for the visualizer's interactive controls.
+.vcr button {
+  transition:
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+
+.vcr button:not(:disabled):hover {
+  border-color: rgba(255, 255, 255, 0.38);
+  transform: translateY(-1px);
+}
+
+.vcr button:focus-visible,
+.signature-link:focus-visible {
+  outline: 3px solid #93c5fd;
+  outline-offset: 2px;
+}
+
+.outcome--active {
+  animation: status-pulse 1.8s ease-in-out infinite;
+}
+
+.current-operation {
+  animation: operation-enter 220ms ease-out;
+}
+
+@keyframes operation-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.35rem);
+  }
+}
+
+@keyframes status-pulse {
+  50% {
+    border-color: rgba(147, 197, 253, 0.9);
+    box-shadow: 0 0 0 0.22rem rgba(96, 165, 250, 0.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .current-operation,
+  .outcome--active,
+  .stack-item {
+    animation: none !important;
+  }
+
+  .progress-track span,
+  .vcr button {
+    transition: none;
+  }
+}
+
+@media (max-width: 40rem) {
+  .vcr {
+    width: 100%;
+  }
+
+  .vcr button {
+    min-width: 2.65rem;
+    padding-inline: 0.45rem;
+  }
+
+  .vcr .vcr__primary {
+    min-width: 5rem;
+  }
+
+  .execution-status {
+    flex-wrap: wrap;
+  }
+}
+
 .byte-inspector {
   margin-top: 1.5rem;
   border: 1px solid var(--color-graphite);

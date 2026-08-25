@@ -1,18 +1,16 @@
 <div class="parser-window" aria-label="Parsed P2PKH scripts">
   <section class="script-lane">
-    <header><strong>1 · scriptSig</strong><span>unlocking script</span></header>
-    <code class="script-hex">{{ scripts().unlocking }}</code>
+    <header><strong>scriptSig</strong><span>runs first</span></header>
     <div class="operation-list">
       @for (operation of unlockingOperations(); track operation.step.index) {
         <button
           type="button"
-          (click)="selectStep.emit(operation.step.index)"
+          (click)="inspectStep.emit(operation.step.index)"
           [class.operation--current]="operation.step.index === currentIndex()"
           [class.operation--complete]="operation.step.index < currentIndex()"
           [attr.aria-current]="operation.step.index === currentIndex() ? 'step' : null"
         >
-          <span>{{ operation.step.index + 1 }}</span
-          ><code>{{ operation.label }}</code>
+          <span aria-hidden="true">●</span><code>{{ operation.label }}</code>
         </button>
       }
     </div>
@@ -21,19 +19,17 @@
   <div class="parse-arrow" aria-hidden="true">→</div>
 
   <section class="script-lane">
-    <header><strong>2 · scriptPubKey</strong><span>locking script</span></header>
-    <code class="script-hex">{{ scripts().locking }}</code>
+    <header><strong>scriptPubKey</strong><span>runs second</span></header>
     <div class="operation-list">
       @for (operation of lockingOperations(); track operation.step.index) {
         <button
           type="button"
-          (click)="selectStep.emit(operation.step.index)"
+          (click)="inspectStep.emit(operation.step.index)"
           [class.operation--current]="operation.step.index === currentIndex()"
           [class.operation--complete]="operation.step.index < currentIndex()"
           [attr.aria-current]="operation.step.index === currentIndex() ? 'step' : null"
         >
-          <span>{{ operation.step.index + 1 }}</span
-          ><code>{{ operation.label }}</code>
+          <span aria-hidden="true">●</span><code>{{ operation.label }}</code>
         </button>
       }
     </div>
