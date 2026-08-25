@@ -130,8 +130,8 @@ test('connects spend elements, parsing, execution, stacks, and signature detail'
   await expect(page.getByText('scriptSig', { exact: true })).toBeVisible();
   await expect(page.getByText('scriptPubKey', { exact: true })).toBeVisible();
   await expect(page.getByText('PUSH signature')).toBeVisible();
-  await expect(page.getByLabel('Execution status')).toContainText('Ready · step 0 of 3');
-  await expect(page.getByLabel('Execution status')).toContainText('Ready to run');
+  await expect(page.getByLabel('Execution status')).toContainText('Step 0 of 3');
+  await expect(page.getByLabel('Execution status')).toContainText('Ready');
   await expect(page.getByLabel('Main stack')).toContainText('Empty stack');
   await expect(page.getByText('Valid spend', { exact: true })).toHaveCount(0);
 
@@ -141,7 +141,7 @@ test('connects spend elements, parsing, execution, stacks, and signature detail'
   await expect(page.getByRole('dialog')).toContainText('DER-encoded ECDSA signature');
   await page.getByRole('dialog').press('Escape');
   await expect(signatureDataButton).toBeFocused();
-  await expect(page.getByLabel('Execution status')).toContainText('Ready · step 0 of 3');
+  await expect(page.getByLabel('Execution status')).toContainText('Step 0 of 3');
 
   const opDupButton = page.getByRole('button', { name: 'OP_DUP' });
   await opDupButton.click();
@@ -149,7 +149,7 @@ test('connects spend elements, parsing, execution, stacks, and signature detail'
   await expect(operationDialog).toBeFocused();
   await expect(operationDialog).toContainText('Opcode');
   await expect(operationDialog).toContainText('Execution stops if the stack is empty');
-  await expect(page.getByLabel('Execution status')).toContainText('Ready · step 0 of 3');
+  await expect(page.getByLabel('Execution status')).toContainText('Step 0 of 3');
   await operationDialog.press('Escape');
   await expect(operationDialog).toHaveCount(0);
   await expect(opDupButton).toBeFocused();
@@ -189,7 +189,7 @@ test('shows a failed P2PKH result without adding another lesson surface', async 
   await mockTraceApi(page, false);
   await page.goto('/visualizer');
 
-  await expect(page.getByText('Ready to run', { exact: true })).toBeVisible();
+  await expect(page.getByLabel('Execution status')).toContainText('Ready');
   await expect(page.getByText('Invalid spend', { exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: 'Go to result' }).click();
   await expect(page.getByText('Invalid spend', { exact: true })).toBeVisible();

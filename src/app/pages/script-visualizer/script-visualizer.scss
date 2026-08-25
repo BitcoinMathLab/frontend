@@ -13,7 +13,7 @@
 }
 
 .visualizer-hero {
-  padding-block: clamp(3rem, 7vw, 5.5rem) clamp(2rem, 4vw, 3rem);
+  padding-block: clamp(2rem, 4vw, 3.5rem) clamp(1.25rem, 2.5vw, 2rem);
   text-align: center;
 }
 
@@ -30,7 +30,7 @@
   max-width: 16ch;
   margin: 0.65rem auto 0;
   color: #fff;
-  font-size: clamp(2.7rem, 6vw, 5.4rem);
+  font-size: clamp(2.7rem, 5vw, 4.5rem);
   letter-spacing: -0.055em;
   line-height: 0.98;
   text-wrap: balance;
@@ -38,7 +38,7 @@
 
 .hero-intro {
   max-width: 36rem;
-  margin: 1.1rem auto 0;
+  margin: 0.85rem auto 0;
   color: #cbd5e1;
   font-size: clamp(1.05rem, 2vw, 1.25rem);
   line-height: 1.5;

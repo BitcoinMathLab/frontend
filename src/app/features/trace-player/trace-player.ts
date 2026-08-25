@@ -37,7 +37,7 @@ export class TracePlayer implements OnDestroy {
   );
   protected readonly stepLabel = computed(() =>
     this.atStart()
-      ? `Ready · step 0 of ${this.trace().steps.length}`
+      ? `Step 0 of ${this.trace().steps.length}`
       : `Step ${this.currentIndex() + 1} of ${this.trace().steps.length}`,
   );
   protected readonly progressPercent = computed(() => {
@@ -47,7 +47,7 @@ export class TracePlayer implements OnDestroy {
       : 0;
   });
   protected readonly outcomeLabel = computed(() => {
-    if (this.atStart()) return 'Ready to run';
+    if (this.atStart()) return 'Ready';
     if (!this.atEnd()) return 'In progress';
     return this.trace().success ? 'Valid spend' : 'Invalid spend';
   });

@@ -42,8 +42,8 @@ describe('TracePlayer', () => {
     expect(compiled.textContent).toContain('scriptPubKey');
     expect(compiled.textContent).toContain('PUSH signature');
     expect(compiled.textContent).toContain('OP_ADD');
-    expect(compiled.textContent).toContain('Ready · step 0 of 3');
-    expect(compiled.textContent).toContain('Ready to run');
+    expect(compiled.textContent).toContain('Step 0 of 3');
+    expect(compiled.textContent).toContain('Ready');
     expect(compiled.textContent).toContain('Empty stack');
     expect(compiled.querySelector('[role="progressbar"]')?.getAttribute('aria-valuenow')).toBe('0');
     expect(control('Restart trace').disabled).toBe(true);
@@ -52,7 +52,7 @@ describe('TracePlayer', () => {
   });
 
   it('moves forward, backward, jumps to the result, and resets', () => {
-    expect(fixture.nativeElement.textContent).toContain('Ready to run');
+    expect(fixture.nativeElement.textContent).toContain('Ready');
     expect(fixture.nativeElement.textContent).not.toContain('Valid spend');
 
     control('Next step').click();
@@ -77,8 +77,8 @@ describe('TracePlayer', () => {
 
     control('Restart trace').click();
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('Ready · step 0 of 3');
-    expect(fixture.nativeElement.textContent).toContain('Ready to run');
+    expect(fixture.nativeElement.textContent).toContain('Step 0 of 3');
+    expect(fixture.nativeElement.textContent).toContain('Ready');
   });
 
   it('plays to the final step and pauses automatically', () => {
@@ -121,7 +121,7 @@ describe('TracePlayer', () => {
 
     player.dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true }));
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('Ready · step 0 of 3');
+    expect(fixture.nativeElement.textContent).toContain('Step 0 of 3');
     expect(control('Restart trace').getAttribute('aria-keyshortcuts')).toBe('Home');
     expect(control('Go to result').getAttribute('aria-keyshortcuts')).toBe('End');
   });
@@ -201,7 +201,7 @@ describe('TracePlayer', () => {
     expect(dialog.textContent).toContain('Opcode');
     expect(dialog.textContent).toContain('Copy the top stack item');
     expect(dialog.textContent).toContain('Execution stops if the stack is empty');
-    expect(fixture.nativeElement.textContent).toContain('Ready · step 0 of 3');
+    expect(fixture.nativeElement.textContent).toContain('Step 0 of 3');
     expect(fixture.nativeElement.textContent).toContain('Empty stack');
   });
 
@@ -216,7 +216,7 @@ describe('TracePlayer', () => {
     expect(dialog.textContent).toContain('Signature data');
     expect(dialog.textContent).toContain('DER-encoded ECDSA signature');
     expect(dialog.textContent).toContain('pushes the signature onto the empty stack');
-    expect(fixture.nativeElement.textContent).toContain('Ready · step 0 of 3');
+    expect(fixture.nativeElement.textContent).toContain('Step 0 of 3');
   });
 
   it('explains the safe diagnostic for a failed trace', () => {
@@ -232,7 +232,7 @@ describe('TracePlayer', () => {
     });
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).toContain('Ready to run');
+    expect(fixture.nativeElement.textContent).toContain('Ready');
     expect(fixture.nativeElement.textContent).not.toContain('Why execution failed');
     control('Next step').click();
     fixture.detectChanges();
