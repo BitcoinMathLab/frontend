@@ -159,6 +159,12 @@ export class TracePlayer implements OnDestroy {
     } else if (event.key === ' ') {
       event.preventDefault();
       this.togglePlay();
+    } else if (event.key === 'Home') {
+      event.preventDefault();
+      this.reset();
+    } else if (event.key === 'End') {
+      event.preventDefault();
+      this.finish();
     }
   }
 

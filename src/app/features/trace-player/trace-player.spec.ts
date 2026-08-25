@@ -97,7 +97,7 @@ describe('TracePlayer', () => {
     expect(control('Next step').disabled).toBe(true);
   });
 
-  it('supports arrow and space keyboard controls', () => {
+  it('supports arrow, space, Home, and End keyboard controls', () => {
     const player = fixture.nativeElement.querySelector('.player') as HTMLElement;
     player.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
     fixture.detectChanges();
@@ -114,6 +114,16 @@ describe('TracePlayer', () => {
     player.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Pause');
+
+    player.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Step 3 of 3');
+
+    player.dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true }));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Ready · step 0 of 3');
+    expect(control('Restart trace').getAttribute('aria-keyshortcuts')).toBe('Home');
+    expect(control('Go to result').getAttribute('aria-keyshortcuts')).toBe('End');
   });
 
   it('shows the current stack workbench and per-operation movement', () => {
@@ -151,6 +161,7 @@ describe('TracePlayer', () => {
       ),
     });
     fixture.detectChanges();
+
     control('Go to result').click();
     fixture.detectChanges();
 
@@ -220,6 +231,14 @@ describe('TracePlayer', () => {
       },
     });
     fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Ready to run');
+    expect(fixture.nativeElement.textContent).not.toContain('Why execution failed');
+    control('Next step').click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('In progress');
+    expect(fixture.nativeElement.textContent).not.toContain('The final stack value is false.');
+
     control('Go to result').click();
     fixture.detectChanges();
 

@@ -11,6 +11,7 @@
         (click)="reset()"
         [disabled]="atStart()"
         aria-label="Restart trace"
+        aria-keyshortcuts="Home"
         title="Restart"
       >
         <span aria-hidden="true">↺</span>
@@ -20,11 +21,12 @@
         (click)="previous()"
         [disabled]="atStart()"
         aria-label="Previous step"
+        aria-keyshortcuts="ArrowLeft"
         title="Previous step"
       >
         <span aria-hidden="true">◀</span>
       </button>
-      <button class="vcr__primary" type="button" (click)="togglePlay()">
+      <button class="vcr__primary" type="button" (click)="togglePlay()" aria-keyshortcuts="Space">
         <span aria-hidden="true">{{ playing() ? 'Ⅱ' : '▶' }}</span>
         <small>{{ playing() ? 'Pause' : 'Play' }}</small>
       </button>
@@ -33,6 +35,7 @@
         (click)="next()"
         [disabled]="atEnd()"
         aria-label="Next step"
+        aria-keyshortcuts="ArrowRight"
         title="Next step"
       >
         <span aria-hidden="true">▶</span>
@@ -42,6 +45,7 @@
         (click)="finish()"
         [disabled]="atEnd()"
         aria-label="Go to result"
+        aria-keyshortcuts="End"
         title="Jump to result"
       >
         <span aria-hidden="true">⇥</span>
@@ -107,7 +111,7 @@
           </button>
         }
 
-        @if (!trace().success && trace().diagnostic; as diagnostic) {
+        @if (atEnd() && !trace().success && trace().diagnostic; as diagnostic) {
           <article class="diagnostic" aria-label="Failure explanation">
             <strong>Why execution failed</strong>
             <span>{{ diagnostic.message }}</span>
