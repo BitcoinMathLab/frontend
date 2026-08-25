@@ -53,7 +53,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: BitcoinMathLab/backend
-          ref: agent/transaction-byte-inspection
+          ref: main
           path: .integration/backend
 
       - name: Check out Bitclone engine
