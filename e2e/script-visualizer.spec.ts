@@ -129,13 +129,17 @@ test('connects spend elements, parsing, execution, stacks, and signature detail'
   await expect(page.getByText('Keyboard:', { exact: false })).toHaveCount(0);
   await expect(page.getByText('scriptSig', { exact: true })).toBeVisible();
   await expect(page.getByText('scriptPubKey', { exact: true })).toBeVisible();
-  await expect(page.getByText('PUSH signature')).toBeVisible();
+  await expect(page.getByText('OP_PUSHBYTES_1')).toBeVisible();
+  await expect(page.getByText('Data (1 bytes)')).toBeVisible();
+  await expect(page.getByText('Signature', { exact: true })).toBeVisible();
+  await expect(page.getByText('Show original scriptSig hex')).toBeVisible();
+  await expect(page.getByText('Show original scriptPubKey hex')).toBeVisible();
   await expect(page.getByLabel('Execution status')).toContainText('Step 0 of 3');
   await expect(page.getByLabel('Execution status')).toContainText('Ready');
   await expect(page.getByLabel('Main stack')).toContainText('Empty stack');
   await expect(page.getByText('Valid spend', { exact: true })).toHaveCount(0);
 
-  const signatureDataButton = page.getByRole('button', { name: 'PUSH signature' });
+  const signatureDataButton = page.getByRole('button', { name: 'Signature data, 1 bytes' });
   await signatureDataButton.click();
   await expect(page.getByRole('dialog')).toContainText('Signature data');
   await expect(page.getByRole('dialog')).toContainText('DER-encoded ECDSA signature');

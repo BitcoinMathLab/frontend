@@ -5,7 +5,7 @@ import { ExecutionTrace, P2pkhTraceResponse, TraceStep } from '../../core/trace-
 interface ParsedOperation {
   readonly step: TraceStep;
   readonly phase: 'scriptSig' | 'scriptPubKey';
-  readonly label: string;
+  readonly dataLabel: string | null;
 }
 
 @Component({
@@ -25,14 +25,14 @@ export class ScriptParser {
     let unlockingPush = 0;
     return this.trace().steps.map((step) => {
       const phase = step.opcode.byte_offset < unlockingLength ? 'scriptSig' : 'scriptPubKey';
-      let label = step.opcode.name;
+      let dataLabel: string | null = null;
       if (step.opcode.is_push && phase === 'scriptSig') {
-        label = unlockingPush === 0 ? 'PUSH signature' : 'PUSH public key';
+        dataLabel = unlockingPush === 0 ? 'Signature' : 'Public key';
         unlockingPush += 1;
       } else if (step.opcode.is_push) {
-        label = 'PUSH expected pubKeyHash';
+        dataLabel = 'Expected public-key hash';
       }
-      return { step, phase, label };
+      return { step, phase, dataLabel };
     });
   });
   protected readonly unlockingOperations = computed(() =>
@@ -41,4 +41,8 @@ export class ScriptParser {
   protected readonly lockingOperations = computed(() =>
     this.operations().filter((operation) => operation.phase === 'scriptPubKey'),
   );
+
+  protected dataLength(operation: ParsedOperation): number {
+    return (operation.step.opcode.push_data?.length ?? 0) / 2;
+  }
 }

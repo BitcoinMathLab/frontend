@@ -44,6 +44,11 @@
   gap: 0.45rem;
 }
 
+.operation-entry {
+  display: grid;
+  gap: 0.35rem;
+}
+
 .operation-list button {
   display: grid;
   width: 100%;
@@ -91,6 +96,45 @@
 
 .operation-list button.operation--current code {
   color: var(--color-valid);
+}
+
+.operation-list .operation-data {
+  min-height: 0;
+  grid-template-columns: minmax(0, 1fr) auto;
+  border-style: dashed;
+  background: rgba(15, 23, 42, 0.68);
+  padding-block: 0.45rem;
+}
+
+.operation-data span {
+  color: #e2e8f0;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+}
+
+.operation-data small {
+  color: #94a3b8;
+  font-size: 0.72rem;
+}
+
+.script-hex {
+  margin-top: 0.75rem;
+  color: #afbdcc;
+  font-size: 0.78rem;
+}
+
+.script-hex summary {
+  cursor: pointer;
+}
+
+.script-hex code {
+  display: block;
+  overflow-wrap: anywhere;
+  margin-top: 0.5rem;
+  color: #d5dee9;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  line-height: 1.55;
 }
 
 .parse-arrow {

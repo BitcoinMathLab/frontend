@@ -40,7 +40,11 @@ describe('TracePlayer', () => {
     expect(compiled.textContent).toContain('Script');
     expect(compiled.textContent).toContain('scriptSig');
     expect(compiled.textContent).toContain('scriptPubKey');
-    expect(compiled.textContent).toContain('PUSH signature');
+    expect(compiled.textContent).toContain('OP_1');
+    expect(compiled.textContent).toContain('Data (1 bytes)');
+    expect(compiled.textContent).toContain('Signature');
+    expect(compiled.textContent).toContain('Show original scriptSig hex');
+    expect(compiled.textContent).toContain('Show original scriptPubKey hex');
     expect(compiled.textContent).toContain('OP_ADD');
     expect(compiled.textContent).toContain('Step 0 of 3');
     expect(compiled.textContent).toContain('Ready');
@@ -206,8 +210,8 @@ describe('TracePlayer', () => {
   });
 
   it('explains the role of pushed P2PKH data without advancing', () => {
-    const signature = [...fixture.nativeElement.querySelectorAll('.operation-list button')].find(
-      (button: HTMLButtonElement) => button.textContent?.includes('PUSH signature'),
+    const signature = fixture.nativeElement.querySelector(
+      '[aria-label="Signature data, 1 bytes"]',
     ) as HTMLButtonElement;
     signature.click();
     fixture.detectChanges();

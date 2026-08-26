@@ -3,17 +3,37 @@
     <header><strong>scriptSig</strong><span>runs first</span></header>
     <div class="operation-list">
       @for (operation of unlockingOperations(); track operation.step.index) {
-        <button
-          type="button"
-          (click)="inspectStep.emit(operation.step.index)"
-          [class.operation--current]="operation.step.index === currentIndex()"
-          [class.operation--complete]="operation.step.index < currentIndex()"
-          [attr.aria-current]="operation.step.index === currentIndex() ? 'step' : null"
-        >
-          <span aria-hidden="true">●</span><code>{{ operation.label }}</code>
-        </button>
+        <div class="operation-entry">
+          <button
+            type="button"
+            (click)="inspectStep.emit(operation.step.index)"
+            [class.operation--current]="operation.step.index === currentIndex()"
+            [class.operation--complete]="operation.step.index < currentIndex()"
+            [attr.aria-current]="operation.step.index === currentIndex() ? 'step' : null"
+            [title]="operation.step.opcode.hex"
+          >
+            <span aria-hidden="true">●</span><code>{{ operation.step.opcode.name }}</code>
+          </button>
+          @if (operation.dataLabel; as label) {
+            <button
+              type="button"
+              class="operation-data"
+              (click)="inspectStep.emit(operation.step.index)"
+              [class.operation--current]="operation.step.index === currentIndex()"
+              [class.operation--complete]="operation.step.index < currentIndex()"
+              [attr.aria-label]="label + ' data, ' + dataLength(operation) + ' bytes'"
+            >
+              <span>Data ({{ dataLength(operation) }} bytes)</span>
+              <small>{{ label }}</small>
+            </button>
+          }
+        </div>
       }
     </div>
+    <details class="script-hex">
+      <summary>Show original scriptSig hex</summary>
+      <code>{{ scripts().unlocking }}</code>
+    </details>
   </section>
 
   <div class="parse-arrow" aria-hidden="true">→</div>
@@ -22,16 +42,36 @@
     <header><strong>scriptPubKey</strong><span>runs second</span></header>
     <div class="operation-list">
       @for (operation of lockingOperations(); track operation.step.index) {
-        <button
-          type="button"
-          (click)="inspectStep.emit(operation.step.index)"
-          [class.operation--current]="operation.step.index === currentIndex()"
-          [class.operation--complete]="operation.step.index < currentIndex()"
-          [attr.aria-current]="operation.step.index === currentIndex() ? 'step' : null"
-        >
-          <span aria-hidden="true">●</span><code>{{ operation.label }}</code>
-        </button>
+        <div class="operation-entry">
+          <button
+            type="button"
+            (click)="inspectStep.emit(operation.step.index)"
+            [class.operation--current]="operation.step.index === currentIndex()"
+            [class.operation--complete]="operation.step.index < currentIndex()"
+            [attr.aria-current]="operation.step.index === currentIndex() ? 'step' : null"
+            [title]="operation.step.opcode.hex"
+          >
+            <span aria-hidden="true">●</span><code>{{ operation.step.opcode.name }}</code>
+          </button>
+          @if (operation.dataLabel; as label) {
+            <button
+              type="button"
+              class="operation-data"
+              (click)="inspectStep.emit(operation.step.index)"
+              [class.operation--current]="operation.step.index === currentIndex()"
+              [class.operation--complete]="operation.step.index < currentIndex()"
+              [attr.aria-label]="label + ' data, ' + dataLength(operation) + ' bytes'"
+            >
+              <span>Data ({{ dataLength(operation) }} bytes)</span>
+              <small>{{ label }}</small>
+            </button>
+          }
+        </div>
       }
     </div>
+    <details class="script-hex">
+      <summary>Show original scriptPubKey hex</summary>
+      <code>{{ scripts().locking }}</code>
+    </details>
   </section>
 </div>
