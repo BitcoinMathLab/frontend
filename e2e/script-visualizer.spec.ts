@@ -132,8 +132,13 @@ test('connects spend elements, parsing, execution, stacks, and signature detail'
   await expect(page.getByText('OP_PUSHBYTES_1')).toBeVisible();
   await expect(page.getByText('Data (1 bytes)')).toBeVisible();
   await expect(page.getByText('Signature', { exact: true })).toBeVisible();
-  await expect(page.getByText('Show original scriptSig hex')).toBeVisible();
+  const scriptSigHex = page.getByText('Show original scriptSig hex');
+  await expect(scriptSigHex).toBeVisible();
   await expect(page.getByText('Show original scriptPubKey hex')).toBeVisible();
+  await scriptSigHex.click();
+  await expect(page.locator('.script-lane').first().getByText('51', { exact: true })).toBeVisible();
+  await expect(page.getByLabel('Restart trace')).toHaveText('<<');
+  await expect(page.getByLabel('Go to result')).toHaveText('>>');
   await expect(page.getByLabel('Execution status')).toContainText('Step 0 of 3');
   await expect(page.getByLabel('Execution status')).toContainText('Ready');
   await expect(page.getByLabel('Main stack')).toContainText('Empty stack');
