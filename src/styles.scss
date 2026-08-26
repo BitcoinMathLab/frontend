@@ -432,6 +432,51 @@ p {
   line-height: 0.94;
 }
 
+.example-selector {
+  display: grid;
+  align-items: center;
+  grid-column: 1;
+  justify-self: start;
+  gap: 0.25rem;
+}
+
+.example-selector span {
+  color: #afbdcc;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.example-selector select {
+  min-height: 2.3rem;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 0.55rem;
+  background: rgba(2, 6, 23, 0.72);
+  color: #f8fafc;
+  font: inherit;
+  padding: 0.35rem 1.9rem 0.35rem 0.6rem;
+}
+
+.vcr .vcr__primary--running {
+  border-color: rgba(255, 107, 107, 0.7);
+  background: linear-gradient(135deg, #fca5a5, #ef4444);
+  color: #3a0808;
+}
+
+.right-workspace {
+  display: grid;
+  min-width: 0;
+  gap: 1rem;
+}
+
+@media (max-width: 40rem) {
+  .example-selector {
+    grid-column: 1;
+    justify-self: center;
+  }
+}
+
 .page-hero > p:last-child {
   max-width: 48rem;
   color: var(--color-text-muted);

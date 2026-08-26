@@ -24,9 +24,6 @@ export class StackWorkbench {
   protected readonly mainStack = computed<StackSnapshot>(
     () => this.step()?.stacks.after.main ?? { depth: 0, items: [] },
   );
-  protected readonly altStack = computed<StackSnapshot>(
-    () => this.step()?.stacks.after.alt ?? { depth: 0, items: [] },
-  );
 }
 
 function stackMovement(step: TraceStep): { consumed: MovementItem[]; produced: MovementItem[] } {

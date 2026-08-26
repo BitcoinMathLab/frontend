@@ -137,7 +137,7 @@ describe('TracePlayer', () => {
     expect(fixture.nativeElement.textContent).toContain('Stack state');
     expect(fixture.nativeElement.textContent).toContain('after OP_ADD');
     expect(fixture.nativeElement.textContent).toContain('Main stack');
-    expect(fixture.nativeElement.textContent).toContain('Alt stack');
+    expect(fixture.nativeElement.textContent).not.toContain('Alt stack');
     expect(fixture.nativeElement.textContent).toContain('Consumed');
     expect(fixture.nativeElement.textContent).toContain('− data');
     expect(fixture.nativeElement.textContent).toContain('Produced');
@@ -201,24 +201,27 @@ describe('TracePlayer', () => {
     fixture.detectChanges();
 
     const dialog = fixture.nativeElement.querySelector('[role="dialog"]') as HTMLElement;
-    expect(dialog.textContent).toContain('Opcode');
+    expect(dialog.textContent).toContain('OP_CODE');
     expect(dialog.textContent).toContain('Copy the top stack item');
-    expect(dialog.textContent).toContain('Execution stops if the stack is empty');
+    expect(dialog.textContent).toContain('Stack effect');
     expect(fixture.nativeElement.textContent).toContain('Step 0 of 3');
     expect(fixture.nativeElement.textContent).toContain('Empty stack');
   });
 
-  it('explains the role of pushed P2PKH data without advancing', () => {
-    const signature = fixture.nativeElement.querySelector(
-      '[aria-label="DATA (Signature), 1 bytes"]',
+  it('explains each push as an opcode without advancing', () => {
+    const pushOpcode = [...fixture.nativeElement.querySelectorAll('.operation-list button')].find(
+      (button: HTMLButtonElement) => button.textContent?.includes('OP_1'),
     ) as HTMLButtonElement;
-    signature.click();
+    pushOpcode.click();
     fixture.detectChanges();
 
     const dialog = fixture.nativeElement.querySelector('[role="dialog"]') as HTMLElement;
-    expect(dialog.textContent).toContain('Signature data');
-    expect(dialog.textContent).toContain('DER-encoded ECDSA signature');
-    expect(dialog.textContent).toContain('pushes the signature onto the empty stack');
+    expect(dialog.textContent).toContain('OP_CODE');
+    expect(dialog.textContent).toContain('OP_1');
+    expect(dialog.textContent).toContain('0x51');
+    expect(dialog.textContent).toContain('Purpose');
+    expect(dialog.textContent).toContain('Push the Script number 1 onto the main stack.');
+    expect(dialog.textContent).toContain('Stack effect');
     expect(fixture.nativeElement.textContent).toContain('Step 0 of 3');
   });
 

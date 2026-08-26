@@ -6,7 +6,6 @@
 
   <div class="stack-columns">
     <app-stack-view label="Main stack" [snapshot]="mainStack()" [stepIndex]="step()?.index ?? -1" />
-    <app-stack-view label="Alt stack" [snapshot]="altStack()" [stepIndex]="step()?.index ?? -1" />
   </div>
 
   @if (step()) {

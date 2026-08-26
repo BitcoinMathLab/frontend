@@ -5,6 +5,12 @@
   aria-label="Script trace player"
 >
   <div class="controls-bar">
+    <label class="example-selector">
+      <span>Example</span>
+      <select aria-label="Signature example">
+        <option value="p2pkh">P2PKH spend</option>
+      </select>
+    </label>
     <div class="vcr" role="group" aria-label="Playback controls">
       <button
         type="button"
@@ -26,7 +32,13 @@
       >
         <span aria-hidden="true">◀</span>
       </button>
-      <button class="vcr__primary" type="button" (click)="togglePlay()" aria-keyshortcuts="Space">
+      <button
+        class="vcr__primary"
+        [class.vcr__primary--running]="playing()"
+        type="button"
+        (click)="togglePlay()"
+        aria-keyshortcuts="Space"
+      >
         <span aria-hidden="true">{{ playing() ? 'Ⅱ' : '▶' }}</span>
         <small>{{ playing() ? 'Pause' : 'Play' }}</small>
       </button>
@@ -90,42 +102,44 @@
       />
     </section>
 
-    <app-stack-workbench [step]="currentStep() ?? null" />
+    <div class="right-workspace">
+      <section class="visual-pane execution-pane" aria-labelledby="execution-pane-heading">
+        <header class="pane-header">
+          <h2 id="execution-pane-heading">Execution</h2>
+          <span>{{ phaseLabel() }}</span>
+        </header>
 
-    <section class="visual-pane execution-pane" aria-labelledby="execution-pane-heading">
-      <header class="pane-header">
-        <h2 id="execution-pane-heading">Execution</h2>
-        <span>{{ phaseLabel() }}</span>
-      </header>
+        @if (currentStep(); as step) {
+          <article class="current-operation">
+            <span class="operation-kicker">Now running</span>
+            <h3>{{ step.opcode.name }}</h3>
+            <p>{{ stackEffect() }}</p>
+          </article>
 
-      @if (currentStep(); as step) {
-        <article class="current-operation">
-          <span class="operation-kicker">Now running</span>
-          <h3>{{ step.opcode.name }}</h3>
-          <p>{{ stackEffect() }}</p>
-        </article>
+          @if (isSignatureCheck()) {
+            <button type="button" class="signature-link" (click)="openSignatureDetail()">
+              Open signature verification detail
+            </button>
+          }
 
-        @if (isSignatureCheck()) {
-          <button type="button" class="signature-link" (click)="openSignatureDetail()">
-            Open signature verification detail
-          </button>
-        }
-
-        @if (atEnd() && !trace().success && trace().diagnostic; as diagnostic) {
-          <article class="diagnostic" aria-label="Failure explanation">
-            <strong>Why execution failed</strong>
-            <span>{{ diagnostic.message }}</span>
-            <code>{{ diagnostic.code }}</code>
+          @if (atEnd() && !trace().success && trace().diagnostic; as diagnostic) {
+            <article class="diagnostic" aria-label="Failure explanation">
+              <strong>Why execution failed</strong>
+              <span>{{ diagnostic.message }}</span>
+              <code>{{ diagnostic.code }}</code>
+            </article>
+          }
+        } @else {
+          <article class="ready-card">
+            <span aria-hidden="true">▶</span>
+            <h3>Ready</h3>
+            <p>The stack is empty. Press Play to run the first instruction.</p>
           </article>
         }
-      } @else {
-        <article class="ready-card">
-          <span aria-hidden="true">▶</span>
-          <h3>Ready</h3>
-          <p>The stack is empty. Press Play to run the first instruction.</p>
-        </article>
-      }
-    </section>
+      </section>
+
+      <app-stack-workbench [step]="currentStep() ?? null" />
+    </div>
   </div>
 
   @if (operationDetail(); as detail) {

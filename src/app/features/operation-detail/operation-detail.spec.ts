@@ -11,6 +11,7 @@ describe('OperationDetail', () => {
     fixture.componentRef.setInput('detail', {
       kind: 'Opcode',
       name: 'OP_DUP',
+      hex: '0x76',
       summary: 'Copy the top stack item and push the duplicate.',
       requirement: 'Requires at least one stack item.',
     });
@@ -21,6 +22,9 @@ describe('OperationDetail', () => {
   it('labels and focuses the modal content', () => {
     const dialog = fixture.nativeElement.querySelector('[role="dialog"]') as HTMLElement;
     expect(dialog.textContent).toContain('OP_DUP');
+    expect(dialog.textContent).toContain('0x76');
+    expect(dialog.textContent).toContain('Purpose');
+    expect(dialog.textContent).toContain('Stack effect');
     expect(dialog.getAttribute('aria-describedby')).toContain('operation-detail-summary');
     expect(document.activeElement).toBe(dialog);
   });

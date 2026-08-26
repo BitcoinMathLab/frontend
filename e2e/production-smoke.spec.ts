@@ -30,7 +30,7 @@ test('verifies the deployed public shell, metadata, and security headers', async
 
   await page.goto('/visualizer');
   await expect(page).toHaveTitle('Script Visualizer — Bitcoin Math Lab');
-  await expect(page.getByRole('heading', { name: 'See the stack come alive.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Stack visualizer' })).toBeVisible();
   await expect(page.getByLabel('Execution status')).toContainText('Step 0');
 
   await page.goto('/explorer');

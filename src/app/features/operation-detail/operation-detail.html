@@ -13,9 +13,20 @@
     <button type="button" aria-label="Close operation detail" (click)="close.emit()">×</button>
     <span>{{ detail().kind }}</span>
     <h2 id="operation-detail-title">{{ detail().name }}</h2>
-    <p id="operation-detail-summary">{{ detail().summary }}</p>
+    <dl class="opcode-facts">
+      <div>
+        <dt>Hex</dt>
+        <dd>
+          <code>{{ detail().hex }}</code>
+        </dd>
+      </div>
+    </dl>
+    <div class="purpose">
+      <strong>Purpose</strong>
+      <p id="operation-detail-summary">{{ detail().summary }}</p>
+    </div>
     <div class="requirement">
-      <strong>Stack requirement</strong>
+      <strong>Stack effect</strong>
       <p id="operation-detail-requirement">{{ detail().requirement }}</p>
     </div>
   </section>

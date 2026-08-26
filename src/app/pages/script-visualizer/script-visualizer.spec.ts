@@ -17,7 +17,7 @@ describe('ScriptVisualizer', () => {
     fixture.detectChanges();
 
     expect(loadP2pkhTrace).toHaveBeenCalledOnce();
-    expect(fixture.nativeElement.textContent).toContain('See the stack come alive.');
+    expect(fixture.nativeElement.textContent).toContain('Stack visualizer');
     expect(fixture.nativeElement.textContent).toContain('scriptSig');
     expect(fixture.nativeElement.textContent).toContain('scriptPubKey');
     expect(fixture.nativeElement.textContent).toContain('Script');
