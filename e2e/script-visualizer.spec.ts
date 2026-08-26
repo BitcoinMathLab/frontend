@@ -153,6 +153,14 @@ test('connects spend elements, parsing, execution, stacks, and signature detail'
   await expect(pushOpcodeButton).toBeFocused();
   await expect(page.getByLabel('Execution status')).toContainText('Step 0 of 3');
 
+  const signatureDataButton = page.getByRole('button', { name: 'DATA (Signature), 1 bytes' });
+  await signatureDataButton.click();
+  await expect(page.getByRole('dialog')).toContainText('DATA');
+  await expect(page.getByRole('dialog')).toContainText('Signature data');
+  await expect(page.getByRole('dialog')).toContainText('DER-encoded ECDSA signature');
+  await page.getByRole('dialog').press('Escape');
+  await expect(signatureDataButton).toBeFocused();
+
   const opDupButton = page.getByRole('button', { name: 'OP_DUP' });
   await opDupButton.click();
   const operationDialog = page.getByRole('dialog');

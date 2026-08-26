@@ -26,13 +26,15 @@
             <code class="operation-hex">{{ operation.step.opcode.hex }}</code>
           </button>
           @if (operation.dataLabel; as label) {
-            <div
+            <button
+              type="button"
               class="operation-data"
+              (click)="inspectData.emit(operation.step.index)"
               [attr.aria-label]="'DATA (' + label + '), ' + dataLength(operation) + ' bytes'"
             >
               <span>DATA ({{ label }})</span>
               <code>{{ operation.step.opcode.push_data }}</code>
-            </div>
+            </button>
           }
         </div>
       }
@@ -68,13 +70,15 @@
             <code class="operation-hex">{{ operation.step.opcode.hex }}</code>
           </button>
           @if (operation.dataLabel; as label) {
-            <div
+            <button
+              type="button"
               class="operation-data"
+              (click)="inspectData.emit(operation.step.index)"
               [attr.aria-label]="'DATA (' + label + '), ' + dataLength(operation) + ' bytes'"
             >
               <span>DATA ({{ label }})</span>
               <code>{{ operation.step.opcode.push_data }}</code>
-            </div>
+            </button>
           }
         </div>
       }

@@ -28,6 +28,7 @@ export class TracePlayer implements OnDestroy {
   protected readonly playing = signal(false);
   protected readonly signatureDetailOpen = signal(false);
   protected readonly selectedOperation = signal<TraceStep | null>(null);
+  protected readonly selectedData = signal<TraceStep | null>(null);
   protected readonly currentStep = computed(() =>
     this.currentIndex() < 0 ? undefined : this.trace().steps[this.currentIndex()],
   );
@@ -70,6 +71,8 @@ export class TracePlayer implements OnDestroy {
     () => this.currentStep()?.stacks.before.main.items[0] ?? 'Unavailable in this trace',
   );
   protected readonly operationDetail = computed(() => {
+    const data = this.selectedData();
+    if (data) return describePushedData(data, this.trace(), this.scripts().unlocking);
     const step = this.selectedOperation();
     if (!step) return null;
     return {
@@ -98,6 +101,7 @@ export class TracePlayer implements OnDestroy {
     this.pause();
     this.signatureDetailOpen.set(false);
     this.selectedOperation.set(null);
+    this.selectedData.set(null);
     this.currentIndex.set(-1);
   }
 
@@ -110,7 +114,16 @@ export class TracePlayer implements OnDestroy {
     this.pause();
     this.signatureDetailOpen.set(false);
     this.rememberFocus();
+    this.selectedData.set(null);
     this.selectedOperation.set(this.trace().steps[index] ?? null);
+  }
+
+  protected inspectData(index: number): void {
+    this.pause();
+    this.signatureDetailOpen.set(false);
+    this.rememberFocus();
+    this.selectedOperation.set(null);
+    this.selectedData.set(this.trace().steps[index] ?? null);
   }
 
   protected openSignatureDetail(): void {
@@ -121,6 +134,7 @@ export class TracePlayer implements OnDestroy {
 
   protected closeOperationDetail(): void {
     this.selectedOperation.set(null);
+    this.selectedData.set(null);
     this.restoreFocus();
   }
 
@@ -137,17 +151,21 @@ export class TracePlayer implements OnDestroy {
     if (this.atEnd()) this.currentIndex.set(-1);
     this.signatureDetailOpen.set(false);
     this.selectedOperation.set(null);
+    this.selectedData.set(null);
     this.playing.set(true);
     this.advance();
     if (this.playing()) this.timer = setInterval(() => this.advance(), 1000);
   }
 
   protected handleKeydown(event: KeyboardEvent): void {
-    if (event.key === 'Escape' && (this.signatureDetailOpen() || this.selectedOperation())) {
+    if (
+      event.key === 'Escape' &&
+      (this.signatureDetailOpen() || this.selectedOperation() || this.selectedData())
+    ) {
       event.preventDefault();
       if (this.signatureDetailOpen()) this.closeSignatureDetail();
       else this.closeOperationDetail();
-    } else if (this.signatureDetailOpen() || this.selectedOperation()) {
+    } else if (this.signatureDetailOpen() || this.selectedOperation() || this.selectedData()) {
       return;
     } else if (event.key === 'ArrowLeft') {
       event.preventDefault();
@@ -177,6 +195,8 @@ export class TracePlayer implements OnDestroy {
       return;
     }
     this.signatureDetailOpen.set(false);
+    this.selectedOperation.set(null);
+    this.selectedData.set(null);
     this.currentIndex.update((index) => index + 1);
     if (this.atEnd()) this.pause();
   }
@@ -199,6 +219,56 @@ export class TracePlayer implements OnDestroy {
     this.returnFocus = null;
     queueMicrotask(() => target?.focus());
   }
+}
+
+function describePushedData(
+  step: TraceStep,
+  trace: ExecutionTrace,
+  unlockingScript: string,
+): {
+  readonly kind: string;
+  readonly name: string;
+  readonly hex: string;
+  readonly summary: string;
+  readonly requirement: string;
+} {
+  const unlockingLength = unlockingScript.length / 2;
+  const isUnlockingData = step.opcode.byte_offset < unlockingLength;
+  const unlockingPushes = trace.steps.filter(
+    (candidate) => candidate.opcode.is_push && candidate.opcode.byte_offset < unlockingLength,
+  );
+  const unlockingPosition = unlockingPushes.findIndex(
+    (candidate) => candidate.index === step.index,
+  );
+
+  if (isUnlockingData && unlockingPosition === 0) {
+    return {
+      kind: 'DATA',
+      name: 'Signature data',
+      hex: step.opcode.push_data ?? step.opcode.raw,
+      summary:
+        'A DER-encoded ECDSA signature plus a hash-type byte. OP_CHECKSIG uses it to test authorization for this spend.',
+      requirement: 'The push opcode places this signature onto the empty stack.',
+    };
+  }
+  if (isUnlockingData && unlockingPosition === 1) {
+    return {
+      kind: 'DATA',
+      name: 'Public-key data',
+      hex: step.opcode.push_data ?? step.opcode.raw,
+      summary:
+        'A SEC-encoded secp256k1 public key. Its HASH160 must match the hash committed by the previous output.',
+      requirement: 'The push opcode places this public key above the signature.',
+    };
+  }
+  return {
+    kind: 'DATA',
+    name: 'Expected public-key hash',
+    hex: step.opcode.push_data ?? step.opcode.raw,
+    summary:
+      'The 20-byte HASH160 committed by the previous output. OP_EQUALVERIFY compares it with the calculated public-key hash.',
+    requirement: 'The push opcode places this expected hash onto the stack for comparison.',
+  };
 }
 
 function describeStackEffect(step: TraceStep | undefined): string {

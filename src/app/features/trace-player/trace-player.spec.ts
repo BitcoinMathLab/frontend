@@ -225,6 +225,21 @@ describe('TracePlayer', () => {
     expect(fixture.nativeElement.textContent).toContain('Step 0 of 3');
   });
 
+  it('explains pushed signature data without advancing', () => {
+    const signatureData = fixture.nativeElement.querySelector(
+      '[aria-label="DATA (Signature), 1 bytes"]',
+    ) as HTMLButtonElement;
+    signatureData.click();
+    fixture.detectChanges();
+
+    const dialog = fixture.nativeElement.querySelector('[role="dialog"]') as HTMLElement;
+    expect(dialog.textContent).toContain('DATA');
+    expect(dialog.textContent).toContain('Signature data');
+    expect(dialog.textContent).toContain('DER-encoded ECDSA signature');
+    expect(dialog.textContent).toContain('places this signature onto the empty stack');
+    expect(fixture.nativeElement.textContent).toContain('Step 0 of 3');
+  });
+
   it('explains the safe diagnostic for a failed trace', () => {
     fixture.componentRef.setInput('trace', {
       ...TRACE_FIXTURE,
