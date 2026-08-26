@@ -1,6 +1,15 @@
 <div class="parser-window" aria-label="Parsed P2PKH scripts">
   <section class="script-lane">
-    <header><strong>scriptSig</strong><span>runs first</span></header>
+    <header>
+      <span class="script-name" tabindex="0" aria-describedby="script-sig-hex-tooltip">
+        <strong>scriptSig</strong>
+        <span id="script-sig-hex-tooltip" class="script-hex-tooltip" role="tooltip">
+          <span>Original hex</span>
+          <code>{{ scripts().unlocking }}</code>
+        </span>
+      </span>
+      <span>runs first</span>
+    </header>
     <div class="operation-list">
       @for (operation of unlockingOperations(); track operation.step.index) {
         <div class="operation-entry">
@@ -12,7 +21,9 @@
             [attr.aria-current]="operation.step.index === currentIndex() ? 'step' : null"
             [title]="operation.step.opcode.hex"
           >
-            <span aria-hidden="true">●</span><code>{{ operation.step.opcode.name }}</code>
+            <span aria-hidden="true">●</span>
+            <code>{{ operation.step.opcode.name }}</code>
+            <code class="operation-hex">{{ operation.step.opcode.hex }}</code>
           </button>
           @if (operation.dataLabel; as label) {
             <button
@@ -21,25 +32,30 @@
               (click)="inspectStep.emit(operation.step.index)"
               [class.operation--current]="operation.step.index === currentIndex()"
               [class.operation--complete]="operation.step.index < currentIndex()"
-              [attr.aria-label]="label + ' data, ' + dataLength(operation) + ' bytes'"
+              [attr.aria-label]="'DATA (' + label + '), ' + dataLength(operation) + ' bytes'"
             >
-              <span>Data ({{ dataLength(operation) }} bytes)</span>
-              <small>{{ label }}</small>
+              <span>DATA ({{ label }})</span>
+              <code>{{ operation.step.opcode.push_data }}</code>
             </button>
           }
         </div>
       }
     </div>
-    <details class="script-hex">
-      <summary>Show original scriptSig hex</summary>
-      <code>{{ scripts().unlocking }}</code>
-    </details>
   </section>
 
   <div class="parse-arrow" aria-hidden="true">→</div>
 
   <section class="script-lane">
-    <header><strong>scriptPubKey</strong><span>runs second</span></header>
+    <header>
+      <span class="script-name" tabindex="0" aria-describedby="script-pubkey-hex-tooltip">
+        <strong>scriptPubKey</strong>
+        <span id="script-pubkey-hex-tooltip" class="script-hex-tooltip" role="tooltip">
+          <span>Original hex</span>
+          <code>{{ scripts().locking }}</code>
+        </span>
+      </span>
+      <span>runs second</span>
+    </header>
     <div class="operation-list">
       @for (operation of lockingOperations(); track operation.step.index) {
         <div class="operation-entry">
@@ -51,7 +67,9 @@
             [attr.aria-current]="operation.step.index === currentIndex() ? 'step' : null"
             [title]="operation.step.opcode.hex"
           >
-            <span aria-hidden="true">●</span><code>{{ operation.step.opcode.name }}</code>
+            <span aria-hidden="true">●</span>
+            <code>{{ operation.step.opcode.name }}</code>
+            <code class="operation-hex">{{ operation.step.opcode.hex }}</code>
           </button>
           @if (operation.dataLabel; as label) {
             <button
@@ -60,18 +78,14 @@
               (click)="inspectStep.emit(operation.step.index)"
               [class.operation--current]="operation.step.index === currentIndex()"
               [class.operation--complete]="operation.step.index < currentIndex()"
-              [attr.aria-label]="label + ' data, ' + dataLength(operation) + ' bytes'"
+              [attr.aria-label]="'DATA (' + label + '), ' + dataLength(operation) + ' bytes'"
             >
-              <span>Data ({{ dataLength(operation) }} bytes)</span>
-              <small>{{ label }}</small>
+              <span>DATA ({{ label }})</span>
+              <code>{{ operation.step.opcode.push_data }}</code>
             </button>
           }
         </div>
       }
     </div>
-    <details class="script-hex">
-      <summary>Show original scriptPubKey hex</summary>
-      <code>{{ scripts().locking }}</code>
-    </details>
   </section>
 </div>
