@@ -20,7 +20,7 @@ describe('ScriptVisualizer', () => {
     expect(fixture.nativeElement.textContent).toContain('Stack visualizer');
     expect(fixture.nativeElement.textContent).toContain('scriptSig');
     expect(fixture.nativeElement.textContent).toContain('scriptPubKey');
-    expect(fixture.nativeElement.textContent).toContain('Script');
+    expect(fixture.nativeElement.textContent).toContain('Stack flow');
     expect(fixture.nativeElement.textContent).toContain('Stack state');
     expect(fixture.nativeElement.textContent).toContain('Execution');
     expect(fixture.nativeElement.textContent).toContain('Step 0 of 3');

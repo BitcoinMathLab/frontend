@@ -46,4 +46,9 @@ export class ScriptParser {
   protected dataLength(operation: ParsedOperation): number {
     return (operation.step.opcode.push_data?.length ?? 0) / 2;
   }
+
+  protected dataPreview(operation: ParsedOperation): string {
+    const data = operation.step.opcode.push_data ?? '';
+    return data.length > 8 ? `${data.slice(0, 4)}…${data.slice(-4)}` : data;
+  }
 }

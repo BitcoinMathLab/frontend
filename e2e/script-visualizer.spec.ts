@@ -106,7 +106,7 @@ test('connects spend elements, parsing, execution, stacks, and signature detail'
 
   const player = page.getByLabel('Script trace player');
   await expect(page.getByRole('heading', { name: 'Stack visualizer' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Script', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Stack flow', exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Stack state' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Execution', exact: true })).toBeVisible();
   const columnCount = await page

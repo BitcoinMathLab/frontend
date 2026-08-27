@@ -32,8 +32,9 @@
               (click)="inspectData.emit(operation.step.index)"
               [attr.aria-label]="'DATA (' + label + '), ' + dataLength(operation) + ' bytes'"
             >
-              <span>DATA ({{ label }})</span>
-              <code>{{ operation.step.opcode.push_data }}</code>
+              <span aria-hidden="true">●</span>
+              <code>DATA ({{ label }})</code>
+              <code class="operation-hex">{{ dataPreview(operation) }}</code>
             </button>
           }
         </div>
@@ -76,8 +77,9 @@
               (click)="inspectData.emit(operation.step.index)"
               [attr.aria-label]="'DATA (' + label + '), ' + dataLength(operation) + ' bytes'"
             >
-              <span>DATA ({{ label }})</span>
-              <code>{{ operation.step.opcode.push_data }}</code>
+              <span aria-hidden="true">●</span>
+              <code>DATA ({{ label }})</code>
+              <code class="operation-hex">{{ dataPreview(operation) }}</code>
             </button>
           }
         </div>

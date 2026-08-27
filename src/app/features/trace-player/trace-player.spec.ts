@@ -37,7 +37,7 @@ describe('TracePlayer', () => {
   it('starts before step one with empty stacks and backward controls disabled', () => {
     const compiled = fixture.nativeElement as HTMLElement;
 
-    expect(compiled.textContent).toContain('Script');
+    expect(compiled.textContent).toContain('Stack flow');
     expect(compiled.textContent).toContain('scriptSig');
     expect(compiled.textContent).toContain('scriptPubKey');
     expect(compiled.textContent).toContain('OP_1');
@@ -226,8 +226,26 @@ describe('TracePlayer', () => {
   });
 
   it('explains pushed signature data without advancing', () => {
+    fixture.componentRef.setInput('trace', {
+      ...TRACE_FIXTURE,
+      steps: TRACE_FIXTURE.steps.map((step, index) =>
+        index === 0
+          ? {
+              ...step,
+              opcode: {
+                ...step.opcode,
+                is_push: true,
+                push_data: '0123456789abcdef',
+              },
+            }
+          : step,
+      ),
+    });
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('0123…cdef');
     const signatureData = fixture.nativeElement.querySelector(
-      '[aria-label="DATA (Signature), 1 bytes"]',
+      '[aria-label="DATA (Signature), 8 bytes"]',
     ) as HTMLButtonElement;
     signatureData.click();
     fixture.detectChanges();
@@ -235,6 +253,7 @@ describe('TracePlayer', () => {
     const dialog = fixture.nativeElement.querySelector('[role="dialog"]') as HTMLElement;
     expect(dialog.textContent).toContain('DATA');
     expect(dialog.textContent).toContain('Signature data');
+    expect(dialog.textContent).toContain('0123456789abcdef');
     expect(dialog.textContent).toContain('DER-encoded ECDSA signature');
     expect(dialog.textContent).toContain('places this signature onto the empty stack');
     expect(fixture.nativeElement.textContent).toContain('Step 0 of 3');

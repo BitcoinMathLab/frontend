@@ -115,34 +115,6 @@
   color: var(--color-valid);
 }
 
-.operation-data {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  min-width: 0;
-  min-height: 2.9rem;
-  border: 1px solid rgba(255, 255, 255, 0.11);
-  border-radius: 0.6rem;
-  background: rgba(30, 41, 59, 0.7);
-  color: inherit;
-  cursor: pointer;
-  gap: 0.35rem;
-  padding: 0.55rem 0.7rem;
-  text-align: left;
-}
-
-.operation-data span {
-  color: #e2e8f0;
-  font-family: var(--font-mono);
-  font-size: 0.84rem;
-}
-
-.operation-data code {
-  color: #94a3b8;
-  font-size: 0.72rem;
-  overflow-wrap: anywhere;
-  white-space: normal;
-}
-
 .script-hex-tooltip {
   position: absolute;
   z-index: 2;
