@@ -23,7 +23,8 @@ monitoring.
 The visualizer at `/visualizer` loads one curated P2PKH spend from the Bitcoin Math Lab backend. It starts before
 execution with empty stacks, then connects the script flow, semantic main/alternate stacks, and current operation through
 playback and keyboard controls. Script elements open focused explanations without moving the trace, and the spend verdict
-appears only after the final step.
+appears only after the final stack-validation step. See the [Script Visualizer QA guide](docs/script-visualizer.md) for
+release-candidate setup and validation.
 
 The transaction explorer at `/explorer` validates a mainnet transaction ID and loads its raw bytes, created and spent
 outputs, classifications, value/fee summary, size metrics, and guided byte ranges from the backend's Bitcoin Core
