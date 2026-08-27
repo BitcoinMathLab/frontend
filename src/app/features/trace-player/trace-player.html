@@ -97,7 +97,8 @@
       <app-script-parser
         [trace]="trace()"
         [scripts]="scripts()"
-        [currentIndex]="currentIndex()"
+        [currentIndex]="currentStep()?.index ?? -1"
+        [currentPhase]="currentPlayback()?.phase ?? null"
         (inspectStep)="inspectOperation($event)"
         (inspectData)="inspectData($event)"
       />
@@ -110,10 +111,12 @@
           <span>{{ phaseLabel() }}</span>
         </header>
 
-        @if (currentStep(); as step) {
+        @if (currentPlayback(); as playback) {
           <article class="current-operation">
             <span class="operation-kicker">Now running</span>
-            <h3>{{ step.opcode.name }}</h3>
+            <h3>
+              {{ playback.phase === 'stack-push' ? 'STACK PUSH' : playback.step.opcode.name }}
+            </h3>
             <p>{{ stackEffect() }}</p>
           </article>
 
@@ -139,12 +142,25 @@
         }
       </section>
 
-      <app-stack-workbench [step]="currentStep() ?? null" />
+      <app-stack-workbench
+        [step]="currentStep() ?? null"
+        [showBefore]="
+          currentPlayback()?.phase === 'opcode' && currentStep()?.opcode?.is_push === true
+        "
+        [showMovement]="
+          currentPlayback()?.phase !== 'opcode' || currentStep()?.opcode?.is_push !== true
+        "
+        (inspectItem)="inspectStackItem($event)"
+      />
     </div>
   </div>
 
   @if (operationDetail(); as detail) {
     <app-operation-detail [detail]="detail" (close)="closeOperationDetail()" />
+  }
+
+  @if (selectedStackItem(); as item) {
+    <app-stack-item-detail [detail]="item" (close)="closeStackItemDetail()" />
   }
 
   @if (signatureDetailOpen()) {

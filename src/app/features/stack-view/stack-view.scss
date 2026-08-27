@@ -37,15 +37,20 @@ header span {
 }
 
 .stack-item {
-  display: grid;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   min-width: 0;
-  min-height: 4rem;
+  min-height: 2.9rem;
   border: 1px solid rgba(255, 255, 255, 0.13);
   border-radius: 0.55rem;
   background: rgba(30, 41, 59, 0.92);
+  color: inherit;
+  cursor: pointer;
   animation: stack-enter 240ms ease-out;
-  gap: 0.25rem;
+  gap: 0.6rem;
   padding: 0.6rem;
+  text-align: left;
 }
 
 .stack-item.signature {
@@ -64,25 +69,19 @@ header span {
   border-color: rgba(74, 222, 128, 0.55);
 }
 
-.stack-item__kind {
-  color: #aebccc;
-  font-size: 0.78rem;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-.stack-item strong {
-  color: var(--color-paper);
-  font-size: 0.95rem;
-}
-
 .stack-item code {
+  min-width: 0;
   overflow: hidden;
   color: var(--color-paper);
   font-family: var(--font-mono);
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.stack-item code:last-child {
+  color: #94a3b8;
+  font-size: 0.72rem;
 }
 
 .stack-view__items > p {

@@ -16,7 +16,9 @@
           <button
             type="button"
             (click)="inspectStep.emit(operation.step.index)"
-            [class.operation--current]="operation.step.index === currentIndex()"
+            [class.operation--current]="
+              operation.step.index === currentIndex() && currentPhase() === 'opcode'
+            "
             [class.operation--complete]="operation.step.index < currentIndex()"
             [attr.aria-current]="operation.step.index === currentIndex() ? 'step' : null"
             [title]="operation.step.opcode.hex"
@@ -30,6 +32,9 @@
               type="button"
               class="operation-data"
               (click)="inspectData.emit(operation.step.index)"
+              [class.operation--current]="
+                operation.step.index === currentIndex() && currentPhase() === 'stack-push'
+              "
               [attr.aria-label]="'DATA (' + label + '), ' + dataLength(operation) + ' bytes'"
             >
               <span aria-hidden="true">●</span>
@@ -61,7 +66,9 @@
           <button
             type="button"
             (click)="inspectStep.emit(operation.step.index)"
-            [class.operation--current]="operation.step.index === currentIndex()"
+            [class.operation--current]="
+              operation.step.index === currentIndex() && currentPhase() === 'opcode'
+            "
             [class.operation--complete]="operation.step.index < currentIndex()"
             [attr.aria-current]="operation.step.index === currentIndex() ? 'step' : null"
             [title]="operation.step.opcode.hex"
@@ -75,6 +82,9 @@
               type="button"
               class="operation-data"
               (click)="inspectData.emit(operation.step.index)"
+              [class.operation--current]="
+                operation.step.index === currentIndex() && currentPhase() === 'stack-push'
+              "
               [attr.aria-label]="'DATA (' + label + '), ' + dataLength(operation) + ' bytes'"
             >
               <span aria-hidden="true">●</span>
