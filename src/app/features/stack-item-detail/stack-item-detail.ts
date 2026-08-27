@@ -33,6 +33,20 @@ export class StackItemDetail implements AfterViewInit {
     if (event.key === 'Escape') {
       event.preventDefault();
       this.close.emit();
+      return;
+    }
+    if (event.key !== 'Tab') return;
+
+    const focusable = [...this.dialog().nativeElement.querySelectorAll<HTMLElement>('button')];
+    const first = focusable[0];
+    const last = focusable.at(-1);
+    if (!first || !last) return;
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
     }
   }
 }

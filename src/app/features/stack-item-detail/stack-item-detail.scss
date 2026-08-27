@@ -20,7 +20,7 @@
   padding: 1.4rem;
 }
 .dialog > span {
-  color: #86efac;
+  color: var(--color-detail-card-type);
   font-size: 0.78rem;
   font-weight: 800;
   letter-spacing: 0.1em;
@@ -69,7 +69,7 @@ dd {
 }
 code {
   display: block;
-  color: var(--color-amber);
+  color: var(--color-detail-card-hex);
   font-family: var(--font-mono);
   overflow-wrap: anywhere;
   word-break: break-all;

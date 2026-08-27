@@ -138,7 +138,7 @@ test('connects spend elements, parsing, execution, stacks, and signature detail'
   await expect(page.getByLabel('Restart trace')).toHaveText('<<');
   await expect(page.getByLabel('Go to result')).toHaveText('>>');
   await expect(page.getByLabel('Signature example')).toHaveValue('p2pkh');
-  await expect(page.getByLabel('Execution status')).toContainText('Step 0 of 4');
+  await expect(page.getByLabel('Execution status')).toContainText('Step 0 of 5');
   await expect(page.getByLabel('Execution status')).toContainText('Ready');
   await expect(page.getByLabel('Main stack')).toContainText('Empty stack');
   await expect(page.getByText('Valid spend', { exact: true })).toHaveCount(0);
@@ -151,12 +151,12 @@ test('connects spend elements, parsing, execution, stacks, and signature detail'
   await expect(page.getByRole('dialog')).toContainText('Push the signature onto the main stack.');
   await page.getByRole('dialog').press('Escape');
   await expect(pushOpcodeButton).toBeFocused();
-  await expect(page.getByLabel('Execution status')).toContainText('Step 0 of 4');
+  await expect(page.getByLabel('Execution status')).toContainText('Step 0 of 5');
 
   const signatureDataButton = page.getByRole('button', { name: 'DATA (Signature), 1 bytes' });
   await signatureDataButton.click();
   await expect(page.getByRole('dialog')).toContainText('DATA');
-  await expect(page.getByRole('dialog')).toContainText('Signature data');
+  await expect(page.getByRole('dialog')).toContainText('DATA (Signature)');
   await expect(page.getByRole('dialog')).toContainText('DER-encoded ECDSA signature');
   await page.getByRole('dialog').press('Escape');
   await expect(signatureDataButton).toBeFocused();
@@ -168,30 +168,30 @@ test('connects spend elements, parsing, execution, stacks, and signature detail'
   await expect(operationDialog).toContainText('OP_CODE');
   await expect(operationDialog).toContainText('Hex');
   await expect(operationDialog).toContainText('Stack effect');
-  await expect(page.getByLabel('Execution status')).toContainText('Step 0 of 4');
+  await expect(page.getByLabel('Execution status')).toContainText('Step 0 of 5');
   await operationDialog.press('Escape');
   await expect(operationDialog).toHaveCount(0);
   await expect(opDupButton).toBeFocused();
 
   await page.getByRole('button', { name: 'Play' }).click();
-  await expect(page.getByLabel('Execution status').getByText('Step 1 of 4')).toBeVisible();
+  await expect(page.getByLabel('Execution status').getByText('Step 1 of 5')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'OP_PUSHBYTES_1', exact: true })).toBeVisible();
   await expect(page.getByLabel('Main stack')).toContainText('Empty stack');
   await page.getByRole('button', { name: 'Pause' }).click();
   await page.getByRole('button', { name: 'Next step' }).click();
-  await expect(page.getByLabel('Execution status').getByText('Step 2 of 4')).toBeVisible();
+  await expect(page.getByLabel('Execution status').getByText('Step 2 of 5')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'STACK PUSH', exact: true })).toBeVisible();
-  const stackItem = page.getByRole('button', { name: 'DATA (True), Top of stack' });
+  const stackItem = page.getByRole('button', { name: 'DATA (True), 1 of stack' });
   await expect(stackItem).toBeVisible();
   await stackItem.click();
   await expect(page.getByRole('dialog')).toContainText('STACK ITEM');
   await expect(page.getByRole('dialog')).toContainText('Stack position');
-  await expect(page.getByRole('dialog')).toContainText('Top');
+  await expect(page.getByRole('dialog')).toContainText('1');
   await expect(page.getByRole('dialog')).toContainText('Hex');
   await page.getByRole('dialog').press('Escape');
   await expect(stackItem).toBeFocused();
   await page.getByRole('button', { name: 'Next step' }).click();
-  await expect(page.getByLabel('Execution status').getByText('Step 3 of 4')).toBeVisible();
+  await expect(page.getByLabel('Execution status').getByText('Step 3 of 5')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'OP_DUP', exact: true })).toBeVisible();
   await expect(page.getByText('Copy the top stack item and push the duplicate.')).toBeVisible();
   await expect(page.getByLabel('Stack state')).toContainText('after OP_DUP');
@@ -200,6 +200,10 @@ test('connects spend elements, parsing, execution, stacks, and signature detail'
 
   await page.getByRole('button', { name: 'Go to result' }).click();
   await expect(page.getByText('Valid spend', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'STACK VALIDATION', exact: true })).toBeVisible();
+  await expect(page.getByText('final stack value is true')).toBeVisible();
+  await player.press('ArrowLeft');
+  await expect(page.getByLabel('Execution status').getByText('Step 4 of 5')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'OP_CHECKSIG', exact: true })).toBeVisible();
   const signatureButton = page.getByRole('button', {
     name: 'Open signature verification detail',
@@ -214,7 +218,7 @@ test('connects spend elements, parsing, execution, stacks, and signature detail'
   await expect(signatureButton).toBeFocused();
 
   await player.press('ArrowLeft');
-  await expect(page.getByLabel('Execution status').getByText('Step 3 of 4')).toBeVisible();
+  await expect(page.getByLabel('Execution status').getByText('Step 3 of 5')).toBeVisible();
 });
 
 test('shows a failed P2PKH result without adding another lesson surface', async ({ page }) => {

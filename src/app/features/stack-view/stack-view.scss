@@ -80,8 +80,8 @@ header span {
 }
 
 .stack-item code:last-child {
-  color: #94a3b8;
-  font-size: 0.72rem;
+  color: var(--color-paper);
+  font-size: 0.9rem;
 }
 
 .stack-view__items > p {

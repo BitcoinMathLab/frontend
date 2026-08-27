@@ -15,18 +15,27 @@ export class StackView {
   readonly stepIndex = input.required<number>();
   readonly inspectItem = output<StackItemDetailContent>();
 
-  protected readonly items = computed(() =>
-    this.snapshot().items.map((value, index) => ({
+  protected readonly items = computed(() => {
+    const values = this.snapshot().items;
+    return values.map((value, index) => ({
       key: `${this.stepIndex()}:${index}:${value}`,
-      position: index === 0 ? 'Top' : `${index + 1}`,
+      position: describeStackPosition(index, values.length),
       value: value || '00',
       ...describeStackValue(value || '00'),
-    })),
-  );
+    }));
+  });
 
   protected preview(value: string): string {
     return value.length > 8 ? `${value.slice(0, 4)}…${value.slice(-4)}` : value;
   }
+}
+
+function describeStackPosition(index: number, depth: number): string {
+  const position = index + 1;
+  if (depth === 1) return `${position}`;
+  if (index === 0) return `${position} (Top)`;
+  if (index === depth - 1) return `${position} (Bottom)`;
+  return `${position}`;
 }
 
 function describeStackValue(value: string): { kind: string; label: string } {

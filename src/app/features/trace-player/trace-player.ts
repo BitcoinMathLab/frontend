@@ -14,7 +14,7 @@ import { SignatureDetail } from '../signature-detail/signature-detail';
 import { StackItemDetail, StackItemDetailContent } from '../stack-item-detail/stack-item-detail';
 import { StackWorkbench } from '../stack-workbench/stack-workbench';
 
-type PlaybackPhase = 'opcode' | 'stack-push';
+type PlaybackPhase = 'opcode' | 'stack-push' | 'stack-validation';
 
 interface PlaybackStep {
   readonly step: TraceStep;
@@ -65,6 +65,9 @@ export class TracePlayer implements OnDestroy {
   });
   protected readonly phaseLabel = computed(() => {
     if (this.atStart()) return 'Waiting to begin';
+    if (this.currentPlayback()?.phase === 'stack-validation') {
+      return 'Checking final stack conditions';
+    }
     const unlockingLength = this.scripts().unlocking.length / 2;
     const step = this.currentStep();
     return step && step.opcode.byte_offset < unlockingLength
@@ -74,9 +77,13 @@ export class TracePlayer implements OnDestroy {
   protected readonly stackEffect = computed(() => {
     const playback = this.currentPlayback();
     if (!playback) return 'No operation selected.';
-    return playback.phase === 'stack-push'
-      ? `Push DATA (${pushedDataLabel(playback.step, this.trace(), this.scripts().unlocking)}) onto the main stack.`
-      : describeStackEffect(playback.step, false);
+    if (playback.phase === 'stack-push') {
+      return `Push DATA (${pushedDataLabel(playback.step, this.trace(), this.scripts().unlocking)}) onto the main stack.`;
+    }
+    if (playback.phase === 'stack-validation') {
+      return 'Check the stack conditions at the end of script execution. A spend is valid only when the final stack value is true.';
+    }
+    return describeStackEffect(playback.step, false);
   });
   protected readonly isSignatureCheck = computed(
     () =>
@@ -292,7 +299,7 @@ function describePushedData(
   if (isUnlockingData && unlockingPosition === 0) {
     return {
       kind: 'DATA',
-      name: 'Signature data',
+      name: 'Signature',
       hex: step.opcode.push_data ?? step.opcode.raw,
       summary:
         'A DER-encoded ECDSA signature plus a hash-type byte. OP_CHECKSIG uses it to test authorization for this spend.',
@@ -302,7 +309,7 @@ function describePushedData(
   if (isUnlockingData && unlockingPosition === 1) {
     return {
       kind: 'DATA',
-      name: 'Public-key data',
+      name: 'Public key',
       hex: step.opcode.push_data ?? step.opcode.raw,
       summary:
         'A SEC-encoded secp256k1 public key. Its HASH160 must match the hash committed by the previous output.',
@@ -346,7 +353,7 @@ function describeStackEffect(step: TraceStep | undefined, includePush = true): s
 }
 
 function playbackStepsFor(trace: ExecutionTrace): readonly PlaybackStep[] {
-  return trace.steps.flatMap((step) =>
+  const executionSteps = trace.steps.flatMap((step) =>
     step.opcode.is_push
       ? [
           { step, phase: 'opcode' as const },
@@ -354,6 +361,10 @@ function playbackStepsFor(trace: ExecutionTrace): readonly PlaybackStep[] {
         ]
       : [{ step, phase: 'opcode' as const }],
   );
+  const finalStep = trace.steps.at(-1);
+  return finalStep
+    ? [...executionSteps, { step: finalStep, phase: 'stack-validation' }]
+    : executionSteps;
 }
 
 function pushedDataLabel(step: TraceStep, trace: ExecutionTrace, unlockingScript: string): string {

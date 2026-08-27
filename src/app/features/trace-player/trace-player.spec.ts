@@ -45,7 +45,7 @@ describe('TracePlayer', () => {
     expect(compiled.textContent).toContain('Original hex');
     expect(compiled.textContent).toContain('0x51');
     expect(compiled.textContent).toContain('OP_ADD');
-    expect(compiled.textContent).toContain('Step 0 of 5');
+    expect(compiled.textContent).toContain('Step 0 of 6');
     expect(compiled.textContent).toContain('Ready');
     expect(compiled.textContent).toContain('Empty stack');
     expect(compiled.querySelector('[role="progressbar"]')?.getAttribute('aria-valuenow')).toBe('0');
@@ -60,32 +60,34 @@ describe('TracePlayer', () => {
 
     control('Next step').click();
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('Step 1 of 5');
+    expect(fixture.nativeElement.textContent).toContain('Step 1 of 6');
     expect(fixture.nativeElement.textContent).toContain('Now running OP_1');
     expect(fixture.nativeElement.textContent).toContain('The stack is unchanged.');
     expect(fixture.nativeElement.textContent).toContain('Empty stack');
     expect(
       fixture.nativeElement.querySelector('[role="progressbar"]')?.getAttribute('aria-valuenow'),
-    ).toBe('20');
+    ).toBe('17');
 
     control('Next step').click();
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('Step 2 of 5');
+    expect(fixture.nativeElement.textContent).toContain('Step 2 of 6');
     expect(fixture.nativeElement.textContent).toContain('Now running STACK PUSH');
     expect(fixture.nativeElement.textContent).toContain('DATA (True)');
 
     control('Previous step').click();
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('Step 1 of 5');
+    expect(fixture.nativeElement.textContent).toContain('Step 1 of 6');
 
     control('Go to result').click();
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('Step 5 of 5');
+    expect(fixture.nativeElement.textContent).toContain('Step 6 of 6');
+    expect(fixture.nativeElement.textContent).toContain('Now running STACK VALIDATION');
+    expect(fixture.nativeElement.textContent).toContain('final stack value is true');
     expect(fixture.nativeElement.textContent).toContain('Valid spend');
 
     control('Restart trace').click();
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('Step 0 of 5');
+    expect(fixture.nativeElement.textContent).toContain('Step 0 of 6');
     expect(fixture.nativeElement.textContent).toContain('Ready');
   });
 
@@ -98,9 +100,9 @@ describe('TracePlayer', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Pause');
 
-    vi.advanceTimersByTime(4_000);
+    vi.advanceTimersByTime(5_000);
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('Step 5 of 5');
+    expect(fixture.nativeElement.textContent).toContain('Step 6 of 6');
     expect(fixture.nativeElement.textContent).toContain('Play');
     expect(control('Next step').disabled).toBe(true);
   });
@@ -109,15 +111,15 @@ describe('TracePlayer', () => {
     const player = fixture.nativeElement.querySelector('.player') as HTMLElement;
     player.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('Step 1 of 5');
+    expect(fixture.nativeElement.textContent).toContain('Step 1 of 6');
 
     player.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('Step 2 of 5');
+    expect(fixture.nativeElement.textContent).toContain('Step 2 of 6');
 
     player.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('Step 1 of 5');
+    expect(fixture.nativeElement.textContent).toContain('Step 1 of 6');
 
     player.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
     fixture.detectChanges();
@@ -125,11 +127,11 @@ describe('TracePlayer', () => {
 
     player.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }));
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('Step 5 of 5');
+    expect(fixture.nativeElement.textContent).toContain('Step 6 of 6');
 
     player.dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true }));
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('Step 0 of 5');
+    expect(fixture.nativeElement.textContent).toContain('Step 0 of 6');
     expect(control('Restart trace').getAttribute('aria-keyshortcuts')).toBe('Home');
     expect(control('Go to result').getAttribute('aria-keyshortcuts')).toBe('End');
   });
@@ -143,10 +145,8 @@ describe('TracePlayer', () => {
     expect(fixture.nativeElement.textContent).toContain('after OP_ADD');
     expect(fixture.nativeElement.textContent).toContain('Main stack');
     expect(fixture.nativeElement.textContent).not.toContain('Alt stack');
-    expect(fixture.nativeElement.textContent).toContain('Consumed');
-    expect(fixture.nativeElement.textContent).toContain('− data');
-    expect(fixture.nativeElement.textContent).toContain('Produced');
-    expect(fixture.nativeElement.textContent).toContain('+ data');
+    expect(fixture.nativeElement.textContent).toContain('Now running STACK VALIDATION');
+    expect(fixture.nativeElement.textContent).not.toContain('Consumed');
   });
 
   it('opens and closes detailed signature verification from OP_CHECKSIG', () => {
@@ -171,6 +171,8 @@ describe('TracePlayer', () => {
     fixture.detectChanges();
 
     control('Go to result').click();
+    fixture.detectChanges();
+    control('Previous step').click();
     fixture.detectChanges();
 
     const open = [...fixture.nativeElement.querySelectorAll('button')].find(
@@ -209,7 +211,7 @@ describe('TracePlayer', () => {
     expect(dialog.textContent).toContain('OP_CODE');
     expect(dialog.textContent).toContain('Copy the top stack item');
     expect(dialog.textContent).toContain('Stack effect');
-    expect(fixture.nativeElement.textContent).toContain('Step 0 of 3');
+    expect(fixture.nativeElement.textContent).toContain('Step 0 of 4');
     expect(fixture.nativeElement.textContent).toContain('Empty stack');
   });
 
@@ -227,7 +229,7 @@ describe('TracePlayer', () => {
     expect(dialog.textContent).toContain('Purpose');
     expect(dialog.textContent).toContain('Push the Script number 1 onto the main stack.');
     expect(dialog.textContent).toContain('Stack effect');
-    expect(fixture.nativeElement.textContent).toContain('Step 0 of 5');
+    expect(fixture.nativeElement.textContent).toContain('Step 0 of 6');
   });
 
   it('explains pushed signature data without advancing', () => {
@@ -257,11 +259,11 @@ describe('TracePlayer', () => {
 
     const dialog = fixture.nativeElement.querySelector('[role="dialog"]') as HTMLElement;
     expect(dialog.textContent).toContain('DATA');
-    expect(dialog.textContent).toContain('Signature data');
+    expect(dialog.textContent).toContain('DATA (Signature)');
     expect(dialog.textContent).toContain('0123456789abcdef');
     expect(dialog.textContent).toContain('DER-encoded ECDSA signature');
     expect(dialog.textContent).toContain('places this signature onto the empty stack');
-    expect(fixture.nativeElement.textContent).toContain('Step 0 of 4');
+    expect(fixture.nativeElement.textContent).toContain('Step 0 of 5');
   });
 
   it('opens a concise data detail for a stack item', () => {
@@ -270,7 +272,7 @@ describe('TracePlayer', () => {
     fixture.detectChanges();
 
     const stackItem = fixture.nativeElement.querySelector(
-      '[aria-label="DATA (True), Top of stack"]',
+      '[aria-label="DATA (True), 1 of stack"]',
     ) as HTMLButtonElement;
     stackItem.click();
     fixture.detectChanges();
@@ -279,7 +281,7 @@ describe('TracePlayer', () => {
     expect(dialog.textContent).toContain('STACK ITEM');
     expect(dialog.textContent).toContain('DATA (True)');
     expect(dialog.textContent).toContain('Stack position');
-    expect(dialog.textContent).toContain('Top');
+    expect(dialog.textContent).toContain('1');
     expect(dialog.textContent).toContain('Hex');
     expect(dialog.textContent).toContain('01');
   });

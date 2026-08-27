@@ -23,7 +23,7 @@
 }
 
 .dialog > span {
-  color: var(--color-amber);
+  color: var(--color-detail-card-type);
   font-size: 0.78rem;
   font-weight: 800;
   letter-spacing: 0.1em;
@@ -71,7 +71,7 @@ p {
 .opcode-facts code {
   display: block;
   max-width: 100%;
-  color: var(--color-amber);
+  color: var(--color-detail-card-hex);
   font-family: var(--font-mono);
   overflow-wrap: anywhere;
   word-break: break-all;

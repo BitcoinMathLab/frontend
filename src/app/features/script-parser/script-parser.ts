@@ -18,7 +18,7 @@ export class ScriptParser {
   readonly trace = input.required<ExecutionTrace>();
   readonly scripts = input.required<P2pkhTraceResponse['scripts']>();
   readonly currentIndex = input.required<number>();
-  readonly currentPhase = input<'opcode' | 'stack-push' | null>(null);
+  readonly currentPhase = input<'opcode' | 'stack-push' | 'stack-validation' | null>(null);
   readonly inspectStep = output<number>();
   readonly inspectData = output<number>();
 

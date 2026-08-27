@@ -29,6 +29,14 @@ header {
   gap: 1rem;
 }
 
+.detail-card-type {
+  color: var(--color-detail-card-type);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
 h2 {
   margin: 0.3rem 0 0;
   font-size: clamp(1.35rem, 4vw, 2rem);
@@ -91,7 +99,7 @@ dt {
 code {
   display: block;
   overflow: hidden;
-  color: var(--color-blue);
+  color: var(--color-detail-card-hex);
   font-family: var(--font-mono);
   text-overflow: ellipsis;
   white-space: nowrap;

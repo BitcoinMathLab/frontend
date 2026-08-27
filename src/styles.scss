@@ -8,6 +8,9 @@
   --color-blue: #65a7ff;
   --color-valid: #43d18b;
   --color-error: #ff6b6b;
+  // Popup-card semantic colors: type identifies the card; hexadecimal is always data.
+  --color-detail-card-type: var(--color-valid);
+  --color-detail-card-hex: var(--color-amber);
   --color-text-muted: #aab3c1;
   --color-text-subtle: #747f91;
   --font-sans:

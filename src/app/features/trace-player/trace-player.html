@@ -115,7 +115,13 @@
           <article class="current-operation">
             <span class="operation-kicker">Now running</span>
             <h3>
-              {{ playback.phase === 'stack-push' ? 'STACK PUSH' : playback.step.opcode.name }}
+              {{
+                playback.phase === 'stack-push'
+                  ? 'STACK PUSH'
+                  : playback.phase === 'stack-validation'
+                    ? 'STACK VALIDATION'
+                    : playback.step.opcode.name
+              }}
             </h3>
             <p>{{ stackEffect() }}</p>
           </article>
@@ -148,7 +154,8 @@
           currentPlayback()?.phase === 'opcode' && currentStep()?.opcode?.is_push === true
         "
         [showMovement]="
-          currentPlayback()?.phase !== 'opcode' || currentStep()?.opcode?.is_push !== true
+          currentPlayback()?.phase !== 'stack-validation' &&
+          (currentPlayback()?.phase !== 'opcode' || currentStep()?.opcode?.is_push !== true)
         "
         (inspectItem)="inspectStackItem($event)"
       />

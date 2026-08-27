@@ -10,6 +10,8 @@ test('runs the curated lesson through the real API and engine', async ({ page })
   await expect(page.getByText('Valid spend', { exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: 'Go to result' }).click();
   await expect(page.getByText('Valid spend', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'STACK VALIDATION', exact: true })).toBeVisible();
+  await page.getByLabel('Script trace player').press('ArrowLeft');
   await expect(page.getByRole('heading', { name: 'OP_CHECKSIG', exact: true })).toBeVisible();
 });
 

@@ -23,7 +23,7 @@ describe('ScriptVisualizer', () => {
     expect(fixture.nativeElement.textContent).toContain('Stack flow');
     expect(fixture.nativeElement.textContent).toContain('Stack state');
     expect(fixture.nativeElement.textContent).toContain('Execution');
-    expect(fixture.nativeElement.textContent).toContain('Step 0 of 3');
+    expect(fixture.nativeElement.textContent).toContain('Step 0 of 4');
     expect(fixture.nativeElement.textContent).toContain('Empty stack');
     expect(fixture.nativeElement.textContent).not.toContain('Outpoint');
     expect(fixture.nativeElement.textContent).not.toContain('Value');
@@ -49,6 +49,6 @@ describe('ScriptVisualizer', () => {
     (fixture.nativeElement.querySelector('.state-card button') as HTMLButtonElement).click();
     fixture.detectChanges();
     expect(loadP2pkhTrace).toHaveBeenCalledTimes(2);
-    expect(fixture.nativeElement.textContent).toContain('Step 0 of 3');
+    expect(fixture.nativeElement.textContent).toContain('Step 0 of 4');
   });
 });
