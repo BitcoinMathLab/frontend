@@ -11,6 +11,7 @@ import {
 export interface OperationDetailContent {
   readonly kind: string;
   readonly name: string;
+  readonly hex: string;
   readonly summary: string;
   readonly requirement: string;
 }

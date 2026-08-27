@@ -1,15 +1,19 @@
 <section class="stack-workbench" aria-label="Stack state" aria-live="polite">
   <header class="stack-workbench__header">
     <h2>Stack state</h2>
-    <span>{{ step() ? 'after ' + step()?.opcode?.name : 'empty before execution' }}</span>
+    <span>{{ stackStateLabel() }}</span>
   </header>
 
   <div class="stack-columns">
-    <app-stack-view label="Main stack" [snapshot]="mainStack()" [stepIndex]="step()?.index ?? -1" />
-    <app-stack-view label="Alt stack" [snapshot]="altStack()" [stepIndex]="step()?.index ?? -1" />
+    <app-stack-view
+      label="Main stack"
+      [snapshot]="mainStack()"
+      [stepIndex]="step()?.index ?? -1"
+      (inspectItem)="inspectItem.emit($event)"
+    />
   </div>
 
-  @if (step()) {
+  @if (step() && showMovement()) {
     <div class="movement-grid" aria-label="Stack movement">
       <section>
         <h4>Consumed</h4>

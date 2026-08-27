@@ -44,6 +44,58 @@ p {
   line-height: 1.6;
 }
 
+.opcode-facts {
+  margin: 1rem 0 0;
+}
+
+.opcode-facts div {
+  display: flex;
+  align-items: baseline;
+  min-width: 0;
+  gap: 0.6rem;
+}
+
+.opcode-facts dt {
+  color: #afbdcc;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.opcode-facts dd {
+  min-width: 0;
+  margin: 0;
+}
+
+.opcode-facts code {
+  display: block;
+  max-width: 100%;
+  color: var(--color-amber);
+  font-family: var(--font-mono);
+  overflow-wrap: anywhere;
+  word-break: break-all;
+}
+
+.purpose,
+.requirement {
+  margin-top: 1rem;
+  border-left: 3px solid #60a5fa;
+  border-radius: 0.25rem 0.65rem 0.65rem 0.25rem;
+  background: rgba(37, 99, 235, 0.12);
+  padding: 0.85rem 1rem;
+}
+
+.purpose strong,
+.requirement strong {
+  color: #bfdbfe;
+}
+
+.purpose p,
+.requirement p {
+  margin-top: 0.3rem;
+}
+
 button {
   position: absolute;
   top: 0.8rem;
@@ -64,19 +116,8 @@ button:focus-visible {
 }
 
 .requirement {
-  margin-top: 1rem;
-  border-left: 3px solid #60a5fa;
-  border-radius: 0.25rem 0.65rem 0.65rem 0.25rem;
-  background: rgba(37, 99, 235, 0.12);
-  padding: 0.85rem 1rem;
-}
-
-.requirement strong {
-  color: #bfdbfe;
-}
-
-.requirement p {
-  margin-top: 0.3rem;
+  border-left-color: rgba(67, 209, 139, 0.8);
+  background: rgba(22, 101, 52, 0.12);
 }
 
 @keyframes backdrop-enter {

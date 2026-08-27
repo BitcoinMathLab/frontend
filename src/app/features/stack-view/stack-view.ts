@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 
 import { StackSnapshot } from '../../core/trace-api.models';
+import { StackItemDetailContent } from '../stack-item-detail/stack-item-detail';
 
 @Component({
   selector: 'app-stack-view',
@@ -12,6 +13,7 @@ export class StackView {
   readonly label = input.required<string>();
   readonly snapshot = input.required<StackSnapshot>();
   readonly stepIndex = input.required<number>();
+  readonly inspectItem = output<StackItemDetailContent>();
 
   protected readonly items = computed(() =>
     this.snapshot().items.map((value, index) => ({
@@ -21,6 +23,10 @@ export class StackView {
       ...describeStackValue(value || '00'),
     })),
   );
+
+  protected preview(value: string): string {
+    return value.length > 8 ? `${value.slice(0, 4)}…${value.slice(-4)}` : value;
+  }
 }
 
 function describeStackValue(value: string): { kind: string; label: string } {

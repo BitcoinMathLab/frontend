@@ -11,11 +11,19 @@ import { ExecutionTrace, P2pkhTraceResponse, TraceStep } from '../../core/trace-
 import { OperationDetail } from '../operation-detail/operation-detail';
 import { ScriptParser } from '../script-parser/script-parser';
 import { SignatureDetail } from '../signature-detail/signature-detail';
+import { StackItemDetail, StackItemDetailContent } from '../stack-item-detail/stack-item-detail';
 import { StackWorkbench } from '../stack-workbench/stack-workbench';
+
+type PlaybackPhase = 'opcode' | 'stack-push';
+
+interface PlaybackStep {
+  readonly step: TraceStep;
+  readonly phase: PlaybackPhase;
+}
 
 @Component({
   selector: 'app-trace-player',
-  imports: [OperationDetail, ScriptParser, SignatureDetail, StackWorkbench],
+  imports: [OperationDetail, ScriptParser, SignatureDetail, StackItemDetail, StackWorkbench],
   templateUrl: './trace-player.html',
   styleUrl: './trace-player.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -28,26 +36,30 @@ export class TracePlayer implements OnDestroy {
   protected readonly playing = signal(false);
   protected readonly signatureDetailOpen = signal(false);
   protected readonly selectedOperation = signal<TraceStep | null>(null);
-  protected readonly currentStep = computed(() =>
-    this.currentIndex() < 0 ? undefined : this.trace().steps[this.currentIndex()],
+  protected readonly selectedData = signal<TraceStep | null>(null);
+  protected readonly selectedStackItem = signal<StackItemDetailContent | null>(null);
+  protected readonly playbackSteps = computed(() => playbackStepsFor(this.trace()));
+  protected readonly currentPlayback = computed(() =>
+    this.currentIndex() < 0 ? undefined : this.playbackSteps()[this.currentIndex()],
   );
+  protected readonly currentStep = computed(() => this.currentPlayback()?.step);
   protected readonly atStart = computed(() => this.currentIndex() < 0);
   protected readonly atEnd = computed(
-    () => this.currentIndex() >= 0 && this.currentIndex() >= this.trace().steps.length - 1,
+    () => this.currentIndex() >= 0 && this.currentIndex() >= this.playbackSteps().length - 1,
   );
   protected readonly stepLabel = computed(() =>
     this.atStart()
-      ? `Ready · step 0 of ${this.trace().steps.length}`
-      : `Step ${this.currentIndex() + 1} of ${this.trace().steps.length}`,
+      ? `Step 0 of ${this.playbackSteps().length}`
+      : `Step ${this.currentIndex() + 1} of ${this.playbackSteps().length}`,
   );
   protected readonly progressPercent = computed(() => {
-    const count = this.trace().steps.length;
+    const count = this.playbackSteps().length;
     return count && this.currentIndex() >= 0
       ? Math.round(((this.currentIndex() + 1) / count) * 100)
       : 0;
   });
   protected readonly outcomeLabel = computed(() => {
-    if (this.atStart()) return 'Ready to run';
+    if (this.atStart()) return 'Ready';
     if (!this.atEnd()) return 'In progress';
     return this.trace().success ? 'Valid spend' : 'Invalid spend';
   });
@@ -59,9 +71,17 @@ export class TracePlayer implements OnDestroy {
       ? 'Executing scriptSig first'
       : 'Executing scriptPubKey';
   });
-  protected readonly stackEffect = computed(() => describeStackEffect(this.currentStep()));
-  protected readonly isSignatureCheck = computed(() =>
-    this.currentStep()?.opcode.name.includes('CHECKSIG'),
+  protected readonly stackEffect = computed(() => {
+    const playback = this.currentPlayback();
+    if (!playback) return 'No operation selected.';
+    return playback.phase === 'stack-push'
+      ? `Push DATA (${pushedDataLabel(playback.step, this.trace(), this.scripts().unlocking)}) onto the main stack.`
+      : describeStackEffect(playback.step, false);
+  });
+  protected readonly isSignatureCheck = computed(
+    () =>
+      this.currentPlayback()?.phase === 'opcode' &&
+      this.currentStep()?.opcode.name.includes('CHECKSIG'),
   );
   protected readonly signature = computed(
     () => this.currentStep()?.stacks.before.main.items[1] ?? 'Unavailable in this trace',
@@ -70,15 +90,16 @@ export class TracePlayer implements OnDestroy {
     () => this.currentStep()?.stacks.before.main.items[0] ?? 'Unavailable in this trace',
   );
   protected readonly operationDetail = computed(() => {
+    const data = this.selectedData();
+    if (data) return describePushedData(data, this.trace(), this.scripts().unlocking);
     const step = this.selectedOperation();
     if (!step) return null;
-    if (step.opcode.is_push)
-      return describePushedData(step, this.trace(), this.scripts().unlocking);
     return {
-      kind: 'Opcode',
+      kind: 'OP_CODE',
       name: step.opcode.name,
-      summary: describeStackEffect(step),
-      requirement: describeRequirement(step),
+      hex: step.opcode.hex,
+      summary: step.explanation,
+      requirement: describeStackEffect(step),
     };
   });
 
@@ -99,19 +120,41 @@ export class TracePlayer implements OnDestroy {
     this.pause();
     this.signatureDetailOpen.set(false);
     this.selectedOperation.set(null);
+    this.selectedData.set(null);
+    this.selectedStackItem.set(null);
     this.currentIndex.set(-1);
   }
 
   protected finish(): void {
     this.pause();
-    this.currentIndex.set(Math.max(this.trace().steps.length - 1, 0));
+    this.currentIndex.set(Math.max(this.playbackSteps().length - 1, 0));
   }
 
   protected inspectOperation(index: number): void {
     this.pause();
     this.signatureDetailOpen.set(false);
     this.rememberFocus();
+    this.selectedData.set(null);
+    this.selectedStackItem.set(null);
     this.selectedOperation.set(this.trace().steps[index] ?? null);
+  }
+
+  protected inspectData(index: number): void {
+    this.pause();
+    this.signatureDetailOpen.set(false);
+    this.rememberFocus();
+    this.selectedOperation.set(null);
+    this.selectedStackItem.set(null);
+    this.selectedData.set(this.trace().steps[index] ?? null);
+  }
+
+  protected inspectStackItem(item: StackItemDetailContent): void {
+    this.pause();
+    this.signatureDetailOpen.set(false);
+    this.selectedOperation.set(null);
+    this.selectedData.set(null);
+    this.rememberFocus();
+    this.selectedStackItem.set(item);
   }
 
   protected openSignatureDetail(): void {
@@ -122,6 +165,13 @@ export class TracePlayer implements OnDestroy {
 
   protected closeOperationDetail(): void {
     this.selectedOperation.set(null);
+    this.selectedData.set(null);
+    this.selectedStackItem.set(null);
+    this.restoreFocus();
+  }
+
+  protected closeStackItemDetail(): void {
+    this.selectedStackItem.set(null);
     this.restoreFocus();
   }
 
@@ -138,17 +188,31 @@ export class TracePlayer implements OnDestroy {
     if (this.atEnd()) this.currentIndex.set(-1);
     this.signatureDetailOpen.set(false);
     this.selectedOperation.set(null);
+    this.selectedData.set(null);
+    this.selectedStackItem.set(null);
     this.playing.set(true);
     this.advance();
     if (this.playing()) this.timer = setInterval(() => this.advance(), 1000);
   }
 
   protected handleKeydown(event: KeyboardEvent): void {
-    if (event.key === 'Escape' && (this.signatureDetailOpen() || this.selectedOperation())) {
+    if (
+      event.key === 'Escape' &&
+      (this.signatureDetailOpen() ||
+        this.selectedOperation() ||
+        this.selectedData() ||
+        this.selectedStackItem())
+    ) {
       event.preventDefault();
       if (this.signatureDetailOpen()) this.closeSignatureDetail();
+      else if (this.selectedStackItem()) this.closeStackItemDetail();
       else this.closeOperationDetail();
-    } else if (this.signatureDetailOpen() || this.selectedOperation()) {
+    } else if (
+      this.signatureDetailOpen() ||
+      this.selectedOperation() ||
+      this.selectedData() ||
+      this.selectedStackItem()
+    ) {
       return;
     } else if (event.key === 'ArrowLeft') {
       event.preventDefault();
@@ -178,6 +242,9 @@ export class TracePlayer implements OnDestroy {
       return;
     }
     this.signatureDetailOpen.set(false);
+    this.selectedOperation.set(null);
+    this.selectedData.set(null);
+    this.selectedStackItem.set(null);
     this.currentIndex.update((index) => index + 1);
     if (this.atEnd()) this.pause();
   }
@@ -202,19 +269,6 @@ export class TracePlayer implements OnDestroy {
   }
 }
 
-function describeRequirement(step: TraceStep): string {
-  switch (step.opcode.name) {
-    case 'OP_DUP':
-    case 'OP_HASH160':
-      return 'Requires at least one stack item. Execution stops if the stack is empty.';
-    case 'OP_EQUALVERIFY':
-    case 'OP_CHECKSIG':
-      return 'Requires two stack items. Execution stops when the required values are missing.';
-    default:
-      return 'Stack requirements depend on the opcode and the values available at this step.';
-  }
-}
-
 function describePushedData(
   step: TraceStep,
   trace: ExecutionTrace,
@@ -222,6 +276,7 @@ function describePushedData(
 ): {
   readonly kind: string;
   readonly name: string;
+  readonly hex: string;
   readonly summary: string;
   readonly requirement: string;
 } {
@@ -236,42 +291,41 @@ function describePushedData(
 
   if (isUnlockingData && unlockingPosition === 0) {
     return {
-      kind: 'Signature data',
-      name: 'Transaction signature',
+      kind: 'DATA',
+      name: 'Signature data',
+      hex: step.opcode.push_data ?? step.opcode.raw,
       summary:
         'A DER-encoded ECDSA signature plus a hash-type byte. OP_CHECKSIG uses it to test authorization for this spend.',
-      requirement: 'This data instruction pushes the signature onto the empty stack.',
+      requirement: 'The push opcode places this signature onto the empty stack.',
     };
   }
   if (isUnlockingData && unlockingPosition === 1) {
     return {
-      kind: 'Public-key data',
-      name: 'Public key',
+      kind: 'DATA',
+      name: 'Public-key data',
+      hex: step.opcode.push_data ?? step.opcode.raw,
       summary:
         'A SEC-encoded secp256k1 public key. Its HASH160 must match the hash committed by the previous output.',
-      requirement: 'This data instruction pushes the public key above the signature.',
-    };
-  }
-  if (!isUnlockingData) {
-    return {
-      kind: 'Hash data',
-      name: 'Expected public-key hash',
-      summary:
-        'The 20-byte HASH160 committed by the previous output. OP_EQUALVERIFY compares it with the public key hash calculated during execution.',
-      requirement: 'This data instruction pushes the expected hash for the comparison.',
+      requirement: 'The push opcode places this public key above the signature.',
     };
   }
   return {
-    kind: 'Pushed data',
-    name: step.opcode.name,
-    summary: 'A value encoded directly inside the Bitcoin Script.',
-    requirement: 'This data instruction adds the value without consuming an existing stack item.',
+    kind: 'DATA',
+    name: 'Expected public-key hash',
+    hex: step.opcode.push_data ?? step.opcode.raw,
+    summary:
+      'The 20-byte HASH160 committed by the previous output. OP_EQUALVERIFY compares it with the calculated public-key hash.',
+    requirement: 'The push opcode places this expected hash onto the stack for comparison.',
   };
 }
 
-function describeStackEffect(step: TraceStep | undefined): string {
+function describeStackEffect(step: TraceStep | undefined, includePush = true): string {
   if (!step) return 'No operation selected.';
-  if (step.opcode.is_push) return 'Push the decoded script value onto the top of the stack.';
+  if (step.opcode.is_push) {
+    return includePush
+      ? 'Push the decoded script value onto the top of the stack.'
+      : `Read the next ${step.opcode.push_data?.length ? step.opcode.push_data.length / 2 : 0} data bytes. The stack is unchanged.`;
+  }
   switch (step.opcode.name) {
     case 'OP_DUP':
       return 'Copy the top stack item and push the duplicate.';
@@ -289,4 +343,27 @@ function describeStackEffect(step: TraceStep | undefined): string {
       return 'Transform the current stack without changing its depth.';
     }
   }
+}
+
+function playbackStepsFor(trace: ExecutionTrace): readonly PlaybackStep[] {
+  return trace.steps.flatMap((step) =>
+    step.opcode.is_push
+      ? [
+          { step, phase: 'opcode' as const },
+          { step, phase: 'stack-push' as const },
+        ]
+      : [{ step, phase: 'opcode' as const }],
+  );
+}
+
+function pushedDataLabel(step: TraceStep, trace: ExecutionTrace, unlockingScript: string): string {
+  const unlockingLength = unlockingScript.length / 2;
+  const isUnlockingData = step.opcode.byte_offset < unlockingLength;
+  const unlockingPushes = trace.steps.filter(
+    (candidate) => candidate.opcode.is_push && candidate.opcode.byte_offset < unlockingLength,
+  );
+  const position = unlockingPushes.findIndex((candidate) => candidate.index === step.index);
+  if (isUnlockingData && position === 0) return 'Signature';
+  if (isUnlockingData && position === 1) return 'Public key';
+  return 'Expected public-key hash';
 }

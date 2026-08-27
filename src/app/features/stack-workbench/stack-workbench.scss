@@ -38,6 +38,10 @@
   gap: 0.7rem;
 }
 
+.stack-columns {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .movement-grid section {
   display: flex;
   align-items: center;

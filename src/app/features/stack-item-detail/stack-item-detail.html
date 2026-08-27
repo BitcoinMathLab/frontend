@@ -1,0 +1,32 @@
+<div class="backdrop" role="presentation" (click)="close.emit()">
+  <section
+    #dialog
+    class="dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="stack-item-detail-title"
+    tabindex="-1"
+    (click)="$event.stopPropagation()"
+    (keydown)="handleKeydown($event)"
+  >
+    <button type="button" aria-label="Close stack item detail" (click)="close.emit()">×</button>
+    <span>STACK ITEM</span>
+    <h2 id="stack-item-detail-title">DATA ({{ detail().name }})</h2>
+    <dl>
+      <div>
+        <dt>Stack position</dt>
+        <dd>{{ detail().position }}</dd>
+      </div>
+      <div>
+        <dt>Data type</dt>
+        <dd>{{ detail().name }}</dd>
+      </div>
+      <div>
+        <dt>Hex</dt>
+        <dd>
+          <code>{{ detail().hex }}</code>
+        </dd>
+      </div>
+    </dl>
+  </section>
+</div>

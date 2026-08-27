@@ -5,13 +5,13 @@
 }
 
 .explorer-hero {
-  padding-block: clamp(4.5rem, 10vw, 8rem) clamp(3rem, 7vw, 5rem);
+  padding-block: clamp(2.5rem, 6vw, 5rem) clamp(1.75rem, 4vw, 3rem);
 }
 
 h1 {
   max-width: 12ch;
   margin: 0.75rem 0 1.35rem;
-  font-size: clamp(3rem, 7vw, 6rem);
+  font-size: clamp(2.8rem, 6vw, 5rem);
   letter-spacing: -0.065em;
   line-height: 0.94;
 }
@@ -64,7 +64,7 @@ dd {
 }
 
 .examples {
-  margin-bottom: 1.25rem;
+  margin-top: 1.25rem;
 }
 
 .explorer__heading h2,

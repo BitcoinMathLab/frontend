@@ -1,17 +1,48 @@
 <div class="parser-window" aria-label="Parsed P2PKH scripts">
   <section class="script-lane">
-    <header><strong>scriptSig</strong><span>runs first</span></header>
+    <header>
+      <span class="script-name" tabindex="0" aria-describedby="script-sig-hex-tooltip">
+        <strong>scriptSig</strong>
+        <span id="script-sig-hex-tooltip" class="script-hex-tooltip" role="tooltip">
+          <span>Original hex</span>
+          <code>{{ scripts().unlocking }}</code>
+        </span>
+      </span>
+      <span>runs first</span>
+    </header>
     <div class="operation-list">
       @for (operation of unlockingOperations(); track operation.step.index) {
-        <button
-          type="button"
-          (click)="inspectStep.emit(operation.step.index)"
-          [class.operation--current]="operation.step.index === currentIndex()"
-          [class.operation--complete]="operation.step.index < currentIndex()"
-          [attr.aria-current]="operation.step.index === currentIndex() ? 'step' : null"
-        >
-          <span aria-hidden="true">●</span><code>{{ operation.label }}</code>
-        </button>
+        <div class="operation-entry">
+          <button
+            type="button"
+            (click)="inspectStep.emit(operation.step.index)"
+            [class.operation--current]="
+              operation.step.index === currentIndex() && currentPhase() === 'opcode'
+            "
+            [class.operation--complete]="operation.step.index < currentIndex()"
+            [attr.aria-current]="operation.step.index === currentIndex() ? 'step' : null"
+            [title]="operation.step.opcode.hex"
+          >
+            <span aria-hidden="true">●</span>
+            <code>{{ operation.step.opcode.name }}</code>
+            <code class="operation-hex">{{ operation.step.opcode.hex }}</code>
+          </button>
+          @if (operation.dataLabel; as label) {
+            <button
+              type="button"
+              class="operation-data"
+              (click)="inspectData.emit(operation.step.index)"
+              [class.operation--current]="
+                operation.step.index === currentIndex() && currentPhase() === 'stack-push'
+              "
+              [attr.aria-label]="'DATA (' + label + '), ' + dataLength(operation) + ' bytes'"
+            >
+              <span aria-hidden="true">●</span>
+              <code>DATA ({{ label }})</code>
+              <code class="operation-hex">{{ dataPreview(operation) }}</code>
+            </button>
+          }
+        </div>
       }
     </div>
   </section>
@@ -19,18 +50,49 @@
   <div class="parse-arrow" aria-hidden="true">→</div>
 
   <section class="script-lane">
-    <header><strong>scriptPubKey</strong><span>runs second</span></header>
+    <header>
+      <span class="script-name" tabindex="0" aria-describedby="script-pubkey-hex-tooltip">
+        <strong>scriptPubKey</strong>
+        <span id="script-pubkey-hex-tooltip" class="script-hex-tooltip" role="tooltip">
+          <span>Original hex</span>
+          <code>{{ scripts().locking }}</code>
+        </span>
+      </span>
+      <span>runs second</span>
+    </header>
     <div class="operation-list">
       @for (operation of lockingOperations(); track operation.step.index) {
-        <button
-          type="button"
-          (click)="inspectStep.emit(operation.step.index)"
-          [class.operation--current]="operation.step.index === currentIndex()"
-          [class.operation--complete]="operation.step.index < currentIndex()"
-          [attr.aria-current]="operation.step.index === currentIndex() ? 'step' : null"
-        >
-          <span aria-hidden="true">●</span><code>{{ operation.label }}</code>
-        </button>
+        <div class="operation-entry">
+          <button
+            type="button"
+            (click)="inspectStep.emit(operation.step.index)"
+            [class.operation--current]="
+              operation.step.index === currentIndex() && currentPhase() === 'opcode'
+            "
+            [class.operation--complete]="operation.step.index < currentIndex()"
+            [attr.aria-current]="operation.step.index === currentIndex() ? 'step' : null"
+            [title]="operation.step.opcode.hex"
+          >
+            <span aria-hidden="true">●</span>
+            <code>{{ operation.step.opcode.name }}</code>
+            <code class="operation-hex">{{ operation.step.opcode.hex }}</code>
+          </button>
+          @if (operation.dataLabel; as label) {
+            <button
+              type="button"
+              class="operation-data"
+              (click)="inspectData.emit(operation.step.index)"
+              [class.operation--current]="
+                operation.step.index === currentIndex() && currentPhase() === 'stack-push'
+              "
+              [attr.aria-label]="'DATA (' + label + '), ' + dataLength(operation) + ' bytes'"
+            >
+              <span aria-hidden="true">●</span>
+              <code>DATA ({{ label }})</code>
+              <code class="operation-hex">{{ dataPreview(operation) }}</code>
+            </button>
+          }
+        </div>
       }
     </div>
   </section>

@@ -5,11 +5,16 @@
   </header>
   <div class="stack-view__items">
     @for (item of items(); track item.key) {
-      <article class="stack-item" [class]="item.kind">
-        <span class="stack-item__kind">{{ item.kind }}</span>
-        <strong>{{ item.position }} · {{ item.label }}</strong>
-        <code [title]="item.value">{{ item.value }}</code>
-      </article>
+      <button
+        type="button"
+        class="stack-item"
+        [class]="item.kind"
+        (click)="inspectItem.emit({ position: item.position, name: item.label, hex: item.value })"
+        [attr.aria-label]="'DATA (' + item.label + '), ' + item.position + ' of stack'"
+      >
+        <code>DATA ({{ item.label }})</code>
+        <code [title]="item.value">{{ preview(item.value) }}</code>
+      </button>
     } @empty {
       <p>Empty stack</p>
     }

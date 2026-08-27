@@ -1,6 +1,5 @@
 <section class="explorer-hero">
   <div>
-    <p class="eyebrow">Interactive lab · Mainnet</p>
     <h1>Open a Bitcoin transaction.</h1>
     <p>
       Retrieve raw transaction bytes and the previous outputs needed to understand each input. Data
@@ -12,39 +11,10 @@
 <section class="explorer" aria-labelledby="explorer-heading">
   <div class="explorer__heading">
     <div>
-      <p class="eyebrow">Transaction context</p>
       <h2 id="explorer-heading">Look up by transaction ID</h2>
     </div>
     <p>The example ID is ready to replace with any confirmed mainnet transaction.</p>
   </div>
-
-  @if (examples().length) {
-    <section class="examples" aria-labelledby="examples-heading">
-      <div class="examples__heading">
-        <div>
-          <p class="eyebrow">Verified mainnet fixtures</p>
-          <h3 id="examples-heading">Choose a transaction concept</h3>
-        </div>
-        <span>{{ examples().length }} examples</span>
-      </div>
-      <div class="selection-grid">
-        @for (example of examples(); track example.slug) {
-          <button
-            type="button"
-            class="selection-card example-card"
-            (click)="selectExample(example)"
-          >
-            <strong>{{ example.title }}</strong>
-            <span>{{ example.description }}</span>
-            <small>
-              {{ example.input_count }} input(s) · {{ example.output_count }} output(s)
-            </small>
-            <span class="example-card__concepts">{{ example.concepts.join(' · ') }}</span>
-          </button>
-        }
-      </div>
-    </section>
-  }
 
   <form (ngSubmit)="lookup()" novalidate>
     <div class="field-header">
@@ -114,6 +84,33 @@
     </div>
   </form>
 
+  @if (examples().length) {
+    <section class="examples" aria-labelledby="examples-heading">
+      <div class="examples__heading">
+        <div>
+          <h3 id="examples-heading">Choose a transaction concept</h3>
+        </div>
+        <span>{{ examples().length }} examples</span>
+      </div>
+      <div class="selection-grid">
+        @for (example of examples(); track example.slug) {
+          <button
+            type="button"
+            class="selection-card example-card"
+            (click)="selectExample(example)"
+          >
+            <strong>{{ example.title }}</strong>
+            <span>{{ example.description }}</span>
+            <small>
+              {{ example.input_count }} input(s) · {{ example.output_count }} output(s)
+            </small>
+            <span class="example-card__concepts">{{ example.concepts.join(' · ') }}</span>
+          </button>
+        }
+      </div>
+    </section>
+  }
+
   @if (loading()) {
     <div class="state-card" role="status">
       <span class="state-card__pulse" aria-hidden="true"></span>
@@ -128,7 +125,6 @@
     <article class="result" aria-labelledby="result-heading">
       <div class="result__heading">
         <div>
-          <p class="eyebrow">Retrieved transaction</p>
           <h2 id="result-heading">Transaction context</h2>
         </div>
         <div class="result__statuses">
@@ -216,7 +212,6 @@
       <section class="byte-inspector" aria-labelledby="byte-inspector-heading">
         <div class="byte-inspector__heading">
           <div>
-            <p class="eyebrow">Serialization map</p>
             <h3 id="byte-inspector-heading">Transaction byte inspector</h3>
           </div>
           <span>{{ byteFields().length }} decoded fields</span>
@@ -252,7 +247,6 @@
             </div>
             @if (selectedByteField(); as field) {
               <aside class="byte-detail" aria-live="polite">
-                <p class="eyebrow">Selected field</p>
                 <div class="byte-detail__title">
                   <h4>{{ field.label }}</h4>
                   <button

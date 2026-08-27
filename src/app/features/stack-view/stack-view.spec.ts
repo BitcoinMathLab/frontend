@@ -14,8 +14,10 @@ describe('StackView', () => {
     const values = [...fixture.nativeElement.querySelectorAll('code')].map(
       (element: Element) => element.textContent,
     );
-    expect(values).toEqual(['02', '01']);
-    expect(fixture.nativeElement.textContent).toContain('Top');
+    expect(values).toEqual(['DATA (1 byte)', '02', 'DATA (True)', '01']);
+    expect(
+      fixture.nativeElement.querySelector('[aria-label="DATA (1 byte), Top of stack"]'),
+    ).not.toBeNull();
     expect(fixture.nativeElement.textContent).toContain('2 items');
     expect(fixture.nativeElement.textContent).toContain('True');
   });

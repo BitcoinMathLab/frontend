@@ -17,13 +17,13 @@ describe('ScriptVisualizer', () => {
     fixture.detectChanges();
 
     expect(loadP2pkhTrace).toHaveBeenCalledOnce();
-    expect(fixture.nativeElement.textContent).toContain('See the stack come alive.');
+    expect(fixture.nativeElement.textContent).toContain('Stack visualizer');
     expect(fixture.nativeElement.textContent).toContain('scriptSig');
     expect(fixture.nativeElement.textContent).toContain('scriptPubKey');
-    expect(fixture.nativeElement.textContent).toContain('Script');
+    expect(fixture.nativeElement.textContent).toContain('Stack flow');
     expect(fixture.nativeElement.textContent).toContain('Stack state');
     expect(fixture.nativeElement.textContent).toContain('Execution');
-    expect(fixture.nativeElement.textContent).toContain('Ready · step 0 of 3');
+    expect(fixture.nativeElement.textContent).toContain('Step 0 of 3');
     expect(fixture.nativeElement.textContent).toContain('Empty stack');
     expect(fixture.nativeElement.textContent).not.toContain('Outpoint');
     expect(fixture.nativeElement.textContent).not.toContain('Value');
@@ -49,6 +49,6 @@ describe('ScriptVisualizer', () => {
     (fixture.nativeElement.querySelector('.state-card button') as HTMLButtonElement).click();
     fixture.detectChanges();
     expect(loadP2pkhTrace).toHaveBeenCalledTimes(2);
-    expect(fixture.nativeElement.textContent).toContain('Ready · step 0 of 3');
+    expect(fixture.nativeElement.textContent).toContain('Step 0 of 3');
   });
 });

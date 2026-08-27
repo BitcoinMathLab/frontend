@@ -149,6 +149,8 @@ describe('TransactionExplorer', () => {
     const fixture = TestBed.createComponent(TransactionExplorer);
     fixture.detectChanges();
 
+    const form = fixture.nativeElement.querySelector('form') as HTMLFormElement;
+    expect(form.nextElementSibling).toBe(fixture.nativeElement.querySelector('.examples'));
     const example = [...fixture.nativeElement.querySelectorAll('.example-card')].find(
       (button: HTMLButtonElement) => button.textContent?.includes('Legacy P2PKH spend'),
     ) as HTMLButtonElement;
@@ -156,7 +158,6 @@ describe('TransactionExplorer', () => {
     await fixture.whenStable();
     fixture.detectChanges();
 
-    const form = fixture.nativeElement.querySelector('form') as HTMLFormElement;
     form.dispatchEvent(new Event('submit'));
     fixture.detectChanges();
 

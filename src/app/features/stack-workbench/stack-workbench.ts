@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 
 import { StackSnapshot, TraceStep } from '../../core/trace-api.models';
 import { StackView } from '../stack-view/stack-view';
+import { StackItemDetailContent } from '../stack-item-detail/stack-item-detail';
 
 interface MovementItem {
   label: string;
@@ -17,16 +18,27 @@ interface MovementItem {
 })
 export class StackWorkbench {
   readonly step = input<TraceStep | null>(null);
+  readonly showBefore = input(false);
+  readonly showMovement = input(true);
+  readonly inspectItem = output<StackItemDetailContent>();
 
   protected readonly movement = computed(() =>
     this.step() ? stackMovement(this.step() as TraceStep) : { consumed: [], produced: [] },
   );
   protected readonly mainStack = computed<StackSnapshot>(
-    () => this.step()?.stacks.after.main ?? { depth: 0, items: [] },
+    () =>
+      (this.showBefore() ? this.step()?.stacks.before.main : this.step()?.stacks.after.main) ?? {
+        depth: 0,
+        items: [],
+      },
   );
-  protected readonly altStack = computed<StackSnapshot>(
-    () => this.step()?.stacks.after.alt ?? { depth: 0, items: [] },
-  );
+
+  protected readonly stackStateLabel = computed(() => {
+    const step = this.step();
+    if (!step) return 'empty before execution';
+    if (this.showBefore()) return `before ${step.opcode.name}`;
+    return step.opcode.is_push ? 'after STACK PUSH' : `after ${step.opcode.name}`;
+  });
 }
 
 function stackMovement(step: TraceStep): { consumed: MovementItem[]; produced: MovementItem[] } {
