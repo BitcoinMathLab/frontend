@@ -1,0 +1,5 @@
+interface:
+  display_name: 'Website Design Reviewer'
+  short_description: 'Audit and improve the complete website design'
+  brand_color: '#F5A524'
+  default_prompt: 'Use $website-design-review to review the entire website and implement a cohesive, accessible design improvement pass.'
