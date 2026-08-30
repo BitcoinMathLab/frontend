@@ -1,0 +1,157 @@
+<section
+  class="signature-player"
+  tabindex="0"
+  aria-label="Signature walkthrough player"
+  (keydown)="handleKeydown($event)"
+>
+  <div class="signature-controls">
+    <div class="signature-type">
+      <span>Signature type</span>
+      <strong>Legacy ECDSA · {{ result().script_type }}</strong>
+    </div>
+    <div class="vcr" role="group" aria-label="Signature playback controls">
+      <button
+        type="button"
+        (click)="reset()"
+        [disabled]="atStart()"
+        aria-label="Restart signature walkthrough"
+      >
+        &lt;&lt;
+      </button>
+      <button
+        type="button"
+        (click)="previous()"
+        [disabled]="atStart()"
+        aria-label="Previous signature step"
+      >
+        ◀
+      </button>
+      <button
+        class="vcr__primary"
+        type="button"
+        (click)="togglePlay()"
+        [attr.aria-label]="playing() ? 'Pause signature walkthrough' : 'Play signature walkthrough'"
+      >
+        <span aria-hidden="true">{{ playing() ? 'Ⅱ' : '▶' }}</span>
+        <small>{{ playing() ? 'Pause' : 'Play' }}</small>
+      </button>
+      <button type="button" (click)="next()" [disabled]="atEnd()" aria-label="Next signature step">
+        ▶
+      </button>
+      <button
+        type="button"
+        (click)="finish()"
+        [disabled]="atEnd()"
+        aria-label="Finish signature walkthrough"
+      >
+        &gt;&gt;
+      </button>
+    </div>
+    <div class="signature-status" aria-label="Signature walkthrough status">
+      <span>{{ stepLabel() }}</span>
+      <strong [class.signature-status__valid]="atEnd() && result().signature.valid">
+        {{ atEnd() ? (result().signature.valid ? 'Valid' : 'Invalid') : currentStep().phase }}
+      </strong>
+    </div>
+  </div>
+  <div
+    class="signature-progress"
+    role="progressbar"
+    aria-label="Signature walkthrough progress"
+    aria-valuemin="0"
+    aria-valuemax="100"
+    [attr.aria-valuenow]="progress()"
+  >
+    <span [style.width.%]="progress()"></span>
+  </div>
+
+  <div class="signature-grid">
+    <section
+      class="signature-pane transaction-pane"
+      aria-labelledby="signature-transaction-heading"
+    >
+      <header>
+        <div>
+          <span>Signing material</span>
+          <h2 id="signature-transaction-heading">Transaction</h2>
+        </div>
+        <code>input {{ result().input_index }}</code>
+      </header>
+      <div class="transaction-regions">
+        <article [class.active]="active('transaction')">
+          <span>Spending transaction</span>
+          <strong>{{ result().sources.script_sig.transaction_txid }}</strong>
+          <code>{{ transactionHex() }}</code>
+        </article>
+        <article [class.active]="active('script-sig')" class="unlocking-region">
+          <span>scriptSig · signature and public key</span>
+          <code>{{ result().scripts.unlocking }}</code>
+        </article>
+        <article [class.active]="active('script-pubkey')" class="locking-region">
+          <span>Previous output scriptPubKey</span>
+          <strong
+            >{{ result().sources.script_pubkey.transaction_txid }}:{{
+              result().sources.script_pubkey.index
+            }}</strong
+          >
+          <code>{{ result().scripts.locking }}</code>
+        </article>
+        <article [class.active]="active('sighash')">
+          <span>Signature hash mode</span>
+          <strong>{{ result().signature.sighash_label }}</strong>
+          <code>0x{{ result().signature.sighash_type.toString(16).padStart(2, '0') }}</code>
+        </article>
+        <article [class.active]="active('digest')">
+          <span>Double-SHA-256 digest</span>
+          <code>{{ result().signature.digest_hex }}</code>
+        </article>
+      </div>
+    </section>
+
+    <section class="signature-pane verification-pane" aria-labelledby="signature-operation-heading">
+      <header>
+        <div>
+          <span>Now running</span>
+          <h2 id="signature-operation-heading">{{ currentStep().phase }}</h2>
+        </div>
+        <span>{{ result().signature.algorithm }}</span>
+      </header>
+      <article class="active-signature-step" aria-live="polite">
+        <strong>{{ currentStep().title }}</strong>
+        <p>{{ currentStep().description }}</p>
+      </article>
+
+      @if (currentIndex() >= 2 && currentIndex() < 4) {
+        <div class="signature-value">
+          <span>Legacy preimage</span>
+          <code>{{ result().signature.preimage_hex }}</code>
+        </div>
+      } @else if (currentIndex() >= 4) {
+        <div class="signature-value">
+          <span>Digest</span>
+          <code>{{ result().signature.digest_hex }}</code>
+        </div>
+      }
+
+      @if (atEnd()) {
+        <dl>
+          <div>
+            <dt>DER signature</dt>
+            <dd>
+              <code>{{ result().signature.signature_hex }}</code>
+            </dd>
+          </div>
+          <div>
+            <dt>Public key</dt>
+            <dd>
+              <code>{{ result().signature.public_key_hex }}</code>
+            </dd>
+          </div>
+        </dl>
+        <p class="signature-verdict" [class.signature-verdict--invalid]="!result().signature.valid">
+          {{ result().signature.valid ? 'Valid signature' : 'Invalid signature' }}
+        </p>
+      }
+    </section>
+  </div>
+</section>

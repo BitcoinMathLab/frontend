@@ -170,7 +170,7 @@ test('connects spend elements, parsing, execution, stacks, and signature detail'
   await page.getByRole('button', { name: 'Close script source detail' }).click();
   await expect(page.getByLabel('Restart trace')).toHaveText('<<');
   await expect(page.getByLabel('Go to result')).toHaveText('>>');
-  await expect(page.getByLabel('Signature example')).toHaveValue('p2pkh');
+  await expect(page.getByLabel('Signature type')).toHaveValue('p2pkh');
   await expect(page.getByLabel('Execution status')).toContainText('Step 0 of 5');
   await expect(page.getByLabel('Execution status')).toContainText('Ready');
   await expect(page.getByLabel('Main stack')).toContainText('Empty stack');
@@ -246,15 +246,62 @@ test('connects spend elements, parsing, execution, stacks, and signature detail'
     'aria-selected',
     'true',
   );
-  await expect(page.getByRole('heading', { name: 'Signature verification' })).toBeVisible();
-  await expect(page.getByText('30signature')).toBeVisible();
-  await expect(page.getByText('Legacy preimage context')).toBeVisible();
+  await expect(page.getByLabel('Signature walkthrough player')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Transaction' })).toBeVisible();
+  await expect(page.getByText('Legacy ECDSA · P2PKH')).toBeVisible();
+  await page.getByRole('button', { name: 'Next signature step' }).click();
+  await expect(page.getByText('Start with the spending transaction')).toBeVisible();
+  await expect(page.locator('.transaction-regions article.active')).toHaveCount(2);
+  await page.getByRole('button', { name: 'Next signature step' }).click();
+  await expect(page.getByText('Insert the previous locking script')).toBeVisible();
   await expect(page.getByText('01000000preimage01000000')).toBeVisible();
-  await page.getByRole('button', { name: /Hash the message/ }).click();
-  await expect(page.getByText('Digest to verify')).toBeVisible();
-  await expect(page.locator('.signature-stage-detail').getByText('c'.repeat(64))).toBeVisible();
-  await page.getByRole('button', { name: /Verify ECDSA/ }).click();
-  await expect(page.getByText('Verification result')).toBeVisible();
+  await page.getByRole('button', { name: 'Finish signature walkthrough' }).click();
+  await expect(page.getByText('Valid signature')).toBeVisible();
+  await expect(page.getByText('30signature')).toBeVisible();
+  await expect(page.locator('.verification-pane').getByText('c'.repeat(64))).toBeVisible();
+});
+
+test('loads modern witness material without sending it to the legacy trace endpoint', async ({
+  page,
+}) => {
+  const txid = 'd'.repeat(64);
+  let traceRequests = 0;
+  await page.route('**/api/v1/traces/p2pkh', async (route) => {
+    traceRequests += 1;
+    await route.fulfill({ contentType: 'application/json', json: validResponse });
+  });
+  await page.route(`**/api/v1/transactions/${txid}/context`, async (route) => {
+    await route.fulfill({
+      contentType: 'application/json',
+      json: {
+        transaction_hex: '020000000001',
+        spent_outputs: [
+          {
+            txid: 'e'.repeat(64),
+            vout: 2,
+            spend_type: 'P2WPKH',
+            amount_sats: 42,
+            script_pubkey_hex: `0014${'11'.repeat(20)}`,
+            script_sig_hex: '',
+            witness_hex: ['30signature', '03publickey'],
+          },
+        ],
+      },
+    });
+  });
+
+  await page.goto('/visualizer');
+  await page.getByLabel('Transaction ID').fill(txid);
+  await page.getByLabel('Input').fill('0');
+  await page.getByRole('button', { name: 'Trace input' }).click();
+
+  await expect(page.getByText('SegWit ECDSA · P2WPKH')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Witness stack' })).toBeVisible();
+  await expect(page.getByText('30signature')).toBeVisible();
+  await expect(page.getByText('03publickey')).toBeVisible();
+  await expect(page.getByText(`0014${'11'.repeat(20)}`)).toBeVisible();
+  await expect(page.getByText('Signature walkthrough not yet available for P2WPKH')).toBeVisible();
+  expect(traceRequests).toBe(1);
 });
 
 test('shows a failed P2PKH result without adding another lesson surface', async ({ page }) => {

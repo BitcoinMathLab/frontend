@@ -105,6 +105,8 @@ export interface PreviousOutputContext {
     | 'UNKNOWN';
   readonly is_nested: boolean;
   readonly redeem_script_hex: string | null;
+  readonly script_sig_hex: string;
+  readonly witness_hex: readonly string[];
 }
 
 export interface TransactionOutputContext {

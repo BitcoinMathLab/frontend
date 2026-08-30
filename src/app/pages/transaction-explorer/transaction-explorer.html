@@ -366,13 +366,11 @@
                   <strong>Input {{ $index + 1 }}</strong>
                   <div>
                     <span>{{ formatSats(output.amount_sats) }} sats</span>
-                    @if (output.spend_type === 'P2PKH') {
-                      <a
-                        class="visualize-input"
-                        [attr.href]="'/visualizer?txid=' + transaction.txid + '&input=' + $index"
-                        >Visualize this spend →</a
-                      >
-                    }
+                    <a
+                      class="visualize-input"
+                      [attr.href]="'/visualizer?txid=' + transaction.txid + '&input=' + $index"
+                      >Visualize this spend →</a
+                    >
                   </div>
                 </div>
                 <dl>

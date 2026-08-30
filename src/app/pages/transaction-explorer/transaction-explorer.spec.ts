@@ -90,6 +90,8 @@ const RESPONSE: TransactionContextResponse = {
       spend_type: 'P2PKH',
       is_nested: false,
       redeem_script_hex: null,
+      script_sig_hex: '483045',
+      witness_hex: [],
     },
   ],
 };

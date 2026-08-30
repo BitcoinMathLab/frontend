@@ -138,6 +138,56 @@ describe('ScriptVisualizer', () => {
     });
   });
 
+  it('loads witness and scriptPubKey material for a modern signature input', async () => {
+    const txid = 'd'.repeat(64);
+    const loadTransactionContext = vi.fn().mockReturnValue(
+      of({
+        transaction_hex: '020000000001',
+        spent_outputs: [
+          {
+            txid: 'e'.repeat(64),
+            vout: 2,
+            spend_type: 'P2WPKH',
+            amount_sats: 20,
+            script_pubkey_hex: '0014' + '11'.repeat(20),
+            script_sig_hex: '',
+            witness_hex: ['30signature', '03publickey'],
+          },
+        ],
+      }),
+    );
+    const loadP2pkhTrace = vi.fn().mockReturnValue(of(TRACE_RESPONSE_FIXTURE));
+    await TestBed.configureTestingModule({
+      imports: [ScriptVisualizer],
+      providers: [
+        { provide: TraceApi, useValue: { loadTransactionContext, loadP2pkhTrace } },
+        { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: { get: () => null } } } },
+      ],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(ScriptVisualizer);
+    fixture.detectChanges();
+    const component = fixture.componentInstance as unknown as {
+      transactionId: string;
+      inputIndex: number;
+      loadSelectedInput(): void;
+    };
+    component.transactionId = txid;
+    component.inputIndex = 0;
+    component.loadSelectedInput();
+    fixture.detectChanges();
+
+    expect(loadP2pkhTrace).toHaveBeenCalledOnce();
+    expect(fixture.nativeElement.textContent).toContain('SegWit ECDSA · P2WPKH');
+    expect(fixture.nativeElement.textContent).toContain('Witness stack');
+    expect(fixture.nativeElement.textContent).toContain('30signature');
+    expect(fixture.nativeElement.textContent).toContain('03publickey');
+    expect(fixture.nativeElement.textContent).toContain('0014' + '11'.repeat(20));
+    expect(fixture.nativeElement.textContent).toContain(
+      'Signature walkthrough not yet available for P2WPKH',
+    );
+  });
+
   it('retries the selected transaction input after its trace request fails', async () => {
     const txid = 'c'.repeat(64);
     const context = {

@@ -12,12 +12,30 @@ import { ActivatedRoute } from '@angular/router';
 
 import { CURATED_P2PKH_REQUEST } from '../../core/curated-p2pkh';
 import { TraceApi } from '../../core/trace-api';
-import { P2pkhTraceRequest, P2pkhTraceResponse } from '../../core/trace-api.models';
+import {
+  P2pkhTraceRequest,
+  P2pkhTraceResponse,
+  PreviousOutputContext,
+} from '../../core/trace-api.models';
+import { SignaturePlayer } from '../../features/signature-player/signature-player';
 import { TracePlayer } from '../../features/trace-player/trace-player';
+
+interface ContextSpend {
+  readonly txid: string;
+  readonly inputIndex: number;
+  readonly transactionHex: string;
+  readonly signatureFamily: string;
+  readonly spendType: string;
+  readonly unlockingLabel: 'scriptSig' | 'witness';
+  readonly unlockingItems: readonly string[];
+  readonly scriptPubkeyHex: string;
+  readonly previousTxid: string;
+  readonly previousVout: number;
+}
 
 @Component({
   selector: 'app-script-visualizer',
-  imports: [FormsModule, TracePlayer],
+  imports: [FormsModule, SignaturePlayer, TracePlayer],
   templateUrl: './script-visualizer.html',
   styleUrl: './script-visualizer.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -28,10 +46,11 @@ export class ScriptVisualizer implements OnInit, OnDestroy {
   private requestSubscription: Subscription | undefined;
 
   protected readonly response = signal<P2pkhTraceResponse | null>(null);
+  protected readonly contextSpend = signal<ContextSpend | null>(null);
+  protected readonly transactionHex = signal(CURATED_P2PKH_REQUEST.transaction_hex);
   protected readonly loading = signal(true);
   protected readonly error = signal('');
   protected readonly activeWorkspace = signal<'execution' | 'signature'>('execution');
-  protected readonly signatureStage = signal<'message' | 'hash' | 'verify'>('message');
   protected transactionId = '';
   protected inputIndex = 0;
 
@@ -75,6 +94,8 @@ export class ScriptVisualizer implements OnInit, OnDestroy {
     this.requestSubscription?.unsubscribe();
     this.loading.set(true);
     this.error.set('');
+    this.response.set(null);
+    this.contextSpend.set(null);
     if (!/^[0-9a-fA-F]{64}$/.test(txid)) {
       this.loading.set(false);
       this.error.set('The transaction ID in this visualizer link is invalid.');
@@ -89,8 +110,11 @@ export class ScriptVisualizer implements OnInit, OnDestroy {
           return;
         }
         if (selectedOutput.spend_type !== 'P2PKH') {
+          this.contextSpend.set(
+            this.toContextSpend(context.transaction_hex, txid, inputIndex, selectedOutput),
+          );
+          this.activeWorkspace.set('signature');
           this.loading.set(false);
-          this.error.set('The selected input is not a legacy P2PKH spend.');
           return;
         }
         this.loadRequest({
@@ -113,6 +137,8 @@ export class ScriptVisualizer implements OnInit, OnDestroy {
     this.requestSubscription?.unsubscribe();
     this.loading.set(true);
     this.error.set('');
+    this.contextSpend.set(null);
+    this.transactionHex.set(request.transaction_hex);
     this.requestSubscription = this.traceApi
       .loadP2pkhTrace(request)
       .pipe(finalize(() => this.loading.set(false)))
@@ -126,6 +152,33 @@ export class ScriptVisualizer implements OnInit, OnDestroy {
     this.activeWorkspace.set(workspace);
   }
 
+  private toContextSpend(
+    transactionHex: string,
+    txid: string,
+    inputIndex: number,
+    output: PreviousOutputContext,
+  ): ContextSpend {
+    const isTaproot = output.spend_type.startsWith('P2TR');
+    const isWitness =
+      output.spend_type.includes('WPKH') || output.spend_type.includes('WSH') || isTaproot;
+    return {
+      txid,
+      inputIndex,
+      transactionHex,
+      signatureFamily: isTaproot ? 'Taproot Schnorr' : isWitness ? 'SegWit ECDSA' : 'Legacy ECDSA',
+      spendType: output.spend_type,
+      unlockingLabel: isWitness ? 'witness' : 'scriptSig',
+      unlockingItems: isWitness
+        ? (output.witness_hex ?? [])
+        : output.script_sig_hex
+          ? [output.script_sig_hex]
+          : [],
+      scriptPubkeyHex: output.script_pubkey_hex,
+      previousTxid: output.txid,
+      previousVout: output.vout,
+    };
+  }
+
   protected handleWorkspaceKeydown(event: KeyboardEvent): void {
     if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
     event.preventDefault();
@@ -136,10 +189,6 @@ export class ScriptVisualizer implements OnInit, OnDestroy {
       const tabs = tablist.querySelectorAll<HTMLButtonElement>('[role="tab"]');
       tabs[workspace === 'execution' ? 0 : 1]?.focus();
     });
-  }
-
-  protected selectSignatureStage(stage: 'message' | 'hash' | 'verify'): void {
-    this.signatureStage.set(stage);
   }
 
   ngOnDestroy(): void {

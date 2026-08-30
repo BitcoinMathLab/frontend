@@ -1,0 +1,279 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+.signature-player:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 3px;
+}
+.signature-controls {
+  display: grid;
+  align-items: center;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 1rem;
+  border: 1px solid rgba(245, 165, 36, 0.32);
+  border-radius: 1rem;
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.96), rgba(15, 23, 42, 0.96));
+  padding: 1rem;
+}
+.signature-type {
+  display: grid;
+  gap: 0.25rem;
+}
+.signature-type span,
+.transaction-pane header span,
+.verification-pane header span,
+.transaction-regions article > span,
+.signature-value > span {
+  color: var(--color-text-subtle);
+  font-size: 0.68rem;
+  font-weight: 750;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+.signature-type strong {
+  color: var(--color-paper);
+}
+.vcr {
+  display: flex;
+  grid-column: 2;
+  gap: 0.4rem;
+}
+.vcr button {
+  display: inline-flex;
+  min-width: 2.8rem;
+  min-height: 2.8rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 0.65rem;
+  background: rgba(2, 6, 23, 0.72);
+  color: #f8fafc;
+  cursor: pointer;
+  padding: 0.4rem 0.55rem;
+}
+.vcr button:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+.vcr .vcr__primary {
+  min-width: 5.4rem;
+  border-color: rgba(74, 222, 128, 0.7);
+  background: linear-gradient(135deg, #86efac, #22c55e);
+  color: #062b14;
+}
+.signature-status {
+  display: flex;
+  align-items: center;
+  grid-column: 3;
+  justify-self: end;
+  gap: 0.7rem;
+  font-family: var(--font-mono);
+}
+.signature-status > strong {
+  min-width: 8rem;
+  border: 1px solid rgba(96, 165, 250, 0.45);
+  border-radius: 999px;
+  color: #dbeafe;
+  padding: 0.55rem 0.8rem;
+  text-align: center;
+}
+.signature-status > span {
+  color: #d8e1ec;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.signature-status .signature-status__valid {
+  border-color: rgba(67, 209, 139, 0.42);
+  color: var(--color-valid);
+}
+.signature-progress {
+  height: 0.35rem;
+  margin: 0.7rem 0 1rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+}
+.signature-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--color-amber), var(--color-blue), var(--color-valid));
+  transition: width 220ms ease;
+}
+.signature-grid {
+  display: grid;
+  align-items: stretch;
+  grid-template-columns: minmax(18rem, 0.9fr) minmax(23rem, 1.1fr);
+  gap: 1rem;
+}
+.signature-pane {
+  min-width: 0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 1rem;
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.92), rgba(15, 23, 42, 0.92));
+  padding: 1rem;
+}
+.transaction-pane {
+  border-top-color: rgba(245, 165, 36, 0.7);
+}
+.verification-pane {
+  border-top-color: rgba(67, 209, 139, 0.7);
+}
+.signature-pane header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+  gap: 0.75rem;
+}
+.signature-pane h2 {
+  margin: 0.2rem 0 0;
+  font-size: 1.3rem;
+}
+.signature-pane header > code {
+  color: var(--color-amber);
+}
+.transaction-regions {
+  display: grid;
+  gap: 0.7rem;
+}
+.transaction-regions article {
+  display: grid;
+  min-width: 0;
+  gap: 0.35rem;
+  border: 1px solid var(--color-graphite);
+  border-radius: 0.65rem;
+  background: rgba(2, 6, 23, 0.48);
+  padding: 0.75rem;
+  transition:
+    border-color 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease;
+}
+.transaction-regions article.active {
+  border-color: var(--color-amber);
+  background: rgba(245, 165, 36, 0.09);
+  box-shadow: 0 0 0 2px rgba(245, 165, 36, 0.1);
+}
+.transaction-regions article.locking-region.active {
+  border-color: var(--color-blue);
+  background: rgba(101, 167, 255, 0.1);
+  box-shadow: 0 0 0 2px rgba(101, 167, 255, 0.1);
+}
+.transaction-regions article.unlocking-region.active {
+  border-color: var(--color-amber);
+}
+.transaction-regions strong {
+  overflow-wrap: anywhere;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+}
+.signature-pane code {
+  color: #fcd58a;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+.active-signature-step {
+  min-height: 9rem;
+  border: 1px dashed rgba(96, 165, 250, 0.42);
+  border-radius: 0.8rem;
+  background: rgba(30, 64, 175, 0.1);
+  padding: 1.15rem;
+}
+.active-signature-step strong {
+  color: var(--color-paper);
+  font-size: 1.35rem;
+}
+.active-signature-step p {
+  margin: 0.65rem 0 0;
+  color: #d1dbe7;
+  line-height: 1.6;
+}
+.signature-value {
+  display: grid;
+  margin-top: 1rem;
+  gap: 0.45rem;
+  border: 1px solid var(--color-graphite);
+  border-radius: 0.65rem;
+  background: var(--color-canvas);
+  padding: 0.8rem;
+}
+.verification-pane dl {
+  display: grid;
+  margin: 1rem 0 0;
+  gap: 0.7rem;
+}
+.verification-pane dl div {
+  display: grid;
+  gap: 0.25rem;
+}
+.verification-pane dt {
+  color: var(--color-text-subtle);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+}
+.verification-pane dd {
+  margin: 0;
+}
+.signature-verdict {
+  width: fit-content;
+  margin: 1rem 0 0;
+  border: 1px solid rgba(67, 209, 139, 0.42);
+  border-radius: 999px;
+  background: rgba(67, 209, 139, 0.12);
+  color: var(--color-valid);
+  font-weight: 750;
+  padding: 0.5rem 0.75rem;
+}
+.signature-verdict--invalid {
+  border-color: rgba(248, 113, 113, 0.45);
+  background: rgba(248, 113, 113, 0.1);
+  color: #fca5a5;
+}
+@media (max-width: 58rem) {
+  .signature-controls {
+    grid-template-columns: 1fr auto;
+  }
+  .vcr {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .signature-status {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+    justify-content: space-between;
+  }
+  .signature-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 36rem) {
+  .signature-controls {
+    grid-template-columns: 1fr;
+  }
+  .signature-type {
+    text-align: center;
+  }
+  .vcr {
+    grid-column: 1;
+    grid-row: auto;
+    justify-self: center;
+  }
+  .signature-status {
+    grid-column: 1;
+    flex-wrap: wrap;
+  }
+  .signature-status > strong {
+    flex: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .signature-progress span,
+  .transaction-regions article {
+    transition: none;
+  }
+}
