@@ -1,10 +1,12 @@
 # Script Visualizer QA
 
-The Script Visualizer at `/visualizer` teaches one curated P2PKH spend and accepts an Explorer selection at
+The Script Visualizer at `/visualizer` teaches a curated P2PKH spend and accepts an Explorer selection at
 `/visualizer?txid=<txid>&input=<zero-based-index>`. It presents the parsed
 `scriptSig` and `scriptPubKey`, the operation currently running, and the resulting main-stack state.
 The centered source bar above the workspace also accepts a transaction ID and zero-based input directly. Legacy P2PKH
-inputs receive full script and signature walkthroughs. Other legacy, SegWit, and Taproot inputs show their real
+inputs receive full script and signature walkthroughs. Native P2WPKH inputs receive a verified witness-stack execution
+trace plus a synchronized BIP143 signature walkthrough covering component hashes, the spent amount, derived
+`scriptCode`, four-byte hash type, double SHA-256, and ECDSA. Other legacy, SegWit, and Taproot inputs show their real
 scriptSig or witness plus previous scriptPubKey while their verified engine walkthrough boundary is still pending.
 The walkthrough finishes with an explicit stack-validation phase: Bitcoin accepts the spend only
 when the final stack value is true.
@@ -48,9 +50,10 @@ frontend, backend, and pinned Bitclone engine together.
    the resulting script provenance to identify that transaction and input.
 8. From Explorer, activate `Visualize this spend` on both a P2PKH and a modern input. Expect the visualizer source
    transaction and input to match the Explorer result.
-9. Enter a SegWit or Taproot spend. Expect the ordered witness items and previous output scriptPubKey, the detected
-   signature type, and an explicit notice that its verified walkthrough is not yet available. Do not expect the legacy
-   P2PKH trace endpoint to run.
+9. Enter a native P2WPKH spend. Expect the ordered witness items to initialize the stack, the derived P2PKH `scriptCode`
+   to execute, and the Signature workspace to highlight `hashPrevouts`, `hashSequence`, `hashOutputs`, amount, and
+   `scriptCode` as BIP143 is assembled and verified. For P2WSH or Taproot, expect the real context and an explicit
+   notice that its verified walkthrough is not yet available. Modern inputs must never call the legacy P2PKH endpoint.
 10. Advance through the last opcode. The final playback phase must read `STACK VALIDATION` and
     explain that the spend is valid only when the final stack value is true. The verdict must not
     appear before this phase.

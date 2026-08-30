@@ -89,6 +89,34 @@ const validResponse = {
   },
 };
 
+const p2wpkhResponse = {
+  ...validResponse,
+  script_type: 'P2WPKH',
+  scripts: {
+    witness: ['30signature01', '03publickey'],
+    locking: `0014${'11'.repeat(20)}`,
+    script_code: `76a914${'11'.repeat(20)}88ac`,
+  },
+  sources: {
+    witness: { transaction_txid: 'd'.repeat(64), index: 0 },
+    script_pubkey: { transaction_txid: 'e'.repeat(64), index: 2 },
+  },
+  signature: {
+    ...validResponse.signature,
+    preimage_hex: '02000000bip14301000000',
+    hash_prevouts_hex: 'a'.repeat(64),
+    hash_sequence_hex: 'b'.repeat(64),
+    hash_outputs_hex: 'c'.repeat(64),
+    script_code_hex: `1976a914${'11'.repeat(20)}88ac`,
+    amount_sats: 42,
+  },
+  trace: {
+    ...validResponse.trace,
+    script: `76a914${'11'.repeat(20)}88ac`,
+    steps: validResponse.trace.steps.slice(1),
+  },
+};
+
 async function mockTraceApi(page: Page, success = true): Promise<void> {
   await page.route('**/api/v1/traces/p2pkh', async (route) => {
     await route.fulfill({
@@ -261,14 +289,15 @@ test('connects spend elements, parsing, execution, stacks, and signature detail'
   await expect(page.locator('.verification-pane').getByText('c'.repeat(64))).toBeVisible();
 });
 
-test('loads modern witness material without sending it to the legacy trace endpoint', async ({
-  page,
-}) => {
+test('loads verified P2WPKH signature and stack walkthroughs', async ({ page }) => {
   const txid = 'd'.repeat(64);
   let traceRequests = 0;
   await page.route('**/api/v1/traces/p2pkh', async (route) => {
     traceRequests += 1;
     await route.fulfill({ contentType: 'application/json', json: validResponse });
+  });
+  await page.route('**/api/v1/traces/p2wpkh', async (route) => {
+    await route.fulfill({ contentType: 'application/json', json: p2wpkhResponse });
   });
   await page.route(`**/api/v1/transactions/${txid}/context`, async (route) => {
     await route.fulfill({
@@ -296,11 +325,33 @@ test('loads modern witness material without sending it to the legacy trace endpo
   await page.getByRole('button', { name: 'Trace input' }).click();
 
   await expect(page.getByText('SegWit ECDSA · P2WPKH')).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Witness stack' })).toBeVisible();
+  await expect(page.getByLabel('Signature walkthrough player')).toBeVisible();
   await expect(page.getByText('30signature')).toBeVisible();
   await expect(page.getByText('03publickey')).toBeVisible();
-  await expect(page.getByText(`0014${'11'.repeat(20)}`)).toBeVisible();
-  await expect(page.getByText('Signature walkthrough not yet available for P2WPKH')).toBeVisible();
+  await expect(page.getByText('hashPrevouts', { exact: false })).toBeVisible();
+  await expect(page.locator('.signature-grid')).toHaveCSS(
+    'grid-template-columns',
+    /\d+(?:\.\d+)?px \d+(?:\.\d+)?px/,
+  );
+  await page.getByRole('button', { name: 'Next signature step' }).click();
+  await expect(page.getByText('Commit every previous outpoint')).toBeVisible();
+  await page.getByRole('button', { name: 'Finish signature walkthrough' }).click();
+  await expect(page.getByText('Valid signature')).toBeVisible();
+  await page.getByRole('tab', { name: 'Execution' }).click();
+  await expect(page.getByLabel('Script trace player')).toBeVisible();
+  await expect(page.getByText('P2PKH scriptCode', { exact: true })).toBeVisible();
+  await expect(page.getByText('initializes stack')).toBeVisible();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole('tab', { name: 'Signature' }).click();
+  await expect(page.locator('.signature-grid')).toHaveCSS(
+    'grid-template-columns',
+    /\d+(?:\.\d+)?px/,
+  );
+  const pageWidth = await page.evaluate(() => ({
+    viewport: window.innerWidth,
+    document: document.documentElement.scrollWidth,
+  }));
+  expect(pageWidth.document).toBeLessThanOrEqual(pageWidth.viewport);
   expect(traceRequests).toBe(1);
 });
 

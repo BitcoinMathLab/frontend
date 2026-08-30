@@ -76,8 +76,10 @@
       <div id="execution-panel" role="tabpanel" aria-labelledby="execution-tab">
         <app-trace-player
           [trace]="result.trace"
-          [scripts]="result.scripts"
-          [sources]="result.sources"
+          [scripts]="displayScripts(result)"
+          [sources]="displaySources(result)"
+          [scriptType]="result.script_type"
+          [witnessItems]="witnessItems(result)"
           (openSignatureWorkspace)="showWorkspace('signature')"
         />
       </div>

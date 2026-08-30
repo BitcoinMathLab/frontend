@@ -1,4 +1,4 @@
-import { ExecutionTrace, P2pkhTraceResponse } from '../core/trace-api.models';
+import { ExecutionTrace, P2pkhTraceResponse, P2wpkhTraceResponse } from '../core/trace-api.models';
 
 export const TRACE_FIXTURE: ExecutionTrace = {
   schema_version: 1,
@@ -95,6 +95,37 @@ export const TRACE_RESPONSE_FIXTURE: P2pkhTraceResponse = {
       '0100000001aabb010000001976a914cc88acffffffff01010000000000000001510000000001000000',
     digest_hex: 'd21483940571a138f8c768a97f1002cc6b6b0c4df9f647feb513b881162d66e6',
     valid: true,
+  },
+  trace: TRACE_FIXTURE,
+};
+
+export const P2WPKH_TRACE_RESPONSE_FIXTURE: P2wpkhTraceResponse = {
+  api_version: 'v1',
+  script_type: 'P2WPKH',
+  input_index: 0,
+  scripts: {
+    witness: ['30signature01', '03publickey'],
+    locking: `0014${'11'.repeat(20)}`,
+    script_code: `76a914${'11'.repeat(20)}88ac`,
+  },
+  sources: {
+    witness: { transaction_txid: 'd'.repeat(64), index: 0 },
+    script_pubkey: { transaction_txid: 'e'.repeat(64), index: 2 },
+  },
+  signature: {
+    algorithm: 'ECDSA/secp256k1',
+    signature_hex: '30signature',
+    public_key_hex: '03publickey',
+    sighash_type: 1,
+    sighash_label: 'SIGHASH_ALL',
+    preimage_hex: '02000000bip14301000000',
+    digest_hex: 'c'.repeat(64),
+    valid: true,
+    hash_prevouts_hex: 'a'.repeat(64),
+    hash_sequence_hex: 'b'.repeat(64),
+    hash_outputs_hex: 'c'.repeat(64),
+    script_code_hex: `1976a914${'11'.repeat(20)}88ac`,
+    amount_sats: 42,
   },
   trace: TRACE_FIXTURE,
 };

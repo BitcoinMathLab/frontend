@@ -7,7 +7,10 @@
   <div class="signature-controls">
     <div class="signature-type">
       <span>Signature type</span>
-      <strong>Legacy ECDSA · {{ result().script_type }}</strong>
+      <strong
+        >{{ result().script_type === 'P2WPKH' ? 'SegWit ECDSA' : 'Legacy ECDSA' }} ·
+        {{ result().script_type }}</strong
+      >
     </div>
     <div class="vcr" role="group" aria-label="Signature playback controls">
       <button
@@ -80,12 +83,16 @@
       <div class="transaction-regions">
         <article [class.active]="active('transaction')">
           <span>Spending transaction</span>
-          <strong>{{ result().sources.script_sig.transaction_txid }}</strong>
+          <strong>{{ spendingTransactionId() }}</strong>
           <code>{{ transactionHex() }}</code>
         </article>
         <article [class.active]="active('script-sig')" class="unlocking-region">
-          <span>scriptSig · signature and public key</span>
-          <code>{{ result().scripts.unlocking }}</code>
+          <span>{{
+            result().script_type === 'P2WPKH'
+              ? 'Witness · signature and public key'
+              : 'scriptSig · signature and public key'
+          }}</span>
+          <code>{{ unlockingData() }}</code>
         </article>
         <article [class.active]="active('script-pubkey')" class="locking-region">
           <span>Previous output scriptPubKey</span>
@@ -94,8 +101,30 @@
               result().sources.script_pubkey.index
             }}</strong
           >
-          <code>{{ result().scripts.locking }}</code>
+          <code>{{ lockingScript() }}</code>
         </article>
+        @if (segwitSignature(); as segwit) {
+          <article [class.active]="active('prevouts')">
+            <span>hashPrevouts · all input outpoints</span>
+            <code>{{ segwit.hash_prevouts_hex }}</code>
+          </article>
+          <article [class.active]="active('sequences')">
+            <span>hashSequence · all input sequences</span>
+            <code>{{ segwit.hash_sequence_hex }}</code>
+          </article>
+          <article [class.active]="active('outputs')">
+            <span>hashOutputs · committed outputs</span>
+            <code>{{ segwit.hash_outputs_hex }}</code>
+          </article>
+          <article [class.active]="active('amount')">
+            <span>Previous output amount</span>
+            <strong>{{ segwit.amount_sats }} sats</strong>
+          </article>
+          <article [class.active]="active('script-code')" class="locking-region">
+            <span>P2PKH scriptCode</span>
+            <code>{{ segwit.script_code_hex }}</code>
+          </article>
+        }
         <article [class.active]="active('sighash')">
           <span>Signature hash mode</span>
           <strong>{{ result().signature.sighash_label }}</strong>
@@ -121,9 +150,14 @@
         <p>{{ currentStep().description }}</p>
       </article>
 
-      @if (currentIndex() >= 2 && currentIndex() < 4) {
+      @if (
+        (result().script_type === 'P2PKH' && currentIndex() >= 2 && currentIndex() < 4) ||
+        (result().script_type === 'P2WPKH' && currentIndex() >= 5 && currentIndex() < 6)
+      ) {
         <div class="signature-value">
-          <span>Legacy preimage</span>
+          <span>{{
+            result().script_type === 'P2WPKH' ? 'BIP143 preimage' : 'Legacy preimage'
+          }}</span>
           <code>{{ result().signature.preimage_hex }}</code>
         </div>
       } @else if (currentIndex() >= 4) {

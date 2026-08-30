@@ -68,6 +68,25 @@
   gap: 0.35rem;
 }
 
+.witness-entry {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr) auto;
+  border: 1px solid rgba(245, 165, 36, 0.24);
+  border-radius: 0.6rem;
+  background: rgba(245, 165, 36, 0.07);
+  padding: 0.7rem;
+}
+
+.witness-entry code {
+  overflow: hidden;
+  color: #fcd58a;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .operation-list button {
   display: grid;
   width: 100%;

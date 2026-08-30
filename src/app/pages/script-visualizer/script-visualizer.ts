@@ -7,15 +7,17 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { finalize, Subscription } from 'rxjs';
+import { finalize, Observable, Subscription } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 
 import { CURATED_P2PKH_REQUEST } from '../../core/curated-p2pkh';
 import { TraceApi } from '../../core/trace-api';
 import {
   P2pkhTraceRequest,
-  P2pkhTraceResponse,
+  SpendTraceResponse,
   PreviousOutputContext,
+  TraceScripts,
+  TraceSources,
 } from '../../core/trace-api.models';
 import { SignaturePlayer } from '../../features/signature-player/signature-player';
 import { TracePlayer } from '../../features/trace-player/trace-player';
@@ -45,7 +47,7 @@ export class ScriptVisualizer implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private requestSubscription: Subscription | undefined;
 
-  protected readonly response = signal<P2pkhTraceResponse | null>(null);
+  protected readonly response = signal<SpendTraceResponse | null>(null);
   protected readonly contextSpend = signal<ContextSpend | null>(null);
   protected readonly transactionHex = signal(CURATED_P2PKH_REQUEST.transaction_hex);
   protected readonly loading = signal(true);
@@ -109,7 +111,7 @@ export class ScriptVisualizer implements OnInit, OnDestroy {
           this.error.set('The selected transaction input does not exist.');
           return;
         }
-        if (selectedOutput.spend_type !== 'P2PKH') {
+        if (selectedOutput.spend_type !== 'P2PKH' && selectedOutput.spend_type !== 'P2WPKH') {
           this.contextSpend.set(
             this.toContextSpend(context.transaction_hex, txid, inputIndex, selectedOutput),
           );
@@ -117,14 +119,18 @@ export class ScriptVisualizer implements OnInit, OnDestroy {
           this.loading.set(false);
           return;
         }
-        this.loadRequest({
-          transaction_hex: context.transaction_hex,
-          input_index: inputIndex,
-          spent_outputs: context.spent_outputs.map((output) => ({
-            amount_sats: output.amount_sats,
-            script_pubkey_hex: output.script_pubkey_hex,
-          })),
-        });
+        if (selectedOutput.spend_type === 'P2WPKH') this.activeWorkspace.set('signature');
+        this.loadRequest(
+          {
+            transaction_hex: context.transaction_hex,
+            input_index: inputIndex,
+            spent_outputs: context.spent_outputs.map((output) => ({
+              amount_sats: output.amount_sats,
+              script_pubkey_hex: output.script_pubkey_hex,
+            })),
+          },
+          selectedOutput.spend_type,
+        );
       },
       error: () => {
         this.loading.set(false);
@@ -133,14 +139,17 @@ export class ScriptVisualizer implements OnInit, OnDestroy {
     });
   }
 
-  private loadRequest(request: P2pkhTraceRequest): void {
+  private loadRequest(request: P2pkhTraceRequest, scriptType: 'P2PKH' | 'P2WPKH' = 'P2PKH'): void {
     this.requestSubscription?.unsubscribe();
     this.loading.set(true);
     this.error.set('');
     this.contextSpend.set(null);
     this.transactionHex.set(request.transaction_hex);
-    this.requestSubscription = this.traceApi
-      .loadP2pkhTrace(request)
+    const traceRequest: Observable<SpendTraceResponse> =
+      scriptType === 'P2WPKH'
+        ? this.traceApi.loadP2wpkhTrace(request)
+        : this.traceApi.loadP2pkhTrace(request);
+    this.requestSubscription = traceRequest
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: (response) => this.response.set(response),
@@ -150,6 +159,26 @@ export class ScriptVisualizer implements OnInit, OnDestroy {
 
   protected showWorkspace(workspace: 'execution' | 'signature'): void {
     this.activeWorkspace.set(workspace);
+  }
+
+  protected displayScripts(result: SpendTraceResponse): TraceScripts {
+    return result.script_type === 'P2PKH'
+      ? result.scripts
+      : {
+          unlocking: '',
+          locking: result.scripts.script_code,
+          combined: result.scripts.script_code,
+        };
+  }
+
+  protected displaySources(result: SpendTraceResponse): TraceSources {
+    return result.script_type === 'P2PKH'
+      ? result.sources
+      : { script_sig: result.sources.witness, script_pubkey: result.sources.script_pubkey };
+  }
+
+  protected witnessItems(result: SpendTraceResponse): readonly string[] {
+    return result.script_type === 'P2WPKH' ? result.scripts.witness : [];
   }
 
   private toContextSpend(

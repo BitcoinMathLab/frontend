@@ -68,6 +68,36 @@ export interface P2pkhTraceResponse {
   readonly trace: ExecutionTrace;
 }
 
+export interface P2wpkhTraceResponse {
+  readonly api_version: 'v1';
+  readonly script_type: 'P2WPKH';
+  readonly input_index: number;
+  readonly scripts: {
+    readonly witness: readonly [string, string];
+    readonly locking: string;
+    readonly script_code: string;
+  };
+  readonly sources: {
+    readonly witness: ScriptSource;
+    readonly script_pubkey: ScriptSource;
+  };
+  readonly signature: SegwitV0SignatureVerification;
+  readonly trace: ExecutionTrace;
+}
+
+export type SpendTraceResponse = P2pkhTraceResponse | P2wpkhTraceResponse;
+
+export interface TraceScripts {
+  readonly unlocking: string;
+  readonly locking: string;
+  readonly combined: string;
+}
+
+export interface TraceSources {
+  readonly script_sig: ScriptSource;
+  readonly script_pubkey: ScriptSource;
+}
+
 export interface ScriptSource {
   readonly transaction_txid: string;
   readonly index: number;
@@ -82,6 +112,14 @@ export interface SignatureVerification {
   readonly preimage_hex: string;
   readonly digest_hex: string;
   readonly valid: boolean;
+}
+
+export interface SegwitV0SignatureVerification extends SignatureVerification {
+  readonly hash_prevouts_hex: string;
+  readonly hash_sequence_hex: string;
+  readonly hash_outputs_hex: string;
+  readonly script_code_hex: string;
+  readonly amount_sats: number;
 }
 
 export type OutputType = 'P2PK' | 'P2PKH' | 'P2MS' | 'P2SH' | 'P2WPKH' | 'P2WSH' | 'P2TR';

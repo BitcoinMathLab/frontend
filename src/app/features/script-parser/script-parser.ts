@@ -2,7 +2,8 @@ import { ChangeDetectionStrategy, Component, computed, input, output, signal } f
 
 import {
   ExecutionTrace,
-  P2pkhTraceResponse,
+  TraceScripts,
+  TraceSources,
   ScriptSource,
   TraceStep,
 } from '../../core/trace-api.models';
@@ -14,7 +15,7 @@ interface ParsedOperation {
 }
 
 interface SelectedSource extends ScriptSource {
-  readonly label: 'scriptSig' | 'scriptPubKey';
+  readonly label: 'scriptSig' | 'witness' | 'scriptPubKey';
   readonly location: string;
   readonly description: string;
 }
@@ -27,8 +28,10 @@ interface SelectedSource extends ScriptSource {
 })
 export class ScriptParser {
   readonly trace = input.required<ExecutionTrace>();
-  readonly scripts = input.required<P2pkhTraceResponse['scripts']>();
-  readonly sources = input.required<P2pkhTraceResponse['sources']>();
+  readonly scripts = input.required<TraceScripts>();
+  readonly sources = input.required<TraceSources>();
+  readonly scriptType = input<'P2PKH' | 'P2WPKH'>('P2PKH');
+  readonly witnessItems = input<readonly string[]>([]);
   readonly currentIndex = input.required<number>();
   readonly currentPhase = input<'opcode' | 'stack-push' | 'stack-validation' | null>(null);
   readonly inspectStep = output<number>();
@@ -72,16 +75,21 @@ export class ScriptParser {
       kind === 'script_sig'
         ? {
             ...source,
-            label: 'scriptSig',
+            label: this.scriptType() === 'P2WPKH' ? 'witness' : 'scriptSig',
             location: `input ${source.index + 1}`,
-            description: 'This unlocking script is serialized in the spending transaction input.',
+            description:
+              this.scriptType() === 'P2WPKH'
+                ? 'These unlocking items are serialized in this spending input’s witness field.'
+                : 'This unlocking script is serialized in the spending transaction input.',
           }
         : {
             ...source,
             label: 'scriptPubKey',
             location: `output ${source.index}`,
             description:
-              'This locking script is serialized in the previous transaction output being spent.',
+              this.scriptType() === 'P2WPKH'
+                ? 'This previous output contains the witness program used to derive the executed scriptCode.'
+                : 'This locking script is serialized in the previous transaction output being spent.',
           },
     );
   }

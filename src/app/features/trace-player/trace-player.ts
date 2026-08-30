@@ -8,7 +8,7 @@ import {
   signal,
 } from '@angular/core';
 
-import { ExecutionTrace, P2pkhTraceResponse, TraceStep } from '../../core/trace-api.models';
+import { ExecutionTrace, TraceScripts, TraceSources, TraceStep } from '../../core/trace-api.models';
 import { OperationDetail } from '../operation-detail/operation-detail';
 import { ScriptParser } from '../script-parser/script-parser';
 import { SignatureDetail } from '../signature-detail/signature-detail';
@@ -31,8 +31,10 @@ interface PlaybackStep {
 })
 export class TracePlayer implements OnDestroy {
   readonly trace = input.required<ExecutionTrace>();
-  readonly scripts = input.required<P2pkhTraceResponse['scripts']>();
-  readonly sources = input.required<P2pkhTraceResponse['sources']>();
+  readonly scripts = input.required<TraceScripts>();
+  readonly sources = input.required<TraceSources>();
+  readonly scriptType = input<'P2PKH' | 'P2WPKH'>('P2PKH');
+  readonly witnessItems = input<readonly string[]>([]);
   readonly openSignatureWorkspace = output<void>();
 
   protected readonly currentIndex = signal(-1);
@@ -73,6 +75,7 @@ export class TracePlayer implements OnDestroy {
     }
     const unlockingLength = this.scripts().unlocking.length / 2;
     const step = this.currentStep();
+    if (this.scriptType() === 'P2WPKH') return 'Executing derived P2PKH scriptCode';
     return step && step.opcode.byte_offset < unlockingLength
       ? 'Executing scriptSig first'
       : 'Executing scriptPubKey';

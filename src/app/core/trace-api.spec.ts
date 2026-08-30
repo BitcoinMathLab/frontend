@@ -33,6 +33,20 @@ describe('TraceApi', () => {
     request.flush({});
   });
 
+  it('posts native witness context to the P2WPKH trace endpoint', () => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const service = TestBed.inject(TraceApi);
+
+    service.loadP2wpkhTrace(CURATED_P2PKH_REQUEST).subscribe();
+
+    const request = TestBed.inject(HttpTestingController).expectOne('/api/v1/traces/p2wpkh');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual(CURATED_P2PKH_REQUEST);
+    request.flush({});
+  });
+
   it('loads transaction context from the configured v1 endpoint', () => {
     globalThis.__BML_CONFIG__ = {
       apiBaseUrl: 'https://api.btcmathlab.com/',

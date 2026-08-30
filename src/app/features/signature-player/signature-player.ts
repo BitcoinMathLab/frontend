@@ -7,9 +7,19 @@ import {
   signal,
 } from '@angular/core';
 
-import { P2pkhTraceResponse } from '../../core/trace-api.models';
+import { SegwitV0SignatureVerification, SpendTraceResponse } from '../../core/trace-api.models';
 
-type SignatureRegion = 'transaction' | 'script-sig' | 'script-pubkey' | 'sighash' | 'digest';
+type SignatureRegion =
+  | 'transaction'
+  | 'script-sig'
+  | 'script-pubkey'
+  | 'prevouts'
+  | 'sequences'
+  | 'outputs'
+  | 'amount'
+  | 'script-code'
+  | 'sighash'
+  | 'digest';
 
 interface SignatureStep {
   readonly phase: string;
@@ -61,6 +71,68 @@ const STEPS: readonly SignatureStep[] = [
   },
 ];
 
+const SEGWIT_STEPS: readonly SignatureStep[] = [
+  {
+    phase: 'Ready',
+    title: 'SegWit signature walkthrough ready',
+    description: 'Press Play to assemble the exact BIP143 message checked by OP_CHECKSIG.',
+    regions: [],
+  },
+  {
+    phase: 'Hash inputs',
+    title: 'Commit every previous outpoint',
+    description: 'Double-SHA-256 the ordered transaction IDs and output indexes into hashPrevouts.',
+    regions: ['transaction', 'prevouts'],
+  },
+  {
+    phase: 'Hash sequences',
+    title: 'Commit every input sequence',
+    description: 'Double-SHA-256 the ordered sequence values into hashSequence.',
+    regions: ['transaction', 'sequences'],
+  },
+  {
+    phase: 'Hash outputs',
+    title: 'Commit the outputs selected by the mode',
+    description: 'SIGHASH_ALL commits every serialized output through hashOutputs.',
+    regions: ['transaction', 'outputs', 'sighash'],
+  },
+  {
+    phase: 'Bind input',
+    title: 'Add the selected input context',
+    description:
+      'Add its outpoint, P2PKH scriptCode, spent amount, and sequence. BIP143 commits the previous value explicitly.',
+    regions: ['transaction', 'script-pubkey', 'script-code', 'amount'],
+  },
+  {
+    phase: 'Build message',
+    title: 'Assemble the BIP143 preimage',
+    description:
+      'Combine version, component hashes, selected input context, locktime, and the four-byte hash type.',
+    regions: [
+      'transaction',
+      'prevouts',
+      'sequences',
+      'outputs',
+      'amount',
+      'script-code',
+      'sighash',
+    ],
+  },
+  {
+    phase: 'Hash message',
+    title: 'Hash the BIP143 preimage twice',
+    description: 'Apply SHA-256 twice to produce the 32-byte ECDSA verification message.',
+    regions: ['digest'],
+  },
+  {
+    phase: 'Verify ECDSA',
+    title: 'Check the witness signature and public key',
+    description:
+      'Verify the DER signature over the digest with the compressed public key from the witness stack.',
+    regions: ['script-sig', 'digest'],
+  },
+];
+
 @Component({
   selector: 'app-signature-player',
   templateUrl: './signature-player.html',
@@ -68,17 +140,22 @@ const STEPS: readonly SignatureStep[] = [
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SignaturePlayer implements OnDestroy {
-  readonly result = input.required<P2pkhTraceResponse>();
+  readonly result = input.required<SpendTraceResponse>();
   readonly transactionHex = input.required<string>();
 
   protected readonly currentIndex = signal(0);
   protected readonly playing = signal(false);
-  protected readonly currentStep = computed(() => STEPS[this.currentIndex()]);
+  protected readonly steps = computed(() =>
+    this.result().script_type === 'P2WPKH' ? SEGWIT_STEPS : STEPS,
+  );
+  protected readonly currentStep = computed(() => this.steps()[this.currentIndex()]);
   protected readonly atStart = computed(() => this.currentIndex() === 0);
-  protected readonly atEnd = computed(() => this.currentIndex() === STEPS.length - 1);
-  protected readonly progress = computed(() => (this.currentIndex() / (STEPS.length - 1)) * 100);
+  protected readonly atEnd = computed(() => this.currentIndex() === this.steps().length - 1);
+  protected readonly progress = computed(
+    () => (this.currentIndex() / (this.steps().length - 1)) * 100,
+  );
   protected readonly stepLabel = computed(
-    () => `Step ${this.currentIndex()} of ${STEPS.length - 1}`,
+    () => `Step ${this.currentIndex()} of ${this.steps().length - 1}`,
   );
 
   private timer: ReturnType<typeof setInterval> | undefined;
@@ -94,13 +171,13 @@ export class SignaturePlayer implements OnDestroy {
   }
 
   protected next(): void {
-    this.currentIndex.update((index) => Math.min(STEPS.length - 1, index + 1));
+    this.currentIndex.update((index) => Math.min(this.steps().length - 1, index + 1));
     if (this.atEnd()) this.stop();
   }
 
   protected finish(): void {
     this.stop();
-    this.currentIndex.set(STEPS.length - 1);
+    this.currentIndex.set(this.steps().length - 1);
   }
 
   protected togglePlay(): void {
@@ -116,6 +193,32 @@ export class SignaturePlayer implements OnDestroy {
 
   protected active(region: SignatureRegion): boolean {
     return this.currentStep().regions.includes(region);
+  }
+
+  protected segwitSignature(): SegwitV0SignatureVerification | null {
+    const signature = this.result().signature;
+    return 'hash_prevouts_hex' in signature ? signature : null;
+  }
+
+  protected witness(): readonly string[] {
+    const scripts = this.result().scripts;
+    return 'witness' in scripts ? scripts.witness : [];
+  }
+
+  protected lockingScript(): string {
+    return this.result().scripts.locking;
+  }
+
+  protected unlockingData(): string {
+    const scripts = this.result().scripts;
+    return 'witness' in scripts ? scripts.witness.join(' · ') : scripts.unlocking;
+  }
+
+  protected spendingTransactionId(): string {
+    const sources = this.result().sources;
+    return 'witness' in sources
+      ? sources.witness.transaction_txid
+      : sources.script_sig.transaction_txid;
   }
 
   protected handleKeydown(event: KeyboardEvent): void {

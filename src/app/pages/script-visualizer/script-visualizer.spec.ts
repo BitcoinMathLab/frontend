@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { of, throwError } from 'rxjs';
 
 import { TraceApi } from '../../core/trace-api';
-import { TRACE_RESPONSE_FIXTURE } from '../../testing/trace.fixture';
+import { P2WPKH_TRACE_RESPONSE_FIXTURE, TRACE_RESPONSE_FIXTURE } from '../../testing/trace.fixture';
 import { ScriptVisualizer } from './script-visualizer';
 
 describe('ScriptVisualizer', () => {
@@ -157,10 +157,14 @@ describe('ScriptVisualizer', () => {
       }),
     );
     const loadP2pkhTrace = vi.fn().mockReturnValue(of(TRACE_RESPONSE_FIXTURE));
+    const loadP2wpkhTrace = vi.fn().mockReturnValue(of(P2WPKH_TRACE_RESPONSE_FIXTURE));
     await TestBed.configureTestingModule({
       imports: [ScriptVisualizer],
       providers: [
-        { provide: TraceApi, useValue: { loadTransactionContext, loadP2pkhTrace } },
+        {
+          provide: TraceApi,
+          useValue: { loadTransactionContext, loadP2pkhTrace, loadP2wpkhTrace },
+        },
         { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: { get: () => null } } } },
       ],
     }).compileComponents();
@@ -177,15 +181,16 @@ describe('ScriptVisualizer', () => {
     component.loadSelectedInput();
     fixture.detectChanges();
 
-    expect(loadP2pkhTrace).toHaveBeenCalledOnce();
+    expect(loadP2wpkhTrace).toHaveBeenCalledWith({
+      transaction_hex: '020000000001',
+      input_index: 0,
+      spent_outputs: [{ amount_sats: 20, script_pubkey_hex: '0014' + '11'.repeat(20) }],
+    });
     expect(fixture.nativeElement.textContent).toContain('SegWit ECDSA · P2WPKH');
-    expect(fixture.nativeElement.textContent).toContain('Witness stack');
     expect(fixture.nativeElement.textContent).toContain('30signature');
     expect(fixture.nativeElement.textContent).toContain('03publickey');
-    expect(fixture.nativeElement.textContent).toContain('0014' + '11'.repeat(20));
-    expect(fixture.nativeElement.textContent).toContain(
-      'Signature walkthrough not yet available for P2WPKH',
-    );
+    expect(fixture.nativeElement.textContent).toContain('P2PKH scriptCode');
+    expect(fixture.nativeElement.textContent).not.toContain('not yet available for P2WPKH');
   });
 
   it('retries the selected transaction input after its trace request fails', async () => {

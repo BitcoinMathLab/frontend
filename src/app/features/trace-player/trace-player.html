@@ -8,7 +8,7 @@
     <label class="example-selector">
       <span>Signature type</span>
       <select aria-label="Signature type">
-        <option value="p2pkh">P2PKH spend</option>
+        <option [value]="scriptType().toLowerCase()">{{ scriptType() }} spend</option>
       </select>
     </label>
     <div class="vcr" role="group" aria-label="Playback controls">
@@ -98,6 +98,8 @@
         [trace]="trace()"
         [scripts]="scripts()"
         [sources]="sources()"
+        [scriptType]="scriptType()"
+        [witnessItems]="witnessItems()"
         [currentIndex]="currentStep()?.index ?? -1"
         [currentPhase]="currentPlayback()?.phase ?? null"
         (inspectStep)="inspectOperation($event)"
@@ -144,7 +146,13 @@
           <article class="ready-card">
             <span aria-hidden="true">▶</span>
             <h3>Ready</h3>
-            <p>The stack is empty. Press Play to run the first instruction.</p>
+            <p>
+              {{
+                scriptType() === 'P2WPKH'
+                  ? 'The signature and public key are loaded from the witness. Press Play to run the derived scriptCode.'
+                  : 'The stack is empty. Press Play to run the first instruction.'
+              }}
+            </p>
           </article>
         }
       </section>

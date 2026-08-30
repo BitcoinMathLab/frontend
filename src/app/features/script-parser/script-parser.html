@@ -1,4 +1,4 @@
-<div class="parser-window" aria-label="Parsed P2PKH scripts">
+<div class="parser-window" [attr.aria-label]="'Parsed ' + scriptType() + ' scripts'">
   <section class="script-lane">
     <header>
       <button
@@ -8,15 +8,27 @@
         aria-haspopup="dialog"
         (click)="openSource('script_sig')"
       >
-        <strong>scriptSig</strong>
+        <strong>{{ scriptType() === 'P2WPKH' ? 'witness' : 'scriptSig' }}</strong>
         <span id="script-sig-hex-tooltip" class="script-hex-tooltip" role="tooltip">
-          <span>Original hex</span>
-          <code>{{ scripts().unlocking }}</code>
+          <span>{{ scriptType() === 'P2WPKH' ? 'Ordered stack items' : 'Original hex' }}</span>
+          <code>{{
+            scriptType() === 'P2WPKH' ? witnessItems().join(' · ') : scripts().unlocking
+          }}</code>
         </span>
       </button>
-      <span>runs first</span>
+      <span>{{ scriptType() === 'P2WPKH' ? 'initializes stack' : 'runs first' }}</span>
     </header>
     <div class="operation-list">
+      @if (scriptType() === 'P2WPKH') {
+        @for (item of witnessItems(); track $index) {
+          <div class="operation-entry witness-entry">
+            <span
+              ><code>{{ $index === 0 ? 'Signature' : 'Public key' }}</code></span
+            >
+            <code class="operation-hex">{{ item.slice(0, 4) }}…{{ item.slice(-4) }}</code>
+          </div>
+        }
+      }
       @for (operation of unlockingOperations(); track operation.step.index) {
         <div class="operation-entry">
           <button
@@ -64,13 +76,13 @@
         aria-haspopup="dialog"
         (click)="openSource('script_pubkey')"
       >
-        <strong>scriptPubKey</strong>
+        <strong>{{ scriptType() === 'P2WPKH' ? 'P2PKH scriptCode' : 'scriptPubKey' }}</strong>
         <span id="script-pubkey-hex-tooltip" class="script-hex-tooltip" role="tooltip">
           <span>Original hex</span>
           <code>{{ scripts().locking }}</code>
         </span>
       </button>
-      <span>runs second</span>
+      <span>{{ scriptType() === 'P2WPKH' ? 'runs with witness stack' : 'runs second' }}</span>
     </header>
     <div class="operation-list">
       @for (operation of lockingOperations(); track operation.step.index) {
