@@ -37,16 +37,15 @@ describe('Home', () => {
     expect(signup?.getAttribute('href')).toContain('early-access%20list');
   });
 
-  it('keeps the static trace preview neutral until the final step', () => {
+  it('presents the product surface without limiting it to a P2PKH trace', () => {
     const fixture = TestBed.createComponent(Home);
     fixture.detectChanges();
-    const preview = fixture.nativeElement.querySelector('.trace-card') as HTMLElement;
+    const preview = fixture.nativeElement.querySelector('.product-preview') as HTMLElement;
 
-    expect(preview.textContent).toContain('Step 4 of 7');
-    expect(preview.textContent).toContain('OP_HASH160');
-    expect(preview.textContent).toContain('In progress');
-    expect(preview.textContent).not.toContain('Valid');
-    expect(preview.querySelectorAll('.timeline span')).toHaveLength(7);
+    expect(preview.textContent).toContain('Script Visualizer');
+    expect(preview.textContent).toContain('Transaction Explorer');
+    expect(preview.textContent).toContain('Signature Lab');
+    expect(preview.textContent).toContain('Planned');
   });
 
   it('describes only the learning experience available in the MVP', () => {
@@ -54,9 +53,11 @@ describe('Home', () => {
     fixture.detectChanges();
     const content = fixture.nativeElement.textContent as string;
 
-    expect(content).toContain('Trace a P2PKH spend step by step');
+    expect(content).toContain(
+      'Bitcoin Math Lab turns opaque transactions, scripts, and consensus rules',
+    );
     expect(content).toContain('Inspect each rule');
-    expect(content).toContain('guided walkthrough');
+    expect(content).toContain('Signature walkthrough');
     expect(content).not.toContain('make every Bitcoin transaction work');
     expect(content).not.toContain('guided lessons');
   });

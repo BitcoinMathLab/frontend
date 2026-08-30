@@ -1,13 +1,19 @@
 <div class="parser-window" aria-label="Parsed P2PKH scripts">
   <section class="script-lane">
     <header>
-      <span class="script-name" tabindex="0" aria-describedby="script-sig-hex-tooltip">
+      <button
+        type="button"
+        class="script-name"
+        aria-describedby="script-sig-hex-tooltip"
+        aria-haspopup="dialog"
+        (click)="openSource('script_sig')"
+      >
         <strong>scriptSig</strong>
         <span id="script-sig-hex-tooltip" class="script-hex-tooltip" role="tooltip">
           <span>Original hex</span>
           <code>{{ scripts().unlocking }}</code>
         </span>
-      </span>
+      </button>
       <span>runs first</span>
     </header>
     <div class="operation-list">
@@ -51,13 +57,19 @@
 
   <section class="script-lane">
     <header>
-      <span class="script-name" tabindex="0" aria-describedby="script-pubkey-hex-tooltip">
+      <button
+        type="button"
+        class="script-name"
+        aria-describedby="script-pubkey-hex-tooltip"
+        aria-haspopup="dialog"
+        (click)="openSource('script_pubkey')"
+      >
         <strong>scriptPubKey</strong>
         <span id="script-pubkey-hex-tooltip" class="script-hex-tooltip" role="tooltip">
           <span>Original hex</span>
           <code>{{ scripts().locking }}</code>
         </span>
-      </span>
+      </button>
       <span>runs second</span>
     </header>
     <div class="operation-list">
@@ -97,3 +109,38 @@
     </div>
   </section>
 </div>
+
+@if (selectedSource(); as source) {
+  <div class="source-backdrop" role="presentation" (click)="closeSource()">
+    <section
+      class="source-detail"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="source-detail-heading"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="source-detail__header">
+        <div>
+          <span>Script source</span>
+          <h2 id="source-detail-heading">{{ source.label }}</h2>
+        </div>
+        <button type="button" aria-label="Close script source detail" (click)="closeSource()">
+          ×
+        </button>
+      </div>
+      <p>{{ source.description }}</p>
+      <dl>
+        <div>
+          <dt>Transaction ID</dt>
+          <dd>
+            <code>{{ source.transaction_txid }}</code>
+          </dd>
+        </div>
+        <div>
+          <dt>Location</dt>
+          <dd>{{ source.location }}</dd>
+        </div>
+      </dl>
+    </section>
+  </div>
+}

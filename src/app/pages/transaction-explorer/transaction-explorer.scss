@@ -250,6 +250,24 @@ li {
   font-size: 0.75rem;
 }
 
+.output-title > div {
+  display: grid;
+  justify-items: end;
+  gap: 0.45rem;
+}
+
+.visualize-input {
+  color: var(--color-blue);
+  font-size: 0.78rem;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.visualize-input:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
 li dl {
   display: grid;
   margin: 0.9rem 0 0;

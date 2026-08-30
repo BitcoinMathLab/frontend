@@ -60,7 +60,28 @@ export interface P2pkhTraceResponse {
     readonly locking: string;
     readonly combined: string;
   };
+  readonly sources: {
+    readonly script_sig: ScriptSource;
+    readonly script_pubkey: ScriptSource;
+  };
+  readonly signature: SignatureVerification;
   readonly trace: ExecutionTrace;
+}
+
+export interface ScriptSource {
+  readonly transaction_txid: string;
+  readonly index: number;
+}
+
+export interface SignatureVerification {
+  readonly algorithm: 'ECDSA/secp256k1';
+  readonly signature_hex: string;
+  readonly public_key_hex: string;
+  readonly sighash_type: number;
+  readonly sighash_label: string;
+  readonly preimage_hex: string;
+  readonly digest_hex: string;
+  readonly valid: boolean;
 }
 
 export type OutputType = 'P2PK' | 'P2PKH' | 'P2MS' | 'P2SH' | 'P2WPKH' | 'P2WSH' | 'P2TR';

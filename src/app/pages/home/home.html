@@ -1,9 +1,9 @@
 <section class="hero">
   <div class="hero__copy">
-    <h1>See Bitcoin <span>execute.</span></h1>
+    <h1>Make Bitcoin <span>legible.</span></h1>
     <p class="hero__lede">
-      Trace a P2PKH spend step by step. Watch the stack change. See how an input proves it can spend
-      a previous output.
+      Bitcoin Math Lab turns opaque transactions, scripts, and consensus rules into things you can
+      inspect, test, and understand.
     </p>
     <div class="hero__actions">
       <a class="button button--primary" routerLink="/visualizer">Try the visualizer</a>
@@ -17,33 +17,42 @@
     </div>
   </div>
 
-  <div class="trace-card" aria-label="Preview of a Bitcoin script execution trace">
-    <div class="trace-card__header">
-      <span>P2PKH execution</span>
-      <span class="status">Step 4 of 7</span>
+  <div class="product-preview" aria-label="Preview of Bitcoin Math Lab tools">
+    <div class="product-preview__header">
+      <span>Bitcoin Math Lab</span>
+      <span class="status">Local preview</span>
     </div>
-    <div class="opcode-row">
-      <span class="step-number">04</span>
-      <div>
-        <strong>OP_HASH160</strong>
-        <p>Hash the duplicated public key before comparing it.</p>
-      </div>
-      <span class="running">In progress</span>
+    <div class="product-preview__tools">
+      <article>
+        <span class="tool-index">01</span>
+        <div>
+          <strong>Script Visualizer</strong>
+          <p>Follow a script instruction by instruction and inspect the changing stack.</p>
+        </div>
+        <span class="tool-status">Ready</span>
+      </article>
+      <article>
+        <span class="tool-index">02</span>
+        <div>
+          <strong>Transaction Explorer</strong>
+          <p>Read real transaction bytes, outputs, spends, and the rules that classify them.</p>
+        </div>
+        <span class="tool-status">Ready</span>
+      </article>
+      <article>
+        <span class="tool-index">03</span>
+        <div>
+          <strong>Signature Lab</strong>
+          <p>Understand the message, key, and verification result behind a Bitcoin signature.</p>
+        </div>
+        <span class="tool-status tool-status--planned">Planned</span>
+      </article>
     </div>
-    <div class="stack">
-      <div class="stack__label">Main stack</div>
-      <code>signature</code>
-      <code>public key</code>
-      <code class="stack__active">HASH160(public key)</code>
-    </div>
-    <div class="timeline" aria-hidden="true">
-      <span class="complete"></span>
-      <span class="complete"></span>
-      <span class="complete"></span>
-      <span class="current"></span>
-      <span></span>
-      <span></span>
-      <span></span>
+    <div class="product-preview__footer">
+      <span>Learn</span>
+      <span>Build</span>
+      <span>Analyze</span>
+      <span>Verify</span>
     </div>
   </div>
 </section>
@@ -83,31 +92,33 @@
 
 <section class="section roadmap-preview" aria-labelledby="roadmap-preview-title">
   <div class="section-heading">
-    <h2 id="roadmap-preview-title">One complete learning experience first.</h2>
+    <h2 id="roadmap-preview-title">Start with the evidence.</h2>
     <p>
-      We are building toward a focused October launch: a guided P2PKH trace that makes every opcode,
-      stack transition, and result understandable.
+      The current tools make one script path and real mainnet transactions inspectable. They are the
+      foundation for broader Bitcoin learning and developer tools.
     </p>
   </div>
   <div class="feature-grid">
     <article>
       <span class="feature-number">Now</span>
       <h3>Integrated visualizer</h3>
-      <p>The engine, API, guided walkthrough, and real-browser contract now run together.</p>
+      <p>
+        The engine, API, visualizer, and explorer run together against a synchronized Bitcoin node.
+      </p>
     </article>
     <article>
       <span class="feature-number">Next</span>
-      <h3>Production validation</h3>
-      <p>Deploy the API, connect the public origin, and verify monitoring and smoke checks.</p>
+      <h3>Signature walkthrough</h3>
+      <p>Make the signature message, public key, verification steps, and result inspectable.</p>
     </article>
     <article>
       <span class="feature-number">October 12</span>
       <h3>Interactive launch</h3>
-      <p>Visitors can navigate a complete visual lesson on desktop or mobile.</p>
+      <p>Visitors can inspect real Bitcoin data and follow the rules behind each result.</p>
     </article>
   </div>
   <a class="text-link" routerLink="/visualizer"
-    >Open the P2PKH execution lab <span aria-hidden="true">→</span></a
+    >Open the Script Visualizer <span aria-hidden="true">→</span></a
   >
 </section>
 

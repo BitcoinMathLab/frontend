@@ -35,7 +35,14 @@
 .script-name {
   position: relative;
   min-width: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
   outline: none;
+  padding: 0;
+  text-align: left;
   text-transform: none;
 }
 
@@ -163,4 +170,85 @@
   color: #94a3b8;
   font-size: 1.2rem;
   transform: rotate(90deg);
+}
+
+.source-backdrop {
+  position: fixed;
+  z-index: 20;
+  display: grid;
+  background: rgba(2, 6, 23, 0.72);
+  inset: 0;
+  padding: 1rem;
+  place-items: center;
+}
+
+.source-detail {
+  width: min(100%, 34rem);
+  border: 1px solid rgba(96, 165, 250, 0.52);
+  border-radius: 0.9rem;
+  background: #0c111a;
+  box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.45);
+  padding: 1.1rem;
+}
+
+.source-detail__header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.source-detail__header span,
+.source-detail dt {
+  color: #afbdcc;
+  font-size: 0.68rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.source-detail h2 {
+  margin: 0.2rem 0 0;
+  color: #f8fafc;
+  font-size: 1.35rem;
+}
+
+.source-detail__header button {
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 0.45rem;
+  background: transparent;
+  color: #d5dee9;
+  cursor: pointer;
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.source-detail > p {
+  color: #afbdcc;
+  line-height: 1.6;
+}
+
+.source-detail dl {
+  display: grid;
+  gap: 0.75rem;
+  margin: 1rem 0 0;
+}
+
+.source-detail dl div {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.source-detail dd {
+  margin: 0;
+  color: #d5dee9;
+}
+
+.source-detail code {
+  overflow-wrap: anywhere;
+  color: #fcd58a;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
 }

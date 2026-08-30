@@ -4,19 +4,199 @@
 </section>
 
 <section class="lab" aria-label="P2PKH spend verification">
+  <form class="transaction-source" (ngSubmit)="loadSelectedInput()" novalidate>
+    <div>
+      <span>Load a real spend</span>
+      <strong>Trace any legacy P2PKH transaction input</strong>
+    </div>
+    <label>
+      <span>Transaction ID</span>
+      <input
+        name="visualizer-transaction-id"
+        type="text"
+        maxlength="64"
+        autocomplete="off"
+        spellcheck="false"
+        placeholder="64 hexadecimal characters"
+        [(ngModel)]="transactionId"
+      />
+    </label>
+    <label class="input-index-field">
+      <span>Input</span>
+      <input
+        name="visualizer-input-index"
+        type="number"
+        min="0"
+        step="1"
+        [(ngModel)]="inputIndex"
+      />
+    </label>
+    <button type="submit" [disabled]="loading()">Trace input</button>
+  </form>
   @if (loading()) {
     <div class="state-card" role="status">
       <span class="state-card__pulse" aria-hidden="true"></span> Preparing the walkthrough…
     </div>
-  } @else if (error()) {
+  } @else if (error(); as errorMessage) {
     <div class="state-card state-card--error" role="alert">
       <div>
         <strong>The walkthrough could not load.</strong>
-        <p>Start the local backend, then try again.</p>
+        <p>{{ errorMessage }}</p>
       </div>
-      <button type="button" (click)="loadTrace()">Try again</button>
+      <button type="button" (click)="retry()">Try again</button>
     </div>
   } @else if (response(); as result) {
-    <app-trace-player [trace]="result.trace" [scripts]="result.scripts" />
+    <div
+      class="workspace-tabs"
+      role="tablist"
+      aria-label="Visualizer workspace"
+      (keydown)="handleWorkspaceKeydown($event)"
+    >
+      <button
+        id="execution-tab"
+        type="button"
+        role="tab"
+        aria-controls="execution-panel"
+        [attr.aria-selected]="activeWorkspace() === 'execution'"
+        [attr.tabindex]="activeWorkspace() === 'execution' ? 0 : -1"
+        (click)="showWorkspace('execution')"
+      >
+        Execution
+      </button>
+      <button
+        id="signature-tab"
+        type="button"
+        role="tab"
+        aria-controls="signature-panel"
+        [attr.aria-selected]="activeWorkspace() === 'signature'"
+        [attr.tabindex]="activeWorkspace() === 'signature' ? 0 : -1"
+        (click)="showWorkspace('signature')"
+      >
+        Signature
+      </button>
+    </div>
+    @if (activeWorkspace() === 'execution') {
+      <div id="execution-panel" role="tabpanel" aria-labelledby="execution-tab">
+        <app-trace-player
+          [trace]="result.trace"
+          [scripts]="result.scripts"
+          [sources]="result.sources"
+          (openSignatureWorkspace)="showWorkspace('signature')"
+        />
+      </div>
+    } @else {
+      <section
+        id="signature-panel"
+        class="signature-workspace"
+        role="tabpanel"
+        aria-labelledby="signature-tab"
+      >
+        <section class="signature-source">
+          <span>Source context</span>
+          <h2>Transaction and locking script</h2>
+          <dl>
+            <div>
+              <dt>Spending transaction</dt>
+              <dd>
+                <code>{{ result.sources.script_sig.transaction_txid }}</code>
+              </dd>
+            </div>
+            <div>
+              <dt>Previous output</dt>
+              <dd>
+                <code
+                  >{{ result.sources.script_pubkey.transaction_txid }}:{{
+                    result.sources.script_pubkey.index
+                  }}</code
+                >
+              </dd>
+            </div>
+            <div>
+              <dt>scriptPubKey</dt>
+              <dd>
+                <code>{{ result.scripts.locking }}</code>
+              </dd>
+            </div>
+          </dl>
+        </section>
+        <section class="signature-steps">
+          <span>{{ result.signature.algorithm }}</span>
+          <h2>Signature verification</h2>
+          <ol class="signature-stage-list">
+            <li>
+              <button
+                type="button"
+                [class.active]="signatureStage() === 'message'"
+                [attr.aria-pressed]="signatureStage() === 'message'"
+                (click)="selectSignatureStage('message')"
+              >
+                <strong>Build the legacy message.</strong> Replace the input script with this
+                scriptPubKey.
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                [class.active]="signatureStage() === 'hash'"
+                [attr.aria-pressed]="signatureStage() === 'hash'"
+                (click)="selectSignatureStage('hash')"
+              >
+                <strong>Hash the message.</strong> Append {{ result.signature.sighash_label }} and
+                apply SHA-256 twice.
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                [class.active]="signatureStage() === 'verify'"
+                [attr.aria-pressed]="signatureStage() === 'verify'"
+                (click)="selectSignatureStage('verify')"
+              >
+                <strong>Verify ECDSA.</strong> Check the DER signature against the public key and
+                digest.
+              </button>
+            </li>
+          </ol>
+          <article class="signature-stage-detail" aria-live="polite">
+            @if (signatureStage() === 'message') {
+              <strong>Legacy preimage context</strong>
+              <p>
+                The selected input is signed against the previous output's locking script, not its
+                original scriptSig.
+              </p>
+              <code>{{ result.signature.preimage_hex }}</code>
+            } @else if (signatureStage() === 'hash') {
+              <strong>Digest to verify</strong><code>{{ result.signature.digest_hex }}</code>
+            } @else {
+              <strong>Verification result</strong>
+              <p>The DER signature and compressed public key are evaluated over this digest.</p>
+            }
+          </article>
+          <dl>
+            <div>
+              <dt>Signature</dt>
+              <dd>
+                <code>{{ result.signature.signature_hex }}</code>
+              </dd>
+            </div>
+            <div>
+              <dt>Public key</dt>
+              <dd>
+                <code>{{ result.signature.public_key_hex }}</code>
+              </dd>
+            </div>
+            <div>
+              <dt>Digest</dt>
+              <dd>
+                <code>{{ result.signature.digest_hex }}</code>
+              </dd>
+            </div>
+          </dl>
+          <p class="signature-verdict" [class.signature-verdict--invalid]="!result.signature.valid">
+            {{ result.signature.valid ? 'Valid signature' : 'Invalid signature' }}
+          </p>
+        </section>
+      </section>
+    }
   }
 </section>

@@ -15,6 +15,42 @@ test('runs the curated lesson through the real API and engine', async ({ page })
   await expect(page.getByRole('heading', { name: 'OP_CHECKSIG', exact: true })).toBeVisible();
 });
 
+test('builds a visualizer trace from a real Explorer transaction input', async ({ page }) => {
+  test.skip(!process.env['BML_LIVE_API'], 'Set BML_LIVE_API=1 to run the cross-repository check.');
+  test.skip(
+    !process.env['BML_LIVE_CORE'],
+    'Set BML_LIVE_CORE=1 when Bitcoin Core RPC is available.',
+  );
+
+  const txid = '40e331b67c0fe7750bb3b1943b378bf702dce86124dc12fa5980f975db7ec930';
+  await page.goto(`/visualizer?txid=${txid}&input=0`);
+
+  await expect(page.getByLabel('Script trace player')).toBeVisible();
+  await page.getByRole('button', { name: /scriptSig/ }).click();
+  await expect(page.getByRole('dialog')).toContainText(txid);
+  await page.getByRole('button', { name: 'Close script source detail' }).click();
+  await page.getByRole('button', { name: 'Go to result' }).click();
+  await expect(page.getByText('Valid spend', { exact: true })).toBeVisible();
+});
+
+test('loads an arbitrary transaction input from the Visualizer source form', async ({ page }) => {
+  test.skip(!process.env['BML_LIVE_API'], 'Set BML_LIVE_API=1 to run the cross-repository check.');
+  test.skip(
+    !process.env['BML_LIVE_CORE'],
+    'Set BML_LIVE_CORE=1 when Bitcoin Core RPC is available.',
+  );
+
+  const txid = '40e331b67c0fe7750bb3b1943b378bf702dce86124dc12fa5980f975db7ec930';
+  await page.goto('/visualizer');
+  await page.getByRole('textbox', { name: 'Transaction ID' }).fill(txid);
+  await page.getByRole('spinbutton', { name: 'Input' }).fill('0');
+  await page.getByRole('button', { name: 'Trace input' }).click();
+
+  await expect(page.getByLabel('Script trace player')).toBeVisible();
+  await page.getByRole('button', { name: /scriptSig/ }).click();
+  await expect(page.getByRole('dialog')).toContainText(txid);
+});
+
 test('loads a catalog example through the real API, Core, and classification engine', async ({
   page,
 }) => {

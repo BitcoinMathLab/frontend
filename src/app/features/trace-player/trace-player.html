@@ -97,6 +97,7 @@
       <app-script-parser
         [trace]="trace()"
         [scripts]="scripts()"
+        [sources]="sources()"
         [currentIndex]="currentStep()?.index ?? -1"
         [currentPhase]="currentPlayback()?.phase ?? null"
         (inspectStep)="inspectOperation($event)"

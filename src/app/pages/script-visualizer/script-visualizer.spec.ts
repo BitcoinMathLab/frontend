@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { ActivatedRoute } from '@angular/router';
 import { of, throwError } from 'rxjs';
 
 import { TraceApi } from '../../core/trace-api';
@@ -10,7 +11,10 @@ describe('ScriptVisualizer', () => {
     const loadP2pkhTrace = vi.fn().mockReturnValue(of(TRACE_RESPONSE_FIXTURE));
     await TestBed.configureTestingModule({
       imports: [ScriptVisualizer],
-      providers: [{ provide: TraceApi, useValue: { loadP2pkhTrace } }],
+      providers: [
+        { provide: TraceApi, useValue: { loadP2pkhTrace } },
+        { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: { get: () => null } } } },
+      ],
     }).compileComponents();
 
     const fixture = TestBed.createComponent(ScriptVisualizer);
@@ -38,7 +42,10 @@ describe('ScriptVisualizer', () => {
       .mockReturnValueOnce(of(TRACE_RESPONSE_FIXTURE));
     await TestBed.configureTestingModule({
       imports: [ScriptVisualizer],
-      providers: [{ provide: TraceApi, useValue: { loadP2pkhTrace } }],
+      providers: [
+        { provide: TraceApi, useValue: { loadP2pkhTrace } },
+        { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: { get: () => null } } } },
+      ],
     }).compileComponents();
 
     const fixture = TestBed.createComponent(ScriptVisualizer);
@@ -50,5 +57,149 @@ describe('ScriptVisualizer', () => {
     fixture.detectChanges();
     expect(loadP2pkhTrace).toHaveBeenCalledTimes(2);
     expect(fixture.nativeElement.textContent).toContain('Step 0 of 4');
+  });
+
+  it('builds a trace request from a selected real P2PKH input', async () => {
+    const txid = 'a'.repeat(64);
+    const loadTransactionContext = vi.fn().mockReturnValue(
+      of({
+        transaction_hex: '01000000',
+        spent_outputs: [{ spend_type: 'P2PKH', amount_sats: 42, script_pubkey_hex: '76a91400' }],
+      }),
+    );
+    const loadP2pkhTrace = vi.fn().mockReturnValue(of(TRACE_RESPONSE_FIXTURE));
+    await TestBed.configureTestingModule({
+      imports: [ScriptVisualizer],
+      providers: [
+        { provide: TraceApi, useValue: { loadTransactionContext, loadP2pkhTrace } },
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              queryParamMap: { get: (name: string) => (name === 'txid' ? txid : '0') },
+            },
+          },
+        },
+      ],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(ScriptVisualizer);
+    fixture.detectChanges();
+
+    expect(loadTransactionContext).toHaveBeenCalledWith(txid);
+    expect(loadP2pkhTrace).toHaveBeenCalledWith({
+      transaction_hex: '01000000',
+      input_index: 0,
+      spent_outputs: [{ amount_sats: 42, script_pubkey_hex: '76a91400' }],
+    });
+  });
+
+  it('loads an arbitrary P2PKH input from the visualizer source form', async () => {
+    const txid = 'b'.repeat(64);
+    const loadTransactionContext = vi.fn().mockReturnValue(
+      of({
+        transaction_hex: '02000000',
+        spent_outputs: [
+          { spend_type: 'P2WPKH', amount_sats: 10, script_pubkey_hex: '001400' },
+          { spend_type: 'P2PKH', amount_sats: 20, script_pubkey_hex: '76a91411' },
+        ],
+      }),
+    );
+    const loadP2pkhTrace = vi.fn().mockReturnValue(of(TRACE_RESPONSE_FIXTURE));
+    await TestBed.configureTestingModule({
+      imports: [ScriptVisualizer],
+      providers: [
+        { provide: TraceApi, useValue: { loadTransactionContext, loadP2pkhTrace } },
+        { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: { get: () => null } } } },
+      ],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(ScriptVisualizer);
+    fixture.detectChanges();
+    const component = fixture.componentInstance as unknown as {
+      transactionId: string;
+      inputIndex: number;
+      loadSelectedInput(): void;
+    };
+    component.transactionId = txid;
+    component.inputIndex = 1;
+    component.loadSelectedInput();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('form')).not.toBeNull();
+    expect(loadTransactionContext).toHaveBeenCalledWith(txid);
+    expect(loadP2pkhTrace).toHaveBeenLastCalledWith({
+      transaction_hex: '02000000',
+      input_index: 1,
+      spent_outputs: [
+        { amount_sats: 10, script_pubkey_hex: '001400' },
+        { amount_sats: 20, script_pubkey_hex: '76a91411' },
+      ],
+    });
+  });
+
+  it('retries the selected transaction input after its trace request fails', async () => {
+    const txid = 'c'.repeat(64);
+    const context = {
+      transaction_hex: '02000000',
+      spent_outputs: [{ spend_type: 'P2PKH', amount_sats: 20, script_pubkey_hex: '76a91411' }],
+    };
+    const loadTransactionContext = vi.fn().mockReturnValue(of(context));
+    const loadP2pkhTrace = vi
+      .fn()
+      .mockReturnValueOnce(of(TRACE_RESPONSE_FIXTURE))
+      .mockReturnValueOnce(throwError(() => new Error('temporary failure')))
+      .mockReturnValueOnce(of(TRACE_RESPONSE_FIXTURE));
+    await TestBed.configureTestingModule({
+      imports: [ScriptVisualizer],
+      providers: [
+        { provide: TraceApi, useValue: { loadTransactionContext, loadP2pkhTrace } },
+        { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: { get: () => null } } } },
+      ],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(ScriptVisualizer);
+    fixture.detectChanges();
+    const component = fixture.componentInstance as unknown as {
+      transactionId: string;
+      inputIndex: number;
+      loadSelectedInput(): void;
+    };
+    component.transactionId = txid;
+    component.inputIndex = 0;
+    component.loadSelectedInput();
+    fixture.detectChanges();
+
+    (fixture.nativeElement.querySelector('.state-card button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    expect(loadTransactionContext).toHaveBeenCalledTimes(2);
+    expect(loadTransactionContext).toHaveBeenLastCalledWith(txid);
+    expect(loadP2pkhTrace).toHaveBeenCalledTimes(3);
+    expect(fixture.nativeElement.textContent).toContain('Step 0 of 4');
+  });
+
+  it('rejects an invalid transaction link without making an API request', async () => {
+    const loadTransactionContext = vi.fn();
+    await TestBed.configureTestingModule({
+      imports: [ScriptVisualizer],
+      providers: [
+        { provide: TraceApi, useValue: { loadTransactionContext } },
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: { queryParamMap: { get: (name: string) => (name === 'txid' ? 'bad' : '0') } },
+          },
+        },
+      ],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(ScriptVisualizer);
+    fixture.detectChanges();
+
+    expect(loadTransactionContext).not.toHaveBeenCalled();
+    expect(fixture.nativeElement.textContent).toContain(
+      'The transaction ID in this visualizer link is invalid.',
+    );
   });
 });

@@ -117,6 +117,10 @@ test('loads a transaction and displays its ordered spend context', async ({ page
   await expect(page.getByText('76a91400112288ac')).toBeVisible();
   await expect(page.getByText('P2PKH', { exact: true })).toHaveCount(4);
   await expect(page.getByText('Fixture verified', { exact: true })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Visualize this spend' })).toHaveAttribute(
+    'href',
+    `/visualizer?txid=${TXID}&input=0`,
+  );
   await expect(page.getByRole('heading', { name: 'Transaction byte inspector' })).toBeVisible();
   await page.getByRole('button', { name: /Output 1 amount, bytes/ }).click();
   await expect(page.locator('.byte-detail')).toContainText('1000 sats');

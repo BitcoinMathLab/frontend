@@ -5,6 +5,20 @@ const validResponse = {
   script_type: 'P2PKH',
   input_index: 0,
   scripts: { unlocking: '51', locking: '76ac', combined: '5176ac' },
+  sources: {
+    script_sig: { transaction_txid: 'a'.repeat(64), index: 0 },
+    script_pubkey: { transaction_txid: 'b'.repeat(64), index: 1 },
+  },
+  signature: {
+    algorithm: 'ECDSA/secp256k1',
+    signature_hex: '30signature',
+    public_key_hex: '02publickey',
+    sighash_type: 1,
+    sighash_label: 'SIGHASH_ALL',
+    preimage_hex: '01000000preimage01000000',
+    digest_hex: 'c'.repeat(64),
+    valid: true,
+  },
   trace: {
     schema_version: 1,
     script: '5176ac',
@@ -106,6 +120,15 @@ test('connects spend elements, parsing, execution, stacks, and signature detail'
 
   const player = page.getByLabel('Script trace player');
   await expect(page.getByRole('heading', { name: 'Stack visualizer' })).toBeVisible();
+  const executionTab = page.getByRole('tab', { name: 'Execution' });
+  const signatureTab = page.getByRole('tab', { name: 'Signature' });
+  await executionTab.focus();
+  await executionTab.press('ArrowRight');
+  await expect(signatureTab).toHaveAttribute('aria-selected', 'true');
+  await expect(signatureTab).toBeFocused();
+  await signatureTab.press('ArrowLeft');
+  await expect(executionTab).toHaveAttribute('aria-selected', 'true');
+  await expect(executionTab).toBeFocused();
   await expect(page.getByRole('heading', { name: 'Stack flow', exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Stack state' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Execution', exact: true })).toBeVisible();
@@ -135,6 +158,16 @@ test('connects spend elements, parsing, execution, stacks, and signature detail'
   await page.getByText('scriptSig', { exact: true }).hover();
   await expect(page.getByRole('tooltip').first()).toContainText('Original hex');
   await expect(page.getByRole('tooltip').first()).toContainText('51');
+  await page.getByRole('button', { name: /scriptSig/ }).click();
+  await expect(page.getByRole('dialog')).toContainText('This unlocking script is serialized');
+  await expect(page.getByRole('dialog')).toContainText('a'.repeat(64));
+  await expect(page.getByRole('dialog')).toContainText('input 1');
+  await page.getByRole('button', { name: 'Close script source detail' }).click();
+  await page.getByRole('button', { name: /scriptPubKey/ }).click();
+  await expect(page.getByRole('dialog')).toContainText('This locking script is serialized');
+  await expect(page.getByRole('dialog')).toContainText('b'.repeat(64));
+  await expect(page.getByRole('dialog')).toContainText('output 1');
+  await page.getByRole('button', { name: 'Close script source detail' }).click();
   await expect(page.getByLabel('Restart trace')).toHaveText('<<');
   await expect(page.getByLabel('Go to result')).toHaveText('>>');
   await expect(page.getByLabel('Signature example')).toHaveValue('p2pkh');
@@ -209,16 +242,19 @@ test('connects spend elements, parsing, execution, stacks, and signature detail'
     name: 'Open signature verification detail',
   });
   await signatureButton.click();
-  const signatureDialog = page.getByRole('dialog');
-  await expect(signatureDialog).toBeFocused();
-  await expect(signatureDialog).toContainText('How this signature is verified');
-  await expect(signatureDialog).toContainText('30signature');
-  await signatureDialog.press('Escape');
-  await expect(signatureDialog).toHaveCount(0);
-  await expect(signatureButton).toBeFocused();
-
-  await player.press('ArrowLeft');
-  await expect(page.getByLabel('Execution status').getByText('Step 3 of 5')).toBeVisible();
+  await expect(page.getByRole('tab', { name: 'Signature' })).toHaveAttribute(
+    'aria-selected',
+    'true',
+  );
+  await expect(page.getByRole('heading', { name: 'Signature verification' })).toBeVisible();
+  await expect(page.getByText('30signature')).toBeVisible();
+  await expect(page.getByText('Legacy preimage context')).toBeVisible();
+  await expect(page.getByText('01000000preimage01000000')).toBeVisible();
+  await page.getByRole('button', { name: /Hash the message/ }).click();
+  await expect(page.getByText('Digest to verify')).toBeVisible();
+  await expect(page.locator('.signature-stage-detail').getByText('c'.repeat(64))).toBeVisible();
+  await page.getByRole('button', { name: /Verify ECDSA/ }).click();
+  await expect(page.getByText('Verification result')).toBeVisible();
 });
 
 test('shows a failed P2PKH result without adding another lesson surface', async ({ page }) => {

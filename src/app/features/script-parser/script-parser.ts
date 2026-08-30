@@ -1,11 +1,22 @@
-import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
 
-import { ExecutionTrace, P2pkhTraceResponse, TraceStep } from '../../core/trace-api.models';
+import {
+  ExecutionTrace,
+  P2pkhTraceResponse,
+  ScriptSource,
+  TraceStep,
+} from '../../core/trace-api.models';
 
 interface ParsedOperation {
   readonly step: TraceStep;
   readonly phase: 'scriptSig' | 'scriptPubKey';
   readonly dataLabel: string | null;
+}
+
+interface SelectedSource extends ScriptSource {
+  readonly label: 'scriptSig' | 'scriptPubKey';
+  readonly location: string;
+  readonly description: string;
 }
 
 @Component({
@@ -17,10 +28,12 @@ interface ParsedOperation {
 export class ScriptParser {
   readonly trace = input.required<ExecutionTrace>();
   readonly scripts = input.required<P2pkhTraceResponse['scripts']>();
+  readonly sources = input.required<P2pkhTraceResponse['sources']>();
   readonly currentIndex = input.required<number>();
   readonly currentPhase = input<'opcode' | 'stack-push' | 'stack-validation' | null>(null);
   readonly inspectStep = output<number>();
   readonly inspectData = output<number>();
+  protected readonly selectedSource = signal<SelectedSource | null>(null);
 
   protected readonly operations = computed<readonly ParsedOperation[]>(() => {
     const unlockingLength = this.scripts().unlocking.length / 2;
@@ -51,5 +64,29 @@ export class ScriptParser {
   protected dataPreview(operation: ParsedOperation): string {
     const data = operation.step.opcode.push_data ?? '';
     return data.length > 8 ? `${data.slice(0, 4)}…${data.slice(-4)}` : data;
+  }
+
+  protected openSource(kind: 'script_sig' | 'script_pubkey'): void {
+    const source = this.sources()[kind];
+    this.selectedSource.set(
+      kind === 'script_sig'
+        ? {
+            ...source,
+            label: 'scriptSig',
+            location: `input ${source.index + 1}`,
+            description: 'This unlocking script is serialized in the spending transaction input.',
+          }
+        : {
+            ...source,
+            label: 'scriptPubKey',
+            location: `output ${source.index}`,
+            description:
+              'This locking script is serialized in the previous transaction output being spent.',
+          },
+    );
+  }
+
+  protected closeSource(): void {
+    this.selectedSource.set(null);
   }
 }

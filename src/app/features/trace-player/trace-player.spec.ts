@@ -21,6 +21,7 @@ describe('TracePlayer', () => {
       })),
     });
     fixture.componentRef.setInput('scripts', TRACE_RESPONSE_FIXTURE.scripts);
+    fixture.componentRef.setInput('sources', TRACE_RESPONSE_FIXTURE.sources);
     fixture.detectChanges();
   });
 

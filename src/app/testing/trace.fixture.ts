@@ -75,5 +75,26 @@ export const TRACE_RESPONSE_FIXTURE: P2pkhTraceResponse = {
     locking: '93',
     combined: '515293',
   },
+  sources: {
+    script_sig: {
+      transaction_txid: '40e331b67c0fe7750bb3b1943b378bf702dce86124dc12fa5980f975db7ec930',
+      index: 0,
+    },
+    script_pubkey: {
+      transaction_txid: '0b6461de422c46a221db99608fcbe0326e4f2325ebf2a47c9faf660ed61ee6a4',
+      index: 1,
+    },
+  },
+  signature: {
+    algorithm: 'ECDSA/secp256k1',
+    signature_hex: '3045022100c233c3a8a510e03ad18b0a24694ef00c78101bfd5ac075b8c1037952ce26e91e',
+    public_key_hex: '03f0609c81a45f8cab67fc2d050c21b1acd3d37c7acfd54041be6601ab4cef4f31',
+    sighash_type: 1,
+    sighash_label: 'SIGHASH_ALL',
+    preimage_hex:
+      '0100000001aabb010000001976a914cc88acffffffff01010000000000000001510000000001000000',
+    digest_hex: 'd21483940571a138f8c768a97f1002cc6b6b0c4df9f647feb513b881162d66e6',
+    valid: true,
+  },
   trace: TRACE_FIXTURE,
 };

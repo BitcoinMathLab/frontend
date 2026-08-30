@@ -4,6 +4,7 @@ import {
   computed,
   input,
   OnDestroy,
+  output,
   signal,
 } from '@angular/core';
 
@@ -31,6 +32,8 @@ interface PlaybackStep {
 export class TracePlayer implements OnDestroy {
   readonly trace = input.required<ExecutionTrace>();
   readonly scripts = input.required<P2pkhTraceResponse['scripts']>();
+  readonly sources = input.required<P2pkhTraceResponse['sources']>();
+  readonly openSignatureWorkspace = output<void>();
 
   protected readonly currentIndex = signal(-1);
   protected readonly playing = signal(false);
@@ -168,6 +171,7 @@ export class TracePlayer implements OnDestroy {
     this.pause();
     this.rememberFocus();
     this.signatureDetailOpen.set(true);
+    this.openSignatureWorkspace.emit();
   }
 
   protected closeOperationDetail(): void {
