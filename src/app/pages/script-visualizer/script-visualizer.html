@@ -4,7 +4,7 @@
 </section>
 
 <section class="lab" aria-label="Bitcoin spend verification">
-  @if (!response() || activeWorkspace() === 'execution') {
+  @if (activeWorkspace() === 'execution') {
     <form class="transaction-source" (ngSubmit)="loadSelectedInput()" novalidate>
       <label>
         <span>Transaction ID</span>
@@ -74,22 +74,81 @@
         Signature
       </button>
     </div>
-    @if (activeWorkspace() === 'execution') {
-      <div id="execution-panel" role="tabpanel" aria-labelledby="execution-tab">
-        <app-trace-player
-          [trace]="result.trace"
-          [scripts]="displayScripts(result)"
-          [sources]="displaySources(result)"
-          [scriptType]="result.script_type"
-          [witnessItems]="witnessItems(result)"
-          (openSignatureWorkspace)="showWorkspace('signature')"
-        />
-      </div>
-    } @else {
-      <div id="signature-panel" role="tabpanel" aria-labelledby="signature-tab">
-        <app-signature-player [result]="result" [transactionHex]="transactionHex()" />
-      </div>
-    }
+    <div
+      id="execution-panel"
+      role="tabpanel"
+      aria-labelledby="execution-tab"
+      [hidden]="activeWorkspace() !== 'execution'"
+    >
+      <app-trace-player
+        [trace]="result.trace"
+        [scripts]="displayScripts(result)"
+        [sources]="displaySources(result)"
+        [scriptType]="result.script_type"
+        [witnessItems]="witnessItems(result)"
+        (openSignatureWorkspace)="showWorkspace('signature')"
+      />
+    </div>
+    <div
+      id="signature-panel"
+      role="tabpanel"
+      aria-labelledby="signature-tab"
+      [hidden]="activeWorkspace() !== 'signature'"
+    >
+      <form class="signature-verifier" (ngSubmit)="verifySignature()" novalidate>
+        <header>
+          <div>
+            <span>Standalone verifier</span>
+            <h2>Verify a DER signature</h2>
+          </div>
+          <p>The transaction supplies the public key, hash type, and exact signing message.</p>
+        </header>
+        <div class="signature-verifier__fields">
+          <label>
+            <span>Transaction ID</span>
+            <input
+              name="signature-transaction-id"
+              type="text"
+              maxlength="64"
+              autocomplete="off"
+              spellcheck="false"
+              [(ngModel)]="verifierTransactionId"
+            />
+          </label>
+          <label class="input-index-field">
+            <span>Input</span>
+            <input
+              name="signature-input-index"
+              type="number"
+              min="0"
+              step="1"
+              [(ngModel)]="verifierInputIndex"
+            />
+          </label>
+          <label class="der-field">
+            <span>DER signature</span>
+            <textarea
+              name="der-signature"
+              rows="2"
+              maxlength="144"
+              autocomplete="off"
+              spellcheck="false"
+              [(ngModel)]="derSignature"
+            ></textarea>
+          </label>
+          <button type="submit" [disabled]="verifying()">
+            {{ verifying() ? 'Verifying…' : 'Verify DER signature' }}
+          </button>
+        </div>
+        @if (verificationError(); as message) {
+          <p class="signature-verifier__error" role="alert">{{ message }}</p>
+        }
+      </form>
+      <app-signature-player
+        [result]="signatureResult(result)"
+        [transactionHex]="signatureTransaction(transactionHex())"
+      />
+    </div>
   } @else if (contextSpend(); as spend) {
     <div
       class="workspace-tabs"

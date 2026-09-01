@@ -107,6 +107,7 @@
               <button
                 type="button"
                 [class.active]="displayedInput().index === input.index"
+                [class.committed]="inputCommitted(input.index)"
                 (click)="chooseInput(input.index)"
               >
                 Input {{ input.index
@@ -129,14 +130,40 @@
                   displayedInput().index === result().input_index &&
                   (field.id.endsWith('script-sig') || field.id.endsWith('script-length'))
                 "
-                ><span>{{ field.label }}</span
-                >{{ field.hex || 'empty' }}</code
+                ><span>{{ inputFieldLabel(field) }}</span
+                >{{ field.hex || 'empty' }}<small>{{ field.decoded }}</small></code
               >
             }
-            @if (result().script_type === 'P2WPKH') {
+            @if (result().script_type === 'P2WPKH' && !hasDecodedWitness()) {
               <code class="selected-field"
                 ><span>Witness · signature and public key</span>{{ unlockingData() }}</code
               >
+            }
+          </div>
+        </article>
+        <article [class.active]="active('outputs')" class="outputs-region">
+          <span>Transaction outputs</span>
+          <div class="input-selector" role="group" aria-label="Transaction outputs">
+            @for (output of outputRegions(); track output.index) {
+              <button
+                type="button"
+                [class.active]="displayedOutput().index === output.index"
+                [class.committed]="outputCommitted(output.index)"
+                (click)="chooseOutput(output.index)"
+              >
+                Output {{ output.index }}{{ outputCommitted(output.index) ? ' · committed' : '' }}
+              </button>
+            }
+          </div>
+          <strong>Output {{ displayedOutput().index }} serialized fields</strong>
+          <div class="transaction-components">
+            @for (field of displayedOutput().fields; track field.id) {
+              <code [class.selected-field]="outputCommitted(displayedOutput().index)"
+                ><span>{{ outputFieldLabel(field) }}</span
+                >{{ field.hex }}<small>{{ field.decoded }}</small></code
+              >
+            } @empty {
+              <p>No transaction outputs were decoded.</p>
             }
           </div>
         </article>

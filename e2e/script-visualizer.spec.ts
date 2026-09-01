@@ -140,6 +140,111 @@ async function mockTraceApi(page: Page, success = true): Promise<void> {
   });
 }
 
+test('verifies a standalone DER signature with transaction-derived context', async ({ page }) => {
+  const txid = 'a'.repeat(64);
+  const candidate = '3006020101020101';
+  let verificationBody: Record<string, unknown> | undefined;
+  await mockTraceApi(page);
+  await page.route(`**/api/v1/transactions/${txid}/context`, async (route) => {
+    await route.fulfill({
+      contentType: 'application/json',
+      json: {
+        transaction_hex: '01000000',
+        spent_outputs: [
+          {
+            txid: 'b'.repeat(64),
+            vout: 1,
+            spend_type: 'P2PKH',
+            amount_sats: 42,
+            script_pubkey_hex: '76ac',
+            script_sig_hex: '51',
+            witness_hex: [],
+          },
+        ],
+      },
+    });
+  });
+  await page.route('**/api/v1/signatures/ecdsa/verify', async (route) => {
+    verificationBody = route.request().postDataJSON() as Record<string, unknown>;
+    const { trace: _trace, ...verificationResponse } = validResponse;
+    await route.fulfill({
+      contentType: 'application/json',
+      json: {
+        ...verificationResponse,
+        signature: { ...verificationResponse.signature, signature_hex: candidate, valid: false },
+      },
+    });
+  });
+
+  await page.goto('/visualizer');
+  await page.getByRole('tab', { name: 'Signature' }).click();
+  await expect(page.getByRole('heading', { name: 'Verify a DER signature' })).toBeVisible();
+  await expect(page.locator('.transaction-source')).toHaveCount(0);
+  await page.getByLabel('DER signature').fill(candidate);
+  await page.getByRole('button', { name: 'Verify DER signature' }).click();
+  await expect.poll(() => verificationBody).toBeTruthy();
+  expect(verificationBody).toMatchObject({
+    transaction_hex: '01000000',
+    input_index: 0,
+    der_signature_hex: candidate,
+    spent_outputs: [{ amount_sats: 42, script_pubkey_hex: '76ac' }],
+  });
+  await page.getByRole('button', { name: 'Finish signature walkthrough' }).click();
+  await expect(page.getByText('Invalid signature')).toBeVisible();
+  await expect(page.getByText(candidate)).toBeVisible();
+});
+
+test('inspects a deep trace stack without moving the stack top or overflowing mobile', async ({
+  page,
+}) => {
+  const deepItems = ['08', '07', '06', '05', '04', '03', '02', '01'];
+  const deepResponse = {
+    ...validResponse,
+    trace: {
+      ...validResponse.trace,
+      steps: validResponse.trace.steps.map((step, index) =>
+        index === validResponse.trace.steps.length - 1
+          ? {
+              ...step,
+              stacks: {
+                ...step.stacks,
+                after: {
+                  ...step.stacks.after,
+                  main: { depth: deepItems.length, items: deepItems },
+                },
+              },
+            }
+          : step,
+      ),
+    },
+  };
+  await page.route('**/api/v1/traces/p2pkh', async (route) => {
+    await route.fulfill({ contentType: 'application/json', json: deepResponse });
+  });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/visualizer');
+  await page.getByRole('button', { name: 'Find previous output' }).click();
+  await page.getByRole('button', { name: 'Assemble execution script' }).click();
+  await page.getByRole('button', { name: 'Go to result' }).click();
+
+  const overflow = page.getByRole('button', { name: 'Inspect 2 more items' });
+  await expect(overflow).toBeVisible();
+  await expect(page.locator('.stack-view__items .stack-item')).toHaveCount(6);
+  await overflow.click();
+  const dialog = page.getByRole('dialog', { name: 'All stack items' });
+  await expect(dialog).toBeVisible();
+  await expect(dialog.locator(':scope > div > button')).toHaveCount(8);
+  await expect(page.getByRole('button', { name: 'Close all stack items' })).toBeFocused();
+  await dialog.press('Escape');
+  await expect(dialog).toHaveCount(0);
+  await expect(overflow).toBeFocused();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= document.documentElement.clientWidth,
+    ),
+  ).toBe(true);
+});
+
 test('connects spend elements, parsing, execution, stacks, and signature detail', async ({
   page,
 }) => {
@@ -157,6 +262,11 @@ test('connects spend elements, parsing, execution, stacks, and signature detail'
   await signatureTab.press('ArrowLeft');
   await expect(executionTab).toHaveAttribute('aria-selected', 'true');
   await expect(executionTab).toBeFocused();
+  await expect(page.getByText('Use the outpoint above')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Stack flow', exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Find previous output' }).click();
+  await expect(page.getByText(/scriptPubKey 76ac/)).toBeVisible();
+  await page.getByRole('button', { name: 'Assemble execution script' }).click();
   await expect(page.getByRole('heading', { name: 'Stack flow', exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Stack state' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Execution', exact: true })).toBeVisible();
@@ -166,7 +276,9 @@ test('connects spend elements, parsing, execution, stacks, and signature detail'
       (element) => getComputedStyle(element).gridTemplateColumns.split(' ').filter(Boolean).length,
     );
   expect(columnCount).toBe(2);
-  const controlsBox = await page.getByLabel('Playback controls').boundingBox();
+  const controlsBox = await page
+    .getByRole('group', { name: 'Playback controls', exact: true })
+    .boundingBox();
   const controlsBarBox = await page.locator('.controls-bar').boundingBox();
   const workspaceBox = await page.locator('.visualizer-grid').boundingBox();
   expect(controlsBox?.y).toBeLessThan(workspaceBox?.y ?? 0);
@@ -182,7 +294,7 @@ test('connects spend elements, parsing, execution, stacks, and signature detail'
   await expect(page.getByText('scriptPubKey', { exact: true })).toBeVisible();
   await expect(page.getByText('OP_PUSHBYTES_1')).toBeVisible();
   await expect(page.getByText('DATA (Signature)')).toBeVisible();
-  await expect(page.getByText('0x01')).toBeVisible();
+  await expect(page.locator('#execution-panel').getByText('0x01')).toBeVisible();
   await page.getByText('scriptSig', { exact: true }).hover();
   await expect(page.getByRole('tooltip').first()).toContainText('Original hex');
   await expect(page.getByRole('tooltip').first()).toContainText('51');
@@ -285,8 +397,13 @@ test('connects spend elements, parsing, execution, stacks, and signature detail'
   await expect(page.getByText('01000000preimage01000000')).toBeVisible();
   await page.getByRole('button', { name: 'Finish signature walkthrough' }).click();
   await expect(page.getByText('Valid signature')).toBeVisible();
-  await expect(page.getByText('30signature')).toBeVisible();
+  await expect(page.locator('.verification-pane').getByText('30signature')).toBeVisible();
   await expect(page.locator('.verification-pane').getByText('c'.repeat(64)).first()).toBeVisible();
+  await page.getByRole('tab', { name: 'Execution' }).click();
+  await expect(page.getByRole('heading', { name: 'Stack flow', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Find previous output' })).toHaveCount(0);
+  await page.getByRole('tab', { name: 'Signature' }).click();
+  await expect(page.getByText('Valid signature')).toBeVisible();
 });
 
 test('loads verified P2WPKH signature and stack walkthroughs', async ({ page }) => {
@@ -320,8 +437,9 @@ test('loads verified P2WPKH signature and stack walkthroughs', async ({ page }) 
   });
 
   await page.goto('/visualizer');
-  await page.getByLabel('Transaction ID').fill(txid);
-  await page.getByLabel('Input').fill('0');
+  const transactionSource = page.locator('.transaction-source');
+  await transactionSource.getByLabel('Transaction ID').fill(txid);
+  await transactionSource.getByLabel('Input', { exact: true }).fill('0');
   await page.getByRole('button', { name: 'Trace input' }).click();
 
   await expect(page.getByText('SegWit ECDSA · P2WPKH')).toBeVisible();
@@ -339,6 +457,8 @@ test('loads verified P2WPKH signature and stack walkthroughs', async ({ page }) 
   await expect(page.getByText('Valid signature')).toBeVisible();
   await page.getByRole('tab', { name: 'Execution' }).click();
   await expect(page.getByLabel('Script trace player')).toBeVisible();
+  await page.getByRole('button', { name: 'Find previous output' }).click();
+  await page.getByRole('button', { name: 'Assemble execution script' }).click();
   await expect(page.getByText('P2PKH scriptCode', { exact: true })).toBeVisible();
   await expect(page.getByText('initializes stack')).toBeVisible();
   await page.setViewportSize({ width: 390, height: 844 });
@@ -359,6 +479,8 @@ test('shows a failed P2PKH result without adding another lesson surface', async 
   await mockTraceApi(page, false);
   await page.goto('/visualizer');
 
+  await page.getByRole('button', { name: 'Find previous output' }).click();
+  await page.getByRole('button', { name: 'Assemble execution script' }).click();
   await expect(page.getByLabel('Execution status')).toContainText('Ready');
   await expect(page.getByText('Invalid spend', { exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: 'Go to result' }).click();
@@ -385,6 +507,8 @@ test('recovers from an API failure and fits a supported mobile viewport', async 
   await expect(page.getByRole('alert')).toContainText('The walkthrough could not load.');
   await page.getByRole('button', { name: 'Try again' }).click();
   await expect(page.getByLabel('Script trace player')).toBeVisible();
+  await page.getByRole('button', { name: 'Find previous output' }).click();
+  await page.getByRole('button', { name: 'Assemble execution script' }).click();
   await expect(page.getByRole('button', { name: 'Next step' })).toBeVisible();
   await expect(page.getByRole('progressbar', { name: 'Execution progress' })).toHaveAttribute(
     'aria-valuenow',

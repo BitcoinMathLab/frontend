@@ -20,7 +20,7 @@
     }
   </div>
   @if (hiddenItemCount() > 0) {
-    <button type="button" class="stack-overflow" (click)="openAllItems()">
+    <button #overflowTrigger type="button" class="stack-overflow" (click)="openAllItems()">
       Inspect {{ hiddenItemCount() }} more {{ hiddenItemCount() === 1 ? 'item' : 'items' }}
     </button>
   }
@@ -34,10 +34,16 @@
       aria-modal="true"
       aria-label="All stack items"
       (click)="$event.stopPropagation()"
+      (keydown)="handleDialogKeydown($event)"
     >
       <header>
         <h2>All stack items</h2>
-        <button type="button" aria-label="Close all stack items" (click)="closeAllItems()">
+        <button
+          #dialogClose
+          type="button"
+          aria-label="Close all stack items"
+          (click)="closeAllItems()"
+        >
           ×
         </button>
       </header>

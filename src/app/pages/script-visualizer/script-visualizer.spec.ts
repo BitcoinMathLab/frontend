@@ -22,9 +22,23 @@ describe('ScriptVisualizer', () => {
 
     expect(loadP2pkhTrace).toHaveBeenCalledOnce();
     expect(fixture.nativeElement.textContent).toContain('Stack visualizer');
+    expect(fixture.nativeElement.textContent).toContain('Find previous output');
+    expect(fixture.nativeElement.textContent).not.toContain('Stack flow');
+    (
+      [...fixture.nativeElement.querySelectorAll('button')].find((button: HTMLButtonElement) =>
+        button.textContent?.includes('Find previous output'),
+      ) as HTMLButtonElement
+    ).click();
+    fixture.detectChanges();
+    (
+      [...fixture.nativeElement.querySelectorAll('button')].find((button: HTMLButtonElement) =>
+        button.textContent?.includes('Assemble execution script'),
+      ) as HTMLButtonElement
+    ).click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Stack flow');
     expect(fixture.nativeElement.textContent).toContain('scriptSig');
     expect(fixture.nativeElement.textContent).toContain('scriptPubKey');
-    expect(fixture.nativeElement.textContent).toContain('Stack flow');
     expect(fixture.nativeElement.textContent).toContain('Stack state');
     expect(fixture.nativeElement.textContent).toContain('Execution');
     expect(fixture.nativeElement.textContent).toContain('Step 0 of 4');
@@ -191,6 +205,66 @@ describe('ScriptVisualizer', () => {
     expect(fixture.nativeElement.textContent).toContain('03publickey');
     expect(fixture.nativeElement.textContent).toContain('selected UTXO');
     expect(fixture.nativeElement.textContent).not.toContain('not yet available for P2WPKH');
+  });
+
+  it('verifies a standalone DER signature with context loaded from its transaction ID', async () => {
+    const txid = 'f'.repeat(64);
+    const context = {
+      transaction_hex: '01000000',
+      spent_outputs: [
+        {
+          spend_type: 'P2PKH',
+          amount_sats: 42,
+          script_pubkey_hex: '76a91400',
+        },
+      ],
+    };
+    const loadP2pkhTrace = vi.fn().mockReturnValue(of(TRACE_RESPONSE_FIXTURE));
+    const loadTransactionContext = vi.fn().mockReturnValue(of(context));
+    const verificationResult = { ...TRACE_RESPONSE_FIXTURE };
+    delete (verificationResult as { trace?: unknown }).trace;
+    const verifyEcdsaSignature = vi.fn().mockReturnValue(of(verificationResult));
+    await TestBed.configureTestingModule({
+      imports: [ScriptVisualizer],
+      providers: [
+        {
+          provide: TraceApi,
+          useValue: { loadP2pkhTrace, loadTransactionContext, verifyEcdsaSignature },
+        },
+        { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: { get: () => null } } } },
+      ],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(ScriptVisualizer);
+    fixture.detectChanges();
+    const signatureTab = [...fixture.nativeElement.querySelectorAll('[role="tab"]')].find(
+      (tab: HTMLButtonElement) => tab.textContent?.includes('Signature'),
+    ) as HTMLButtonElement;
+    signatureTab.click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Verify a DER signature');
+    expect(fixture.nativeElement.querySelector('.transaction-source')).toBeNull();
+
+    const component = fixture.componentInstance as unknown as {
+      verifierTransactionId: string;
+      verifierInputIndex: number;
+      derSignature: string;
+      verifySignature(): void;
+    };
+    component.verifierTransactionId = txid;
+    component.verifierInputIndex = 0;
+    component.derSignature = '3006020101020101';
+    component.verifySignature();
+    fixture.detectChanges();
+
+    expect(loadTransactionContext).toHaveBeenCalledWith(txid);
+    expect(verifyEcdsaSignature).toHaveBeenCalledWith({
+      transaction_hex: context.transaction_hex,
+      input_index: 0,
+      spent_outputs: [{ amount_sats: 42, script_pubkey_hex: '76a91400' }],
+      der_signature_hex: '3006020101020101',
+    });
+    expect(fixture.nativeElement.textContent).toContain('Signature walkthrough ready');
   });
 
   it('retries the selected transaction input after its trace request fails', async () => {

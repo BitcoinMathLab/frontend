@@ -9,6 +9,10 @@ export interface P2pkhTraceRequest {
   readonly spent_outputs: readonly SpentOutputRequest[];
 }
 
+export interface EcdsaSignatureVerificationRequest extends P2pkhTraceRequest {
+  readonly der_signature_hex: string;
+}
+
 export interface StackSnapshot {
   readonly depth: number;
   readonly items: readonly string[];
@@ -86,6 +90,12 @@ export interface P2wpkhTraceResponse {
 }
 
 export type SpendTraceResponse = P2pkhTraceResponse | P2wpkhTraceResponse;
+
+export type P2pkhSignatureVerificationResponse = Omit<P2pkhTraceResponse, 'trace'>;
+export type P2wpkhSignatureVerificationResponse = Omit<P2wpkhTraceResponse, 'trace'>;
+export type EcdsaSignatureVerificationResponse =
+  P2pkhSignatureVerificationResponse | P2wpkhSignatureVerificationResponse;
+export type SignatureWalkthroughResult = SpendTraceResponse | EcdsaSignatureVerificationResponse;
 
 export interface TraceScripts {
   readonly unlocking: string;

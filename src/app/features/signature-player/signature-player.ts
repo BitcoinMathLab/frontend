@@ -7,7 +7,10 @@ import {
   signal,
 } from '@angular/core';
 
-import { SegwitV0SignatureVerification, SpendTraceResponse } from '../../core/trace-api.models';
+import {
+  SegwitV0SignatureVerification,
+  SignatureWalkthroughResult,
+} from '../../core/trace-api.models';
 import {
   decodeTransactionBytes,
   TransactionByteField,
@@ -37,6 +40,11 @@ interface InputRegion {
   readonly fields: readonly TransactionByteField[];
 }
 
+interface OutputRegion {
+  readonly index: number;
+  readonly fields: readonly TransactionByteField[];
+}
+
 const STEPS: readonly SignatureStep[] = [
   {
     phase: 'Ready',
@@ -62,14 +70,14 @@ const STEPS: readonly SignatureStep[] = [
     title: 'Apply the signature commitments',
     description:
       'Keep the inputs, outputs, and sequences committed by this signature hash mode, then append its four-byte little-endian value.',
-    regions: ['transaction', 'script-pubkey', 'sighash'],
+    regions: ['transaction', 'script-pubkey', 'outputs', 'sighash'],
   },
   {
     phase: 'Hash message',
     title: 'Hash the legacy preimage twice',
     description:
       'Apply SHA-256 twice. The resulting 32-byte digest is the ECDSA verification message.',
-    regions: ['transaction', 'script-pubkey', 'sighash', 'digest'],
+    regions: ['transaction', 'script-pubkey', 'outputs', 'sighash', 'digest'],
   },
   {
     phase: 'Verify ECDSA',
@@ -102,7 +110,8 @@ const SEGWIT_STEPS: readonly SignatureStep[] = [
   {
     phase: 'Hash outputs',
     title: 'Commit the outputs selected by the mode',
-    description: 'SIGHASH_ALL commits every serialized output through hashOutputs.',
+    description:
+      'The hash type chooses which serialized outputs are committed through hashOutputs.',
     regions: ['transaction', 'outputs', 'sighash'],
   },
   {
@@ -149,12 +158,13 @@ const SEGWIT_STEPS: readonly SignatureStep[] = [
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SignaturePlayer implements OnDestroy {
-  readonly result = input.required<SpendTraceResponse>();
+  readonly result = input.required<SignatureWalkthroughResult>();
   readonly transactionHex = input.required<string>();
 
   protected readonly currentIndex = signal(0);
   protected readonly playing = signal(false);
   protected readonly selectedInput = signal(0);
+  protected readonly selectedOutput = signal(0);
   protected readonly steps = computed(() =>
     this.result().script_type === 'P2WPKH' ? SEGWIT_STEPS : STEPS,
   );
@@ -205,6 +215,21 @@ export class SignaturePlayer implements OnDestroy {
       this.inputRegions().find((input) => input.index === this.selectedInput()) ??
       this.inputRegions()[0] ?? { index: this.result().input_index, fields: [] },
   );
+  protected readonly outputRegions = computed<readonly OutputRegion[]>(() => {
+    const outputs = new Map<number, TransactionByteField[]>();
+    for (const field of this.transactionFields()) {
+      const match = /^output-(\d+)-/.exec(field.id);
+      if (!match) continue;
+      const index = Number(match[1]);
+      outputs.set(index, [...(outputs.get(index) ?? []), field]);
+    }
+    return [...outputs.entries()].map(([index, fields]) => ({ index, fields }));
+  });
+  protected readonly displayedOutput = computed(
+    () =>
+      this.outputRegions().find((output) => output.index === this.selectedOutput()) ??
+      this.outputRegions()[0] ?? { index: 0, fields: [] },
+  );
 
   private timer: ReturnType<typeof setInterval> | undefined;
 
@@ -247,8 +272,38 @@ export class SignaturePlayer implements OnDestroy {
     this.selectedInput.set(index);
   }
 
+  protected chooseOutput(index: number): void {
+    this.selectedOutput.set(index);
+  }
+
   protected inputFieldLabel(field: TransactionByteField): string {
     return field.label.replace(/^Input \d+/, `Input ${this.displayedInput().index}`);
+  }
+
+  protected outputFieldLabel(field: TransactionByteField): string {
+    return field.label.replace(/^Output \d+/, `Output ${this.displayedOutput().index}`);
+  }
+
+  protected inputCommitted(index: number): boolean {
+    const selected = this.result().input_index;
+    if (index === selected) return this.active('transaction') || this.active('prevouts');
+    if (this.result().signature.sighash_type & 0x80) return false;
+    if (this.active('prevouts')) return true;
+    if (!this.active('transaction')) return false;
+    const baseType = this.result().signature.sighash_type & 0x1f;
+    return baseType !== 2 && baseType !== 3;
+  }
+
+  protected outputCommitted(index: number): boolean {
+    if (!this.active('outputs')) return false;
+    const baseType = this.result().signature.sighash_type & 0x1f;
+    if (baseType === 2) return false;
+    if (baseType === 3) return index === this.result().input_index;
+    return true;
+  }
+
+  protected hasDecodedWitness(): boolean {
+    return this.displayedInput().fields.some((field) => field.group === 'witness');
   }
 
   protected segwitSignature(): SegwitV0SignatureVerification | null {

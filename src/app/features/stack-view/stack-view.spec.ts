@@ -74,4 +74,43 @@ describe('StackView', () => {
     expect(compiled.querySelector('.stack-item.hash')).not.toBeNull();
     expect(compiled.querySelector('.stack-item.boolean')).not.toBeNull();
   });
+
+  it('keeps six items fixed in the stack and returns focus after inspecting overflow', async () => {
+    await TestBed.configureTestingModule({ imports: [StackView] }).compileComponents();
+    const fixture = TestBed.createComponent(StackView);
+    fixture.componentRef.setInput('label', 'Main stack after OP_8');
+    fixture.componentRef.setInput('snapshot', {
+      depth: 8,
+      items: ['08', '07', '06', '05', '04', '03', '02', '01'],
+    });
+    fixture.componentRef.setInput('stepIndex', 7);
+    fixture.detectChanges();
+
+    const overflow = fixture.nativeElement.querySelector('.stack-overflow') as HTMLButtonElement;
+    expect(fixture.nativeElement.querySelectorAll('.stack-view__items .stack-item')).toHaveLength(
+      6,
+    );
+    expect(overflow.textContent).toContain('Inspect 2 more items');
+    overflow.focus();
+    overflow.click();
+    fixture.detectChanges();
+    await new Promise((resolve) => setTimeout(resolve));
+
+    const dialog = fixture.nativeElement.querySelector('[role="dialog"]') as HTMLElement;
+    const close = fixture.nativeElement.querySelector(
+      '[aria-label="Close all stack items"]',
+    ) as HTMLButtonElement;
+    expect(dialog).not.toBeNull();
+    expect(dialog.querySelectorAll(':scope > div > button')).toHaveLength(8);
+    expect(fixture.nativeElement.querySelectorAll('.stack-view__items .stack-item')).toHaveLength(
+      6,
+    );
+    expect(close).toBe(document.activeElement);
+
+    dialog.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    fixture.detectChanges();
+    await Promise.resolve();
+    expect(fixture.nativeElement.querySelector('[role="dialog"]')).toBeNull();
+    expect(overflow).toBe(document.activeElement);
+  });
 });

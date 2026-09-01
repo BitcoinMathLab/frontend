@@ -4,6 +4,8 @@ import { Observable } from 'rxjs';
 
 import { getRuntimeConfig } from './runtime-config';
 import {
+  EcdsaSignatureVerificationRequest,
+  EcdsaSignatureVerificationResponse,
   P2pkhTraceRequest,
   P2pkhTraceResponse,
   P2wpkhTraceResponse,
@@ -22,6 +24,15 @@ export class TraceApi {
 
   loadP2wpkhTrace(request: P2pkhTraceRequest): Observable<P2wpkhTraceResponse> {
     return this.http.post<P2wpkhTraceResponse>(`${this.apiBaseUrl}/api/v1/traces/p2wpkh`, request);
+  }
+
+  verifyEcdsaSignature(
+    request: EcdsaSignatureVerificationRequest,
+  ): Observable<EcdsaSignatureVerificationResponse> {
+    return this.http.post<EcdsaSignatureVerificationResponse>(
+      `${this.apiBaseUrl}/api/v1/signatures/ecdsa/verify`,
+      request,
+    );
   }
 
   loadTransactionContext(txid: string): Observable<TransactionContextResponse> {

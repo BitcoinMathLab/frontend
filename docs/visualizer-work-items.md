@@ -5,6 +5,8 @@ script-preparation pass. They are local planning notes, not external project-tra
 
 ## VIZ-01 — Make UTXO discovery an explicit, inspectable transition
 
+Status: Complete.
+
 The current Script Preparation panel truthfully shows the selected input outpoint, the resolved
 previous output, and the resulting execution path. Refine it into a user-driven `Find UTXO`
 transition that visibly moves the outpoint into the prior transaction/output lookup before
@@ -17,6 +19,8 @@ Acceptance criteria:
 - Preserve keyboard access and the 390px layout.
 
 ## VIZ-02 — Complete the standalone signature-verifier contract
+
+Status: Complete.
 
 Add a verified Signature-workspace mode for a transaction ID, input index, and DER signature.
 This requires a stable backend/Bitclone boundary that derives the correct public key and signature
@@ -31,6 +35,8 @@ Acceptance criteria:
 
 ## VIZ-03 — Expand signature transaction commitments without visual overload
 
+Status: Complete.
+
 The Signature workspace now shows canonical transaction header fields, selectable inputs, the
 selected input, the UTXO, and the digest tracker. For transactions with multiple inputs and
 outputs, refine the compact input/output list so each committed region can be selected and its
@@ -44,6 +50,8 @@ Acceptance criteria:
 - Validate with a multi-input legacy case and a multi-input P2WPKH case.
 
 ## VIZ-04 — Exercise stack overflow with a real deep-stack example
+
+Status: Complete.
 
 The stack view now holds its top edge and exposes a dialog when more than six items are present.
 Add or select a real trace fixture that exceeds six stack items, then verify the overflow dialog,

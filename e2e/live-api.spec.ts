@@ -8,6 +8,8 @@ test('runs the curated lesson through the real API and engine', async ({ page })
   const player = page.getByLabel('Script trace player');
   await expect(player).toBeVisible();
   await expect(page.getByText('Valid spend', { exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Find previous output' }).click();
+  await page.getByRole('button', { name: 'Assemble execution script' }).click();
   await page.getByRole('button', { name: 'Go to result' }).click();
   await expect(page.getByText('Valid spend', { exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'STACK VALIDATION', exact: true })).toBeVisible();
@@ -26,6 +28,8 @@ test('builds a visualizer trace from a real Explorer transaction input', async (
   await page.goto(`/visualizer?txid=${txid}&input=0`);
 
   await expect(page.getByLabel('Script trace player')).toBeVisible();
+  await page.getByRole('button', { name: 'Find previous output' }).click();
+  await page.getByRole('button', { name: 'Assemble execution script' }).click();
   await page.getByRole('button', { name: /scriptSig/ }).click();
   await expect(page.getByRole('dialog')).toContainText(txid);
   await page.getByRole('button', { name: 'Close script source detail' }).click();
@@ -47,6 +51,8 @@ test('loads an arbitrary transaction input from the Visualizer source form', asy
   await page.getByRole('button', { name: 'Trace input' }).click();
 
   await expect(page.getByLabel('Script trace player')).toBeVisible();
+  await page.getByRole('button', { name: 'Find previous output' }).click();
+  await page.getByRole('button', { name: 'Assemble execution script' }).click();
   await page.getByRole('button', { name: /scriptSig/ }).click();
   await expect(page.getByRole('dialog')).toContainText(txid);
 });

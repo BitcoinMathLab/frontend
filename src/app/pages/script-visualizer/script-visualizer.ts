@@ -7,14 +7,16 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { finalize, Observable, Subscription } from 'rxjs';
+import { EMPTY, finalize, Observable, Subscription, switchMap } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 
 import { CURATED_P2PKH_REQUEST } from '../../core/curated-p2pkh';
 import { TraceApi } from '../../core/trace-api';
 import {
+  EcdsaSignatureVerificationResponse,
   P2pkhTraceRequest,
   SpendTraceResponse,
+  SignatureWalkthroughResult,
   PreviousOutputContext,
   TraceScripts,
   TraceSources,
@@ -46,15 +48,23 @@ export class ScriptVisualizer implements OnInit, OnDestroy {
   private readonly traceApi = inject(TraceApi);
   private readonly route = inject(ActivatedRoute);
   private requestSubscription: Subscription | undefined;
+  private verificationSubscription: Subscription | undefined;
 
   protected readonly response = signal<SpendTraceResponse | null>(null);
   protected readonly contextSpend = signal<ContextSpend | null>(null);
+  protected readonly verificationResponse = signal<EcdsaSignatureVerificationResponse | null>(null);
+  protected readonly verificationTransactionHex = signal('');
+  protected readonly verifying = signal(false);
+  protected readonly verificationError = signal('');
   protected readonly transactionHex = signal(CURATED_P2PKH_REQUEST.transaction_hex);
   protected readonly loading = signal(true);
   protected readonly error = signal('');
   protected readonly activeWorkspace = signal<'execution' | 'signature'>('execution');
   protected transactionId = '';
   protected inputIndex = 0;
+  protected verifierTransactionId = '';
+  protected verifierInputIndex = 0;
+  protected derSignature = '';
 
   ngOnInit(): void {
     const txid = this.route.snapshot.queryParamMap.get('txid');
@@ -152,7 +162,10 @@ export class ScriptVisualizer implements OnInit, OnDestroy {
     this.requestSubscription = traceRequest
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
-        next: (response) => this.response.set(response),
+        next: (response) => {
+          this.response.set(response);
+          this.populateVerifier(response);
+        },
         error: () => this.error.set('The selected spend could not be traced.'),
       });
   }
@@ -179,6 +192,73 @@ export class ScriptVisualizer implements OnInit, OnDestroy {
 
   protected witnessItems(result: SpendTraceResponse): readonly string[] {
     return result.script_type === 'P2WPKH' ? result.scripts.witness : [];
+  }
+
+  protected verifySignature(): void {
+    const txid = this.verifierTransactionId.trim().toLowerCase();
+    const signature = this.derSignature.trim().toLowerCase();
+    this.verificationError.set('');
+    if (!/^[0-9a-f]{64}$/.test(txid)) {
+      this.verificationError.set(
+        'Enter a transaction ID containing exactly 64 hexadecimal characters.',
+      );
+      return;
+    }
+    if (!Number.isSafeInteger(this.verifierInputIndex) || this.verifierInputIndex < 0) {
+      this.verificationError.set('Enter a transaction input index of zero or greater.');
+      return;
+    }
+    if (!/^(?:[0-9a-f]{2}){8,72}$/.test(signature)) {
+      this.verificationError.set('Enter 8 to 72 bytes of DER signature as hexadecimal.');
+      return;
+    }
+
+    this.verificationSubscription?.unsubscribe();
+    this.verifying.set(true);
+    this.verificationResponse.set(null);
+    this.verificationSubscription = this.traceApi
+      .loadTransactionContext(txid)
+      .pipe(
+        switchMap((context) => {
+          const selectedOutput = context.spent_outputs[this.verifierInputIndex];
+          if (!selectedOutput) {
+            this.verificationError.set('The selected transaction input does not exist.');
+            return EMPTY;
+          }
+          if (selectedOutput.spend_type !== 'P2PKH' && selectedOutput.spend_type !== 'P2WPKH') {
+            this.verificationError.set(
+              `DER ECDSA verification is not available for ${selectedOutput.spend_type}.`,
+            );
+            return EMPTY;
+          }
+          this.verificationTransactionHex.set(context.transaction_hex);
+          return this.traceApi.verifyEcdsaSignature({
+            transaction_hex: context.transaction_hex,
+            input_index: this.verifierInputIndex,
+            spent_outputs: context.spent_outputs.map((output) => ({
+              amount_sats: output.amount_sats,
+              script_pubkey_hex: output.script_pubkey_hex,
+            })),
+            der_signature_hex: signature,
+          });
+        }),
+        finalize(() => this.verifying.set(false)),
+      )
+      .subscribe({
+        next: (response) => this.verificationResponse.set(response),
+        error: () =>
+          this.verificationError.set(
+            'The DER signature or its verified transaction context could not be checked.',
+          ),
+      });
+  }
+
+  protected signatureResult(result: SpendTraceResponse): SignatureWalkthroughResult {
+    return this.verificationResponse() ?? result;
+  }
+
+  protected signatureTransaction(resultTransactionHex: string): string {
+    return this.verificationResponse() ? this.verificationTransactionHex() : resultTransactionHex;
   }
 
   private toContextSpend(
@@ -222,5 +302,17 @@ export class ScriptVisualizer implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.requestSubscription?.unsubscribe();
+    this.verificationSubscription?.unsubscribe();
+  }
+
+  private populateVerifier(response: SpendTraceResponse): void {
+    const sources = response.sources;
+    this.verifierTransactionId =
+      'witness' in sources ? sources.witness.transaction_txid : sources.script_sig.transaction_txid;
+    this.verifierInputIndex = response.input_index;
+    this.derSignature = response.signature.signature_hex;
+    this.verificationResponse.set(null);
+    this.verificationTransactionHex.set('');
+    this.verificationError.set('');
   }
 }

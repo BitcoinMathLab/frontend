@@ -35,9 +35,46 @@ describe('TracePlayer', () => {
     return match;
   }
 
+  function prepareExecution(): void {
+    const findOutput = [...fixture.nativeElement.querySelectorAll('button')].find(
+      (button: HTMLButtonElement) => button.textContent?.includes('Find previous output'),
+    ) as HTMLButtonElement;
+    findOutput.click();
+    fixture.detectChanges();
+    const assemble = [...fixture.nativeElement.querySelectorAll('button')].find(
+      (button: HTMLButtonElement) => button.textContent?.includes('Assemble execution script'),
+    ) as HTMLButtonElement;
+    assemble.click();
+    fixture.detectChanges();
+  }
+
   it('starts before step one with empty stacks and backward controls disabled', () => {
     const compiled = fixture.nativeElement as HTMLElement;
 
+    expect(compiled.textContent).toContain('Read this input’s outpoint');
+    expect(compiled.textContent).toContain('Use the outpoint above');
+    expect(compiled.textContent).not.toContain(
+      `scriptPubKey ${TRACE_RESPONSE_FIXTURE.scripts.locking}`,
+    );
+    expect(compiled.textContent).not.toContain('Stack flow');
+    expect(control('Next step').disabled).toBe(true);
+
+    const findOutput = [...compiled.querySelectorAll('button')].find((button: HTMLButtonElement) =>
+      button.textContent?.includes('Find previous output'),
+    ) as HTMLButtonElement;
+    findOutput.click();
+    fixture.detectChanges();
+    expect(compiled.textContent).toContain(
+      `scriptPubKey ${TRACE_RESPONSE_FIXTURE.scripts.locking}`,
+    );
+    expect(compiled.textContent).toContain('Assemble execution script');
+    expect(compiled.textContent).not.toContain('Stack flow');
+
+    const assemble = [...compiled.querySelectorAll('button')].find((button: HTMLButtonElement) =>
+      button.textContent?.includes('Assemble execution script'),
+    ) as HTMLButtonElement;
+    assemble.click();
+    fixture.detectChanges();
     expect(compiled.textContent).toContain('Stack flow');
     expect(compiled.textContent).toContain('scriptSig');
     expect(compiled.textContent).toContain('scriptPubKey');
@@ -56,6 +93,7 @@ describe('TracePlayer', () => {
   });
 
   it('moves forward, backward, jumps to the result, and resets', () => {
+    prepareExecution();
     expect(fixture.nativeElement.textContent).toContain('Ready');
     expect(fixture.nativeElement.textContent).not.toContain('Valid spend');
 
@@ -93,6 +131,7 @@ describe('TracePlayer', () => {
   });
 
   it('plays to the final step and pauses automatically', () => {
+    prepareExecution();
     vi.useFakeTimers();
     const play = [...fixture.nativeElement.querySelectorAll('.vcr button')].find(
       (button: HTMLButtonElement) => button.textContent?.includes('Play'),
@@ -109,6 +148,7 @@ describe('TracePlayer', () => {
   });
 
   it('supports arrow, space, Home, and End keyboard controls', () => {
+    prepareExecution();
     const player = fixture.nativeElement.querySelector('.player') as HTMLElement;
     player.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
     fixture.detectChanges();
@@ -138,6 +178,7 @@ describe('TracePlayer', () => {
   });
 
   it('shows the current stack workbench and per-operation movement', () => {
+    prepareExecution();
     control('Go to result').click();
     fixture.detectChanges();
 
@@ -151,6 +192,7 @@ describe('TracePlayer', () => {
   });
 
   it('opens the signature workspace from OP_CHECKSIG', () => {
+    prepareExecution();
     fixture.componentRef.setInput('trace', {
       ...TRACE_FIXTURE,
       steps: TRACE_FIXTURE.steps.map((step, index) =>
@@ -190,6 +232,7 @@ describe('TracePlayer', () => {
   });
 
   it('opens opcode information without advancing the walkthrough', () => {
+    prepareExecution();
     fixture.componentRef.setInput('trace', {
       ...TRACE_FIXTURE,
       steps: TRACE_FIXTURE.steps.map((step, index) =>
@@ -215,6 +258,7 @@ describe('TracePlayer', () => {
   });
 
   it('explains each push as an opcode without advancing', () => {
+    prepareExecution();
     const pushOpcode = [...fixture.nativeElement.querySelectorAll('.operation-list button')].find(
       (button: HTMLButtonElement) => button.textContent?.includes('OP_1'),
     ) as HTMLButtonElement;
@@ -232,6 +276,7 @@ describe('TracePlayer', () => {
   });
 
   it('explains pushed signature data without advancing', () => {
+    prepareExecution();
     fixture.componentRef.setInput('trace', {
       ...TRACE_FIXTURE,
       steps: TRACE_FIXTURE.steps.map((step, index) =>
@@ -266,6 +311,7 @@ describe('TracePlayer', () => {
   });
 
   it('opens a concise data detail for a stack item', () => {
+    prepareExecution();
     control('Next step').click();
     control('Next step').click();
     fixture.detectChanges();
@@ -286,6 +332,7 @@ describe('TracePlayer', () => {
   });
 
   it('explains the safe diagnostic for a failed trace', () => {
+    prepareExecution();
     fixture.componentRef.setInput('trace', {
       ...TRACE_FIXTURE,
       success: false,

@@ -47,6 +47,26 @@ describe('TraceApi', () => {
     request.flush({});
   });
 
+  it('posts a candidate DER signature with complete spend context', () => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const service = TestBed.inject(TraceApi);
+    const verificationRequest = {
+      ...CURATED_P2PKH_REQUEST,
+      der_signature_hex: '3006020101020101',
+    };
+
+    service.verifyEcdsaSignature(verificationRequest).subscribe();
+
+    const request = TestBed.inject(HttpTestingController).expectOne(
+      '/api/v1/signatures/ecdsa/verify',
+    );
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual(verificationRequest);
+    request.flush({});
+  });
+
   it('loads transaction context from the configured v1 endpoint', () => {
     globalThis.__BML_CONFIG__ = {
       apiBaseUrl: 'https://api.btcmathlab.com/',

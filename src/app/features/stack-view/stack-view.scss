@@ -59,6 +59,7 @@ header span {
 }
 
 .stack-detail {
+  max-width: calc(100vw - 2rem);
   display: grid;
   width: min(100%, 42rem);
   max-height: min(42rem, calc(100dvh - 2rem));
@@ -109,6 +110,8 @@ header span {
 }
 
 .stack-detail code {
+  min-width: 0;
+  max-width: 100%;
   overflow-wrap: anywhere;
   font-family: var(--font-mono);
 }
@@ -185,5 +188,16 @@ header span {
 
   .stack-view__items {
     min-height: 14rem;
+  }
+
+  .stack-backdrop {
+    padding: 0.5rem;
+  }
+
+  .stack-detail {
+    width: 100%;
+    max-width: calc(100vw - 1rem);
+    max-height: calc(100dvh - 1rem);
+    padding: 0.75rem;
   }
 }

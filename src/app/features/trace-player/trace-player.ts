@@ -16,6 +16,7 @@ import { StackItemDetail, StackItemDetailContent } from '../stack-item-detail/st
 import { StackWorkbench } from '../stack-workbench/stack-workbench';
 
 type PlaybackPhase = 'opcode' | 'stack-push' | 'stack-validation';
+type PreparationStage = 0 | 1 | 2;
 
 interface PlaybackStep {
   readonly step: TraceStep;
@@ -39,7 +40,8 @@ export class TracePlayer implements OnDestroy {
 
   protected readonly currentIndex = signal(-1);
   protected readonly playing = signal(false);
-  protected readonly preparationComplete = signal(false);
+  protected readonly preparationStage = signal<PreparationStage>(0);
+  protected readonly preparationComplete = computed(() => this.preparationStage() === 2);
   protected readonly signatureDetailOpen = signal(false);
   protected readonly selectedOperation = signal<TraceStep | null>(null);
   protected readonly selectedData = signal<TraceStep | null>(null);
@@ -65,6 +67,7 @@ export class TracePlayer implements OnDestroy {
       : 0;
   });
   protected readonly outcomeLabel = computed(() => {
+    if (!this.preparationComplete()) return 'Prepare scripts';
     if (this.atStart()) return 'Ready';
     if (!this.atEnd()) return 'In progress';
     return this.trace().success ? 'Valid spend' : 'Invalid spend';
@@ -139,8 +142,12 @@ export class TracePlayer implements OnDestroy {
     this.currentIndex.set(-1);
   }
 
+  protected findPreviousOutput(): void {
+    this.preparationStage.set(1);
+  }
+
   protected prepareExecution(): void {
-    this.preparationComplete.set(true);
+    this.preparationStage.set(2);
   }
 
   protected signatureTypeTitle(): string {
@@ -183,8 +190,6 @@ export class TracePlayer implements OnDestroy {
 
   protected openSignatureDetail(): void {
     this.pause();
-    this.rememberFocus();
-    this.signatureDetailOpen.set(true);
     this.openSignatureWorkspace.emit();
   }
 
@@ -206,6 +211,7 @@ export class TracePlayer implements OnDestroy {
   }
 
   protected togglePlay(): void {
+    if (!this.preparationComplete()) return;
     if (this.playing()) {
       this.pause();
       return;
@@ -239,6 +245,8 @@ export class TracePlayer implements OnDestroy {
       this.selectedStackItem()
     ) {
       return;
+    } else if (!this.preparationComplete()) {
+      return;
     } else if (event.key === 'ArrowLeft') {
       event.preventDefault();
       this.previous();
@@ -262,6 +270,7 @@ export class TracePlayer implements OnDestroy {
   }
 
   private advance(): void {
+    if (!this.preparationComplete()) return;
     if (this.atEnd()) {
       this.pause();
       return;
