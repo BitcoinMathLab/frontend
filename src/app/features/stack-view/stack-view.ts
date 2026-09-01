@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
 
 import { StackSnapshot } from '../../core/trace-api.models';
 import { StackItemDetailContent } from '../stack-item-detail/stack-item-detail';
@@ -14,6 +14,7 @@ export class StackView {
   readonly snapshot = input.required<StackSnapshot>();
   readonly stepIndex = input.required<number>();
   readonly inspectItem = output<StackItemDetailContent>();
+  protected readonly expanded = signal(false);
 
   protected readonly items = computed(() => {
     const values = this.snapshot().items;
@@ -24,6 +25,19 @@ export class StackView {
       ...describeStackValue(value || '00'),
     }));
   });
+  protected readonly visibleItems = computed(() =>
+    this.expanded() ? this.items() : this.items().slice(0, 6),
+  );
+  protected readonly hiddenItemCount = computed(() => Math.max(0, this.items().length - 6));
+  protected readonly hasOverflow = computed(() => this.items().length > 6);
+
+  protected openAllItems(): void {
+    this.expanded.set(true);
+  }
+
+  protected closeAllItems(): void {
+    this.expanded.set(false);
+  }
 
   protected preview(value: string): string {
     return value.length > 8 ? `${value.slice(0, 4)}…${value.slice(-4)}` : value;

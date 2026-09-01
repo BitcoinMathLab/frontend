@@ -8,6 +8,10 @@ import {
 } from '@angular/core';
 
 import { SegwitV0SignatureVerification, SpendTraceResponse } from '../../core/trace-api.models';
+import {
+  decodeTransactionBytes,
+  TransactionByteField,
+} from '../../pages/transaction-explorer/transaction-byte-decoder';
 
 type SignatureRegion =
   | 'transaction'
@@ -26,6 +30,11 @@ interface SignatureStep {
   readonly title: string;
   readonly description: string;
   readonly regions: readonly SignatureRegion[];
+}
+
+interface InputRegion {
+  readonly index: number;
+  readonly fields: readonly TransactionByteField[];
 }
 
 const STEPS: readonly SignatureStep[] = [
@@ -145,6 +154,7 @@ export class SignaturePlayer implements OnDestroy {
 
   protected readonly currentIndex = signal(0);
   protected readonly playing = signal(false);
+  protected readonly selectedInput = signal(0);
   protected readonly steps = computed(() =>
     this.result().script_type === 'P2WPKH' ? SEGWIT_STEPS : STEPS,
   );
@@ -156,6 +166,44 @@ export class SignaturePlayer implements OnDestroy {
   );
   protected readonly stepLabel = computed(
     () => `Step ${this.currentIndex()} of ${this.steps().length - 1}`,
+  );
+  protected readonly transactionFields = computed<readonly TransactionByteField[]>(() => {
+    try {
+      return decodeTransactionBytes(this.transactionHex());
+    } catch {
+      return [
+        {
+          id: 'serialized-transaction',
+          label: 'Serialized transaction',
+          group: 'header',
+          offset: 0,
+          length: this.transactionHex().length / 2,
+          hex: this.transactionHex(),
+          decoded: 'Transaction fields are available for canonical serialized transactions.',
+          description: 'Complete serialized transaction.',
+        },
+      ];
+    }
+  });
+  protected readonly transactionHeaderFields = computed(() =>
+    this.transactionFields().filter(
+      (field) => field.group === 'header' || field.group === 'footer',
+    ),
+  );
+  protected readonly inputRegions = computed<readonly InputRegion[]>(() => {
+    const inputs = new Map<number, TransactionByteField[]>();
+    for (const field of this.transactionFields()) {
+      const match = /^input-(\d+)-/.exec(field.id);
+      if (!match) continue;
+      const index = Number(match[1]);
+      inputs.set(index, [...(inputs.get(index) ?? []), field]);
+    }
+    return [...inputs.entries()].map(([index, fields]) => ({ index, fields }));
+  });
+  protected readonly displayedInput = computed(
+    () =>
+      this.inputRegions().find((input) => input.index === this.selectedInput()) ??
+      this.inputRegions()[0] ?? { index: this.result().input_index, fields: [] },
   );
 
   private timer: ReturnType<typeof setInterval> | undefined;
@@ -193,6 +241,14 @@ export class SignaturePlayer implements OnDestroy {
 
   protected active(region: SignatureRegion): boolean {
     return this.currentStep().regions.includes(region);
+  }
+
+  protected chooseInput(index: number): void {
+    this.selectedInput.set(index);
+  }
+
+  protected inputFieldLabel(field: TransactionByteField): string {
+    return field.label.replace(/^Input \d+/, `Input ${this.displayedInput().index}`);
   }
 
   protected segwitSignature(): SegwitV0SignatureVerification | null {

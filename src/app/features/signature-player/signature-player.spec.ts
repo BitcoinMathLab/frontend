@@ -62,7 +62,7 @@ describe('SignaturePlayer', () => {
     expect(fixture.nativeElement.textContent).toContain('Assemble the BIP143 preimage');
     expect(fixture.nativeElement.textContent).toContain('02000000bip14301000000');
     expect(
-      fixture.nativeElement.querySelectorAll('.transaction-regions article.active').length,
-    ).toBeGreaterThanOrEqual(6);
+      fixture.nativeElement.querySelectorAll('.digest-tracker > div.active').length,
+    ).toBeGreaterThanOrEqual(4);
   });
 });

@@ -45,7 +45,7 @@ describe('Home', () => {
     expect(preview.textContent).toContain('Script Visualizer');
     expect(preview.textContent).toContain('Transaction Explorer');
     expect(preview.textContent).toContain('Signature Lab');
-    expect(preview.textContent).toContain('Planned');
+    expect(preview.textContent).toContain('Verified');
   });
 
   it('describes only the learning experience available in the MVP', () => {

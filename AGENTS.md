@@ -29,6 +29,9 @@ Do not push, deploy, merge, or update external project tracking unless the user 
   scriptPubKey`; modern inputs show `witness + scriptPubKey`.
 - Do not send non-P2PKH inputs to the legacy trace endpoint.
 - Label walkthrough selectors `Signature type`, not `Example`.
+- Keep the transaction ID/input source form within the Execution workspace; do not present it as a Signature control.
+- After a real input is traced, show its outpoint, previous-output `txid:vout`, and the resulting script path before
+  execution begins. The scriptPubKey lane must retain that source reference in its visible context.
 
 ## Execution and Signature Workspaces
 
@@ -36,6 +39,10 @@ Do not push, deploy, merge, or update external project tracking unless the user 
 - Both use consistent VCR controls: start, previous, play/pause, next, and end, with step count, phase, and progress.
 - On desktop, the Signature workspace shows transaction/signing material on the left and the active operation on the
   right. As steps advance, visibly highlight every transaction region committed by the signature mode.
+- Keep the Signature workspace's left pane to transaction and UTXO evidence. Put preimages, component hashes, and the
+  digest in the active-operation/digest-tracker area rather than treating a digest as a transaction card.
+- Anchor the top of a stack state. It may grow downward, and an overflow control must expose additional items without
+  shifting the visible top or creating page-level overflow.
 - On mobile, stack those panels without losing active highlights or playback controls.
 - Legacy steps teach input selection, script replacement, sighash input/output commitments, the four-byte hash-type
   suffix, double SHA-256, and ECDSA verification.

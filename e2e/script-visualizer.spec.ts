@@ -198,7 +198,7 @@ test('connects spend elements, parsing, execution, stacks, and signature detail'
   await page.getByRole('button', { name: 'Close script source detail' }).click();
   await expect(page.getByLabel('Restart trace')).toHaveText('<<');
   await expect(page.getByLabel('Go to result')).toHaveText('>>');
-  await expect(page.getByLabel('Signature type')).toHaveValue('p2pkh');
+  await expect(page.locator('.signature-family')).toHaveText('P2PKH');
   await expect(page.getByLabel('Execution status')).toContainText('Step 0 of 5');
   await expect(page.getByLabel('Execution status')).toContainText('Ready');
   await expect(page.getByLabel('Main stack')).toContainText('Empty stack');
@@ -267,7 +267,7 @@ test('connects spend elements, parsing, execution, stacks, and signature detail'
   await expect(page.getByLabel('Execution status').getByText('Step 4 of 5')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'OP_CHECKSIG', exact: true })).toBeVisible();
   const signatureButton = page.getByRole('button', {
-    name: 'Open signature verification detail',
+    name: 'Open signature walkthrough',
   });
   await signatureButton.click();
   await expect(page.getByRole('tab', { name: 'Signature' })).toHaveAttribute(
@@ -275,7 +275,7 @@ test('connects spend elements, parsing, execution, stacks, and signature detail'
     'true',
   );
   await expect(page.getByLabel('Signature walkthrough player')).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Transaction' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Transaction and UTXO' })).toBeVisible();
   await expect(page.getByText('Legacy ECDSA · P2PKH')).toBeVisible();
   await page.getByRole('button', { name: 'Next signature step' }).click();
   await expect(page.getByText('Start with the spending transaction')).toBeVisible();
@@ -286,7 +286,7 @@ test('connects spend elements, parsing, execution, stacks, and signature detail'
   await page.getByRole('button', { name: 'Finish signature walkthrough' }).click();
   await expect(page.getByText('Valid signature')).toBeVisible();
   await expect(page.getByText('30signature')).toBeVisible();
-  await expect(page.locator('.verification-pane').getByText('c'.repeat(64))).toBeVisible();
+  await expect(page.locator('.verification-pane').getByText('c'.repeat(64)).first()).toBeVisible();
 });
 
 test('loads verified P2WPKH signature and stack walkthroughs', async ({ page }) => {

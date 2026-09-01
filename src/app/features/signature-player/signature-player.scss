@@ -170,6 +170,72 @@
   font-family: var(--font-mono);
   font-size: 0.72rem;
 }
+
+.transaction-components {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.transaction-components code {
+  display: grid;
+  min-width: 0;
+  border-left: 2px solid rgba(101, 167, 255, 0.42);
+  background: rgba(101, 167, 255, 0.05);
+  gap: 0.2rem;
+  padding: 0.45rem 0.55rem;
+}
+
+.transaction-components code > span,
+.digest-tracker span {
+  color: var(--color-text-subtle);
+  font-family: var(--font-sans);
+  font-size: 0.65rem;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.transaction-components .selected-field {
+  border-left-color: var(--color-amber);
+  background: rgba(245, 165, 36, 0.08);
+}
+
+.transaction-regions details {
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+}
+
+.transaction-regions details summary {
+  cursor: pointer;
+}
+
+.transaction-regions details code {
+  display: block;
+  margin-top: 0.55rem;
+}
+
+.input-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.input-selector button {
+  border: 1px solid var(--color-graphite);
+  border-radius: 999px;
+  background: rgba(2, 6, 23, 0.48);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.4rem 0.55rem;
+}
+
+.input-selector button.active {
+  border-color: var(--color-amber);
+  background: rgba(245, 165, 36, 0.12);
+  color: #fcd58a;
+}
 .signature-pane code {
   color: #fcd58a;
   font-family: var(--font-mono);
@@ -233,6 +299,44 @@
   border-color: rgba(248, 113, 113, 0.45);
   background: rgba(248, 113, 113, 0.1);
   color: #fca5a5;
+}
+
+.digest-tracker {
+  display: grid;
+  margin-top: 1rem;
+  border: 1px solid rgba(67, 209, 139, 0.32);
+  border-radius: 0.8rem;
+  background: rgba(6, 43, 20, 0.12);
+  gap: 0.55rem;
+  padding: 0.8rem;
+}
+
+.digest-tracker header {
+  margin: 0;
+}
+
+.digest-tracker header > span {
+  color: var(--color-valid);
+}
+
+.digest-tracker header > strong {
+  color: var(--color-paper);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+}
+
+.digest-tracker > div {
+  display: grid;
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  background: rgba(2, 6, 23, 0.34);
+  gap: 0.25rem;
+  padding: 0.55rem;
+}
+
+.digest-tracker > div.active {
+  border-color: rgba(67, 209, 139, 0.65);
+  background: rgba(67, 209, 139, 0.1);
 }
 @media (max-width: 58rem) {
   .signature-controls {

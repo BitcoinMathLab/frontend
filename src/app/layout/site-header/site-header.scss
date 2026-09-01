@@ -3,7 +3,7 @@
   z-index: 20;
   top: 0;
   border-bottom: 1px solid rgba(39, 49, 66, 0.82);
-  background: rgba(8, 11, 18, 0.92);
+  background: rgba(8, 11, 18, 0.94);
   backdrop-filter: blur(16px);
 }
 
@@ -43,7 +43,8 @@ nav a {
   text-decoration: none;
   transition:
     color 160ms ease,
-    background-color 160ms ease;
+    background-color 160ms ease,
+    box-shadow 160ms ease;
 }
 
 nav a:hover,
@@ -70,19 +71,25 @@ nav a.active {
 
   nav {
     width: 100%;
-    justify-content: space-between;
-    gap: 0;
+    gap: 0.15rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  nav::-webkit-scrollbar {
+    display: none;
   }
 
   nav a {
     font-size: 0.82rem;
-    padding: 0.55rem 0.35rem;
+    padding: 0.55rem 0.58rem;
+    white-space: nowrap;
   }
 }
 
 @media (max-width: 25rem) {
   nav a {
     font-size: 0.76rem;
-    padding-inline: 0.25rem;
+    padding-inline: 0.48rem;
   }
 }

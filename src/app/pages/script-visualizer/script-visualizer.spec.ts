@@ -189,7 +189,7 @@ describe('ScriptVisualizer', () => {
     expect(fixture.nativeElement.textContent).toContain('SegWit ECDSA · P2WPKH');
     expect(fixture.nativeElement.textContent).toContain('30signature');
     expect(fixture.nativeElement.textContent).toContain('03publickey');
-    expect(fixture.nativeElement.textContent).toContain('P2PKH scriptCode');
+    expect(fixture.nativeElement.textContent).toContain('selected UTXO');
     expect(fixture.nativeElement.textContent).not.toContain('not yet available for P2WPKH');
   });
 

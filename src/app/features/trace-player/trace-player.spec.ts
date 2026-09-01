@@ -150,7 +150,7 @@ describe('TracePlayer', () => {
     expect(fixture.nativeElement.textContent).not.toContain('Consumed');
   });
 
-  it('opens and closes detailed signature verification from OP_CHECKSIG', () => {
+  it('opens the signature workspace from OP_CHECKSIG', () => {
     fixture.componentRef.setInput('trace', {
       ...TRACE_FIXTURE,
       steps: TRACE_FIXTURE.steps.map((step, index) =>
@@ -171,24 +171,22 @@ describe('TracePlayer', () => {
     });
     fixture.detectChanges();
 
+    let signatureWorkspaceOpened = false;
+    fixture.componentInstance.openSignatureWorkspace.subscribe(() => {
+      signatureWorkspaceOpened = true;
+    });
+
     control('Go to result').click();
     fixture.detectChanges();
     control('Previous step').click();
     fixture.detectChanges();
 
     const open = [...fixture.nativeElement.querySelectorAll('button')].find(
-      (button: HTMLButtonElement) => button.textContent?.includes('signature verification detail'),
+      (button: HTMLButtonElement) => button.textContent?.includes('Open signature walkthrough'),
     ) as HTMLButtonElement;
     open.click();
     fixture.detectChanges();
-
-    const dialog = fixture.nativeElement.querySelector('[role="dialog"]') as HTMLElement;
-    expect(dialog.textContent).toContain('How this signature is verified');
-    expect(dialog.textContent).toContain('Apply SHA-256 twice');
-    expect(dialog.textContent).toContain('30signature');
-    control('Close detail').click();
-    fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('[role="dialog"]')).toBeNull();
+    expect(signatureWorkspaceOpened).toBe(true);
   });
 
   it('opens opcode information without advancing the walkthrough', () => {

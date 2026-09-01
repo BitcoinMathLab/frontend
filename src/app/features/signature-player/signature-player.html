@@ -75,64 +75,79 @@
     >
       <header>
         <div>
-          <span>Signing material</span>
-          <h2 id="signature-transaction-heading">Transaction</h2>
+          <span>Signing context</span>
+          <h2 id="signature-transaction-heading">Transaction and UTXO</h2>
         </div>
         <code>input {{ result().input_index }}</code>
       </header>
       <div class="transaction-regions">
         <article [class.active]="active('transaction')">
-          <span>Spending transaction</span>
+          <span>Spending transaction · component fields</span>
           <strong>{{ spendingTransactionId() }}</strong>
-          <code>{{ transactionHex() }}</code>
+          <div class="transaction-components">
+            @for (field of transactionHeaderFields(); track field.id) {
+              <code
+                ><span>{{ inputFieldLabel(field) }}</span
+                >{{ field.hex }}</code
+              >
+            }
+          </div>
+          <details>
+            <summary>Complete serialized transaction</summary>
+            <code>{{ transactionHex() }}</code>
+          </details>
         </article>
-        <article [class.active]="active('script-sig')" class="unlocking-region">
-          <span>{{
-            result().script_type === 'P2WPKH'
-              ? 'Witness · signature and public key'
-              : 'scriptSig · signature and public key'
-          }}</span>
-          <code>{{ unlockingData() }}</code>
+        <article
+          [class.active]="active('transaction') || active('script-sig')"
+          class="unlocking-region"
+        >
+          <span>Transaction inputs</span>
+          <div class="input-selector" role="group" aria-label="Transaction inputs">
+            @for (input of inputRegions(); track input.index) {
+              <button
+                type="button"
+                [class.active]="displayedInput().index === input.index"
+                (click)="chooseInput(input.index)"
+              >
+                Input {{ input.index
+                }}{{ input.index === result().input_index ? ' · signed input' : '' }}
+              </button>
+            }
+          </div>
+          <strong
+            >Input {{ displayedInput().index
+            }}{{
+              displayedInput().index === result().input_index
+                ? ' is the selected signing input'
+                : ''
+            }}</strong
+          >
+          <div class="transaction-components">
+            @for (field of displayedInput().fields; track field.id) {
+              <code
+                [class.selected-field]="
+                  displayedInput().index === result().input_index &&
+                  (field.id.endsWith('script-sig') || field.id.endsWith('script-length'))
+                "
+                ><span>{{ field.label }}</span
+                >{{ field.hex || 'empty' }}</code
+              >
+            }
+            @if (result().script_type === 'P2WPKH') {
+              <code class="selected-field"
+                ><span>Witness · signature and public key</span>{{ unlockingData() }}</code
+              >
+            }
+          </div>
         </article>
         <article [class.active]="active('script-pubkey')" class="locking-region">
-          <span>Previous output scriptPubKey</span>
+          <span>UTXO · previous output scriptPubKey</span>
           <strong
             >{{ result().sources.script_pubkey.transaction_txid }}:{{
               result().sources.script_pubkey.index
             }}</strong
           >
           <code>{{ lockingScript() }}</code>
-        </article>
-        @if (segwitSignature(); as segwit) {
-          <article [class.active]="active('prevouts')">
-            <span>hashPrevouts · all input outpoints</span>
-            <code>{{ segwit.hash_prevouts_hex }}</code>
-          </article>
-          <article [class.active]="active('sequences')">
-            <span>hashSequence · all input sequences</span>
-            <code>{{ segwit.hash_sequence_hex }}</code>
-          </article>
-          <article [class.active]="active('outputs')">
-            <span>hashOutputs · committed outputs</span>
-            <code>{{ segwit.hash_outputs_hex }}</code>
-          </article>
-          <article [class.active]="active('amount')">
-            <span>Previous output amount</span>
-            <strong>{{ segwit.amount_sats }} sats</strong>
-          </article>
-          <article [class.active]="active('script-code')" class="locking-region">
-            <span>P2PKH scriptCode</span>
-            <code>{{ segwit.script_code_hex }}</code>
-          </article>
-        }
-        <article [class.active]="active('sighash')">
-          <span>Signature hash mode</span>
-          <strong>{{ result().signature.sighash_label }}</strong>
-          <code>0x{{ result().signature.sighash_type.toString(16).padStart(2, '0') }}</code>
-        </article>
-        <article [class.active]="active('digest')">
-          <span>Double-SHA-256 digest</span>
-          <code>{{ result().signature.digest_hex }}</code>
         </article>
       </div>
     </section>
@@ -186,6 +201,34 @@
           {{ result().signature.valid ? 'Valid signature' : 'Invalid signature' }}
         </p>
       }
+
+      <section class="digest-tracker" aria-label="Signature digest tracker">
+        <header>
+          <span>Digest tracker</span><strong>{{ result().signature.sighash_label }}</strong>
+        </header>
+        @if (segwitSignature(); as segwit) {
+          <div [class.active]="active('prevouts')">
+            <span>hashPrevouts</span><code>{{ segwit.hash_prevouts_hex }}</code>
+          </div>
+          <div [class.active]="active('sequences')">
+            <span>hashSequence</span><code>{{ segwit.hash_sequence_hex }}</code>
+          </div>
+          <div [class.active]="active('outputs')">
+            <span>hashOutputs</span><code>{{ segwit.hash_outputs_hex }}</code>
+          </div>
+          <div [class.active]="active('amount') || active('script-code')">
+            <span>selected UTXO</span
+            ><code>{{ segwit.amount_sats }} sats · {{ segwit.script_code_hex }}</code>
+          </div>
+        }
+        <div [class.active]="active('sighash')">
+          <span>Hash type</span
+          ><code>0x{{ result().signature.sighash_type.toString(16).padStart(2, '0') }}</code>
+        </div>
+        <div [class.active]="active('digest')">
+          <span>Double-SHA-256 digest</span><code>{{ result().signature.digest_hex }}</code>
+        </div>
+      </section>
     </section>
   </div>
 </section>

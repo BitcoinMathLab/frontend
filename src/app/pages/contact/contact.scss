@@ -6,17 +6,17 @@ aside {
 
 .contact {
   display: grid;
-  min-height: calc(100dvh - 8rem);
+  min-height: min(47rem, calc(100dvh - 8rem));
   align-items: center;
   gap: clamp(3rem, 8vw, 7rem);
   grid-template-columns: 1fr 1fr;
-  padding-block: clamp(5rem, 12vw, 9rem);
+  padding-block: clamp(4rem, 10vw, 7.5rem);
 }
 
 h1 {
   max-width: 12ch;
   margin: 0.75rem 0 1.5rem;
-  font-size: clamp(3.2rem, 7vw, 6rem);
+  font-size: clamp(3rem, 6.5vw, 5.5rem);
   letter-spacing: -0.065em;
   line-height: 0.94;
 }
@@ -36,12 +36,22 @@ h1 {
   display: grid;
   border-top: 1px solid var(--color-graphite);
   gap: 0.45rem;
-  padding-block: 1.5rem;
+  margin-inline: -1rem;
+  border-radius: 0.55rem;
+  padding: 1.35rem 1rem;
   text-decoration: none;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease;
 }
 
 .contact-list a:last-child {
   border-bottom: 1px solid var(--color-graphite);
+}
+
+.contact-list a:hover,
+.contact-list a:focus-visible {
+  background: rgba(101, 167, 255, 0.06);
 }
 
 .contact-list span {
@@ -66,8 +76,10 @@ aside {
   padding-block: 2rem 5rem;
 }
 
-aside strong {
+aside h2 {
+  margin: 0;
   color: var(--color-amber);
+  font-size: 1rem;
 }
 
 aside p {
@@ -90,5 +102,11 @@ aside a:focus-visible {
   .contact {
     min-height: auto;
     grid-template-columns: 1fr;
+    gap: 3rem;
+    padding-block: 3.5rem 4rem;
+  }
+
+  h1 {
+    font-size: clamp(3rem, 15vw, 4.4rem);
   }
 }

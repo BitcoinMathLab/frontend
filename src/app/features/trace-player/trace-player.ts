@@ -39,6 +39,7 @@ export class TracePlayer implements OnDestroy {
 
   protected readonly currentIndex = signal(-1);
   protected readonly playing = signal(false);
+  protected readonly preparationComplete = signal(false);
   protected readonly signatureDetailOpen = signal(false);
   protected readonly selectedOperation = signal<TraceStep | null>(null);
   protected readonly selectedData = signal<TraceStep | null>(null);
@@ -136,6 +137,16 @@ export class TracePlayer implements OnDestroy {
     this.selectedData.set(null);
     this.selectedStackItem.set(null);
     this.currentIndex.set(-1);
+  }
+
+  protected prepareExecution(): void {
+    this.preparationComplete.set(true);
+  }
+
+  protected signatureTypeTitle(): string {
+    return this.scriptType() === 'P2WPKH'
+      ? 'Pay to Witness Public Key Hash'
+      : 'Pay to Public Key Hash';
   }
 
   protected finish(): void {

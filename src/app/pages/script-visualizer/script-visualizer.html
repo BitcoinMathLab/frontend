@@ -4,31 +4,33 @@
 </section>
 
 <section class="lab" aria-label="Bitcoin spend verification">
-  <form class="transaction-source" (ngSubmit)="loadSelectedInput()" novalidate>
-    <label>
-      <span>Transaction ID</span>
-      <input
-        name="visualizer-transaction-id"
-        type="text"
-        maxlength="64"
-        autocomplete="off"
-        spellcheck="false"
-        placeholder="64 hexadecimal characters"
-        [(ngModel)]="transactionId"
-      />
-    </label>
-    <label class="input-index-field">
-      <span>Input</span>
-      <input
-        name="visualizer-input-index"
-        type="number"
-        min="0"
-        step="1"
-        [(ngModel)]="inputIndex"
-      />
-    </label>
-    <button type="submit" [disabled]="loading()">Trace input</button>
-  </form>
+  @if (!response() || activeWorkspace() === 'execution') {
+    <form class="transaction-source" (ngSubmit)="loadSelectedInput()" novalidate>
+      <label>
+        <span>Transaction ID</span>
+        <input
+          name="visualizer-transaction-id"
+          type="text"
+          maxlength="64"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="64 hexadecimal characters"
+          [(ngModel)]="transactionId"
+        />
+      </label>
+      <label class="input-index-field">
+        <span>Input</span>
+        <input
+          name="visualizer-input-index"
+          type="number"
+          min="0"
+          step="1"
+          [(ngModel)]="inputIndex"
+        />
+      </label>
+      <button type="submit" [disabled]="loading()">Trace input</button>
+    </form>
+  }
 
   @if (loading()) {
     <div class="state-card" role="status">

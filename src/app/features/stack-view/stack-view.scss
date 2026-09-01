@@ -1,7 +1,7 @@
 .stack-view {
   display: grid;
   min-width: 0;
-  grid-template-rows: auto minmax(13rem, 1fr);
+  grid-template-rows: auto minmax(21rem, 1fr);
   gap: 0.5rem;
 }
 
@@ -28,12 +28,89 @@ header span {
 .stack-view__items {
   display: flex;
   flex-direction: column;
-  min-height: 13rem;
+  min-height: 21rem;
   border: 1px dashed rgba(148, 163, 184, 0.32);
   border-radius: 0.75rem;
   background: rgba(2, 6, 23, 0.55);
   gap: 0.5rem;
   padding: 0.65rem;
+  justify-content: flex-start;
+}
+
+.stack-overflow {
+  border: 1px solid rgba(101, 167, 255, 0.44);
+  border-radius: 0.45rem;
+  background: rgba(101, 167, 255, 0.08);
+  color: #bfdbfe;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.55rem;
+}
+
+.stack-backdrop {
+  position: fixed;
+  z-index: 30;
+  display: grid;
+  background: rgba(2, 6, 23, 0.76);
+  inset: 0;
+  padding: 1rem;
+  place-items: center;
+}
+
+.stack-detail {
+  display: grid;
+  width: min(100%, 42rem);
+  max-height: min(42rem, calc(100dvh - 2rem));
+  border: 1px solid rgba(101, 167, 255, 0.52);
+  border-radius: 0.9rem;
+  background: #0c111a;
+  gap: 0.8rem;
+  overflow: auto;
+  padding: 1rem;
+}
+
+.stack-detail header {
+  font-size: inherit;
+}
+
+.stack-detail h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.stack-detail header button {
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--color-graphite);
+  border-radius: 0.4rem;
+  background: transparent;
+  color: var(--color-paper);
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+
+.stack-detail > div {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.stack-detail > div > button {
+  display: grid;
+  min-width: 0;
+  border: 1px solid var(--color-graphite);
+  border-radius: 0.5rem;
+  background: var(--color-surface);
+  color: var(--color-paper);
+  cursor: pointer;
+  gap: 0.3rem;
+  padding: 0.65rem;
+  text-align: left;
+}
+
+.stack-detail code {
+  overflow-wrap: anywhere;
+  font-family: var(--font-mono);
 }
 
 .stack-item {
@@ -103,10 +180,10 @@ header span {
 
 @media (max-width: 44rem) {
   .stack-view {
-    grid-template-rows: auto minmax(8rem, 1fr);
+    grid-template-rows: auto minmax(14rem, 1fr);
   }
 
   .stack-view__items {
-    min-height: 8rem;
+    min-height: 14rem;
   }
 }

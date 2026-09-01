@@ -5,13 +5,13 @@
 }
 
 .explorer-hero {
-  padding-block: clamp(2.5rem, 6vw, 5rem) clamp(1.75rem, 4vw, 3rem);
+  padding-block: clamp(3rem, 6vw, 5rem) clamp(2rem, 4vw, 3rem);
 }
 
 h1 {
   max-width: 12ch;
   margin: 0.75rem 0 1.35rem;
-  font-size: clamp(2.8rem, 6vw, 5rem);
+  font-size: clamp(2.8rem, 5.6vw, 4.7rem);
   letter-spacing: -0.065em;
   line-height: 0.94;
 }
@@ -86,7 +86,8 @@ form,
 .result {
   border: 1px solid var(--color-graphite);
   border-radius: 1.1rem;
-  background: rgba(16, 21, 31, 0.72);
+  background: linear-gradient(145deg, rgba(21, 28, 40, 0.78), rgba(12, 17, 26, 0.72));
+  box-shadow: var(--shadow-panel);
   padding: clamp(1.25rem, 4vw, 2rem);
 }
 
@@ -122,6 +123,14 @@ button {
   cursor: pointer;
   font-weight: 750;
   padding: 0.75rem 1.1rem;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+
+button:not(:disabled):hover {
+  transform: translateY(-1px);
 }
 
 button:disabled {
@@ -170,7 +179,7 @@ button:disabled {
   display: grid;
   margin: 1.5rem 0;
   border-block: 1px solid var(--color-graphite);
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
 }
 
 .summary div {
@@ -182,7 +191,7 @@ button:disabled {
   padding-left: 0;
 }
 
-.summary div:last-child {
+.summary div:nth-child(3n) {
   border-right: 0;
 }
 

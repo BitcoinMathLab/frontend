@@ -7,9 +7,9 @@
   <div class="controls-bar">
     <label class="example-selector">
       <span>Signature type</span>
-      <select aria-label="Signature type">
-        <option [value]="scriptType().toLowerCase()">{{ scriptType() }} spend</option>
-      </select>
+      <span class="signature-family" [title]="signatureTypeTitle()">
+        <abbr [title]="signatureTypeTitle()">{{ scriptType() }}</abbr>
+      </span>
     </label>
     <div class="vcr" role="group" aria-label="Playback controls">
       <button
@@ -77,6 +77,52 @@
       </span>
     </div>
   </div>
+  @if (!preparationComplete()) {
+    <section class="script-preparation" aria-labelledby="script-preparation-heading">
+      <header>
+        <div>
+          <span>Script preparation</span>
+          <h2 id="script-preparation-heading">Locate the UTXO, then assemble execution.</h2>
+        </div>
+        <code
+          >{{ sources().script_pubkey.transaction_txid }}:{{ sources().script_pubkey.index }}</code
+        >
+      </header>
+      <ol>
+        <li>
+          <span>1</span>
+          <div>
+            <strong>Read this input’s outpoint</strong
+            ><code
+              >{{ sources().script_pubkey.transaction_txid }}:vout
+              {{ sources().script_pubkey.index }}</code
+            >
+          </div>
+        </li>
+        <li>
+          <span>2</span>
+          <div>
+            <strong>Find that previous output</strong
+            ><code>scriptPubKey {{ scripts().locking }}</code>
+          </div>
+        </li>
+        <li>
+          <span>3</span>
+          <div>
+            <strong>Prepare the script path</strong
+            ><code>{{
+              scriptType() === 'P2WPKH'
+                ? 'witness initializes the stack; scriptCode executes'
+                : 'scriptSig runs first, then scriptPubKey'
+            }}</code>
+          </div>
+        </li>
+      </ol>
+      <button type="button" class="prepare-button" (click)="prepareExecution()">
+        Prepare execution script
+      </button>
+    </section>
+  }
   <div
     class="progress-track"
     role="progressbar"
@@ -108,6 +154,17 @@
     </section>
 
     <div class="right-workspace" role="region" aria-label="Execution and stack">
+      <app-stack-workbench
+        [step]="currentStep() ?? null"
+        [showBefore]="
+          currentPlayback()?.phase === 'opcode' && currentStep()?.opcode?.is_push === true
+        "
+        [showMovement]="
+          currentPlayback()?.phase !== 'stack-validation' &&
+          (currentPlayback()?.phase !== 'opcode' || currentStep()?.opcode?.is_push !== true)
+        "
+        (inspectItem)="inspectStackItem($event)"
+      />
       <section class="visual-pane execution-pane" aria-labelledby="execution-pane-heading">
         <header class="pane-header">
           <h2 id="execution-pane-heading">Execution</h2>
@@ -131,7 +188,7 @@
 
           @if (isSignatureCheck()) {
             <button type="button" class="signature-link" (click)="openSignatureDetail()">
-              Open signature verification detail
+              Open signature walkthrough
             </button>
           }
 
@@ -156,21 +213,8 @@
           </article>
         }
       </section>
-
-      <app-stack-workbench
-        [step]="currentStep() ?? null"
-        [showBefore]="
-          currentPlayback()?.phase === 'opcode' && currentStep()?.opcode?.is_push === true
-        "
-        [showMovement]="
-          currentPlayback()?.phase !== 'stack-validation' &&
-          (currentPlayback()?.phase !== 'opcode' || currentStep()?.opcode?.is_push !== true)
-        "
-        (inspectItem)="inspectStackItem($event)"
-      />
     </div>
   </div>
-
   @if (operationDetail(); as detail) {
     <app-operation-detail [detail]="detail" (close)="closeOperationDetail()" />
   }

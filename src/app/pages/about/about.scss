@@ -8,14 +8,15 @@
   display: grid;
   gap: 1rem;
   grid-template-columns: repeat(2, 1fr);
-  padding-bottom: 6rem;
+  padding-bottom: clamp(4rem, 8vw, 6rem);
 }
 
 .content-grid article {
   border: 1px solid var(--color-graphite);
   border-radius: 1rem;
-  background: var(--color-surface);
+  background: linear-gradient(145deg, var(--color-surface-raised), var(--color-surface));
   padding: clamp(1.5rem, 4vw, 2.5rem);
+  box-shadow: inset 0 2px 0 rgba(245, 165, 36, 0.18);
 }
 
 .content-grid span {
@@ -43,12 +44,13 @@
   border-top: 1px solid var(--color-graphite);
   gap: 4rem;
   grid-template-columns: 0.8fr 1.2fr;
-  padding-block: 6rem;
+  padding-block: clamp(4rem, 8vw, 6rem);
 }
 
 .architecture ol {
   display: grid;
   margin: 0;
+  counter-reset: repository;
   padding: 0;
   list-style: none;
 }
@@ -59,6 +61,15 @@
   gap: 1rem;
   grid-template-columns: 9rem 1fr;
   padding-block: 1.2rem;
+  counter-increment: repository;
+}
+
+.architecture li::before {
+  color: var(--color-amber);
+  content: '0' counter(repository);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  grid-column: 1 / -1;
 }
 
 .architecture li:last-child {

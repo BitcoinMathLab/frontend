@@ -4,7 +4,7 @@
     <span>{{ snapshot().depth }} {{ snapshot().depth === 1 ? 'item' : 'items' }}</span>
   </header>
   <div class="stack-view__items">
-    @for (item of items(); track item.key) {
+    @for (item of visibleItems(); track item.key) {
       <button
         type="button"
         class="stack-item"
@@ -19,4 +19,40 @@
       <p>Empty stack</p>
     }
   </div>
+  @if (hiddenItemCount() > 0) {
+    <button type="button" class="stack-overflow" (click)="openAllItems()">
+      Inspect {{ hiddenItemCount() }} more {{ hiddenItemCount() === 1 ? 'item' : 'items' }}
+    </button>
+  }
 </section>
+
+@if (expanded() && hasOverflow()) {
+  <div class="stack-backdrop" role="presentation" (click)="closeAllItems()">
+    <section
+      class="stack-detail"
+      role="dialog"
+      aria-modal="true"
+      aria-label="All stack items"
+      (click)="$event.stopPropagation()"
+    >
+      <header>
+        <h2>All stack items</h2>
+        <button type="button" aria-label="Close all stack items" (click)="closeAllItems()">
+          ×
+        </button>
+      </header>
+      <div>
+        @for (item of items(); track item.key) {
+          <button
+            type="button"
+            (click)="
+              inspectItem.emit({ position: item.position, name: item.label, hex: item.value })
+            "
+          >
+            <code>DATA ({{ item.label }})</code><code>{{ item.value }}</code>
+          </button>
+        }
+      </div>
+    </section>
+  </div>
+}
