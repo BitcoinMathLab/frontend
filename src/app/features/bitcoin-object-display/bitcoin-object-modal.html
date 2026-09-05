@@ -1,0 +1,40 @@
+<div class="backdrop" (mousedown)="dismissBackdrop($event)">
+  <section
+    #panel
+    class="modal"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-labelledby]="'object-modal-title-' + fixture().id"
+  >
+    <header class="modal__header">
+      <h2 [id]="'object-modal-title-' + fixture().id">{{ fixture().typeLabel }} quick view</h2>
+      <div class="modal__actions">
+        @if (showFullPage()) {
+          <a
+            class="full-page"
+            [routerLink]="fixture().fullPageRoute"
+            target="_blank"
+            rel="noopener"
+            (click)="prepareFullPage()"
+            >Open full page <span aria-hidden="true">→</span></a
+          >
+        }
+        <button
+          data-modal-initial-focus
+          type="button"
+          aria-label="Close object display"
+          (click)="closed.emit()"
+        >
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+    </header>
+    <div class="modal__body">
+      <app-bitcoin-object-display
+        [fixture]="fixture()"
+        [compact]="true"
+        (referenceOpened)="referenceOpened.emit($event)"
+      />
+    </div>
+  </section>
+</div>

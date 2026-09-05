@@ -1,0 +1,100 @@
+<article class="object" [class.object--compact]="compact()" [attr.data-kind]="fixture().kind">
+  <div class="explorer-layout">
+    <div class="explorer-layout__content">
+      <app-object-field-list
+        [items]="orderedItems()"
+        [selectedItemId]="selectedItem()?.id ?? initialItem().id"
+        (selected)="selectItem($event)"
+        (referenceOpened)="referenceOpened.emit($event)"
+      />
+    </div>
+
+    <aside class="details" aria-label="Object details" aria-live="polite">
+      @if (selectedItem(); as item) {
+        <h4>{{ item.label }}</h4>
+        <code class="details__value">{{ item.value }}</code>
+        <p>{{ item.description }}</p>
+        <dl>
+          @if (item.range && item.range.length > 0) {
+            <div>
+              <dt>Byte range</dt>
+              <dd>{{ item.range.offset }}–{{ item.range.offset + item.range.length - 1 }}</dd>
+            </div>
+            <div>
+              <dt>Length</dt>
+              <dd>{{ item.range.length }} bytes</dd>
+            </div>
+          } @else {
+            <div>
+              <dt>Byte range</dt>
+              <dd>No direct byte range</dd>
+            </div>
+          }
+        </dl>
+        @if (item.rawHex) {
+          <div class="details__bytes">
+            <span>Raw bytes</span>
+            <code>{{ item.rawHex }}</code>
+          </div>
+          <app-object-copy-button [value]="item.rawHex" [label]="item.label + ' bytes'" />
+        } @else {
+          <app-object-copy-button [value]="item.value" [label]="item.label" />
+        }
+        @if (item.reference) {
+          <div class="details__reference">
+            <app-object-reference
+              [reference]="item.reference"
+              (opened)="referenceOpened.emit($event)"
+            />
+          </div>
+        }
+      } @else {
+        <div class="details__empty">
+          <h4>{{ initialItem().label }}</h4>
+          <code class="details__value">{{ initialItem().value }}</code>
+          <p>{{ initialItem().description }}</p>
+          <app-object-copy-button [value]="initialItem().value" [label]="initialItem().label" />
+          @if (overviewItems().length) {
+            <dl class="details__overview">
+              @for (item of overviewItems(); track item.label) {
+                <div>
+                  <dt>{{ item.label }}</dt>
+                  <dd>{{ item.value }}</dd>
+                </div>
+              }
+            </dl>
+          }
+        </div>
+      }
+    </aside>
+  </div>
+
+  @if (standaloneReferences().length) {
+    <section
+      class="references"
+      [attr.aria-labelledby]="'object-references-heading-' + fixture().id"
+    >
+      <h3 [id]="'object-references-heading-' + fixture().id">Related objects</h3>
+      <p class="references__help">
+        Quick view opens the related object over this page. From there, choose Open full page for
+        its permanent address.
+      </p>
+      <div class="references__grid">
+        @for (reference of standaloneReferences(); track reference.route) {
+          <app-object-reference [reference]="reference" (opened)="referenceOpened.emit($event)" />
+        }
+      </div>
+    </section>
+  }
+
+  <details class="raw">
+    <summary>
+      <span>{{ fixture().rawLabel }}</span>
+      <small>{{ fixture().rawDisclosureLabel ?? fixture().rawHex.length / 2 + ' bytes' }}</small>
+    </summary>
+    <div>
+      <code>{{ fixture().rawHex }}</code>
+      <app-object-copy-button [value]="fixture().rawHex" [label]="fixture().rawLabel" />
+    </div>
+  </details>
+</article>

@@ -1,0 +1,119 @@
+<div class="fields">
+  @for (item of items(); track item.id) {
+    @if (item.children?.length) {
+      <details class="field field--collection" [attr.data-tone]="item.tone ?? 'neutral'">
+        <summary>
+          <span>
+            <strong>{{ item.label }}</strong>
+            <code>{{ item.value }}</code>
+          </span>
+          <span class="field__action">Expand list <span aria-hidden="true">↓</span></span>
+        </summary>
+        <div class="collection">
+          <button
+            type="button"
+            class="collection__count"
+            [class.field--active]="selectedItemId() === item.id"
+            [attr.aria-pressed]="selectedItemId() === item.id"
+            (click)="selected.emit(item)"
+          >
+            <span>{{ item.label }} count</span>
+            <code>{{ item.value }}</code>
+          </button>
+          @if (item.collectionKind === 'transactions') {
+            <label class="transaction-search">
+              <span>Find transaction ID</span>
+              <input
+                type="search"
+                placeholder="Search txid"
+                [value]="transactionSearch()"
+                (input)="searchTransactions($event)"
+              />
+            </label>
+            <div class="transaction-list" aria-live="polite">
+              @for (transaction of pagedTransactions(); track transaction.id) {
+                <button
+                  type="button"
+                  class="transaction-card"
+                  (click)="openTransaction(transaction)"
+                >
+                  <span>{{ transaction.label }}</span>
+                  <code>{{ transaction.value }}</code>
+                </button>
+              } @empty {
+                <p>No transaction IDs match that search.</p>
+              }
+            </div>
+            @if (filteredTransactions().length > transactionPageSize) {
+              <nav class="transaction-pages" aria-label="Transaction pages">
+                <button
+                  type="button"
+                  [disabled]="transactionPage() === 0"
+                  (click)="previousTransactionPage()"
+                >
+                  Previous
+                </button>
+                <span>Page {{ transactionPage() + 1 }} of {{ transactionPageCount() }}</span>
+                <button
+                  type="button"
+                  [disabled]="transactionPage() + 1 >= transactionPageCount()"
+                  (click)="nextTransactionPage()"
+                >
+                  Next
+                </button>
+              </nav>
+            }
+          } @else {
+            @for (member of item.children; track member.id) {
+              <details class="collection__member">
+                <summary>
+                  <span>
+                    <strong>{{ member.label }}</strong>
+                    <code>{{ member.value }}</code>
+                  </span>
+                  <span>Expand fields <span aria-hidden="true">↓</span></span>
+                </summary>
+                <div class="collection__fields">
+                  <button
+                    type="button"
+                    class="collection__overview"
+                    [class.field--active]="selectedItemId() === member.id"
+                    [attr.aria-pressed]="selectedItemId() === member.id"
+                    (click)="selected.emit(member)"
+                  >
+                    Inspect {{ member.label }}
+                  </button>
+                  @for (child of member.children; track child.id) {
+                    <button
+                      type="button"
+                      class="collection__field"
+                      [class.field--active]="selectedItemId() === child.id"
+                      [attr.data-tone]="child.tone ?? 'neutral'"
+                      [attr.aria-pressed]="selectedItemId() === child.id"
+                      (click)="selected.emit(child)"
+                    >
+                      <strong>{{ child.label }}</strong>
+                      <code>{{ child.value }}</code>
+                    </button>
+                  }
+                </div>
+              </details>
+            }
+          }
+        </div>
+      </details>
+    } @else {
+      <button
+        type="button"
+        class="field"
+        [class.field--active]="selectedItemId() === item.id"
+        [attr.data-tone]="item.tone ?? 'neutral'"
+        [attr.aria-pressed]="selectedItemId() === item.id"
+        (click)="selected.emit(item)"
+      >
+        <strong>{{ item.label }}</strong>
+        <code>{{ item.value }}</code>
+      </button>
+    }
+  }
+</div>

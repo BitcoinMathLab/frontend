@@ -5,8 +5,8 @@ exposing Bitcoin Core credentials to the browser. It displays transaction identi
 value and fee summaries, every created output, each input's ordered previous output, standard output/spend-path
 classification, and guided raw-byte ranges supplied by Bitclone.
 
-The explorer loads its verified example catalog from `/api/v1/transactions/examples`. Each concept card selects a
-confirmed mainnet txid and states the expected input/output shape before the learner inspects it.
+The explorer loads its verified example catalog from `/api/v1/transactions/examples` for the Random action. Random,
+Paste, and typing only populate the field; **Inspect transaction** remains the explicit action that retrieves context.
 
 ## Automated evidence
 
@@ -21,9 +21,11 @@ Unit coverage verifies the API URL and method, input/output rendering, client-si
 Playwright covers the same user paths and checks a 390-pixel viewport for horizontal overflow. The browser tests mock
 the transaction endpoint so they do not depend on a synchronized local node.
 
-With the backend, Core tunnel, and frontend running, verify the full catalog path with:
+With the backend, Core tunnel, and frontend running, verify the live Explorer path with:
 
-    BML_LIVE_API=1 npx playwright test e2e/live-api.spec.ts --grep "catalog example"
+```bash
+BML_LIVE_API=1 npx playwright test e2e/live-api.spec.ts --grep "Explorer transaction"
+```
 
 ## Manual setup
 
@@ -51,8 +53,8 @@ successful historical lookup until synchronization finishes.
   be removed without sending another request.
 - **Field actions:** Copy writes the current txid to the clipboard, Paste replaces it without submitting, and Random
   selects a different example from the versioned catalog without submitting.
-- **Example catalog:** Expect labeled cards for genesis, early payment/change, P2PKH, P2WPKH, and P2WSH. Selecting a
-  card replaces the txid without issuing a context request; Inspect remains the explicit lookup action.
+- **Curated Random:** Activate Random and expect a verified example txid to replace the current value without issuing a
+  context request; Inspect remains the explicit lookup action.
 - **Unavailable Core:** Stop Core, interrupt the tunnel, or test while `txindex` is building. Expect a safe message that
   Core is catching up or unavailable, with no hostnames, credentials, or internal exception detail.
 - **Boundary:** Load the genesis coinbase transaction

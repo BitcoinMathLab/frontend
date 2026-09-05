@@ -93,7 +93,8 @@ test('loads a transaction and displays its ordered spend context', async ({ page
   await mockTransactionApi(page);
   await page.goto('/explorer');
 
-  await page.getByRole('button', { name: /Early payment and change/ }).click();
+  await expect(page.getByText('Choose a transaction concept')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Use random transaction example' }).click();
   await expect(page.getByRole('textbox', { name: 'Transaction ID' })).toHaveValue(TXID);
   await page.getByRole('button', { name: 'Inspect transaction' }).click();
 

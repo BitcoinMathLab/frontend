@@ -35,5 +35,5 @@ test('verifies the deployed public shell, metadata, and security headers', async
 
   await page.goto('/explorer');
   await expect(page).toHaveTitle('Transaction Explorer — Bitcoin Math Lab');
-  await expect(page.getByRole('heading', { name: 'Open a Bitcoin transaction.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Transaction Explorer' })).toBeVisible();
 });

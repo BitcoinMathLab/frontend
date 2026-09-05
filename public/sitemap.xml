@@ -13,6 +13,9 @@
     <loc>https://bitcoinmathlab.com/explorer</loc>
   </url>
   <url>
+    <loc>https://bitcoinmathlab.com/display</loc>
+  </url>
+  <url>
     <loc>https://bitcoinmathlab.com/contact</loc>
   </url>
 </urlset>

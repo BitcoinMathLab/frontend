@@ -89,13 +89,37 @@ export interface P2wpkhTraceResponse {
   readonly trace: ExecutionTrace;
 }
 
-export type SpendTraceResponse = P2pkhTraceResponse | P2wpkhTraceResponse;
+export interface P2msTraceResponse {
+  readonly api_version: 'v1';
+  readonly script_type: 'P2MS';
+  readonly input_index: number;
+  readonly scripts: {
+    readonly unlocking: string;
+    readonly locking: string;
+    readonly combined: string;
+  };
+  readonly sources: {
+    readonly script_sig: ScriptSource;
+    readonly script_pubkey: ScriptSource;
+  };
+  readonly multisig: {
+    readonly required_signatures: number;
+    readonly total_public_keys: number;
+    readonly signatures: readonly string[];
+    readonly public_keys: readonly string[];
+    readonly has_null_dummy: boolean;
+  };
+  readonly trace: ExecutionTrace;
+}
+
+export type SpendTraceResponse = P2pkhTraceResponse | P2wpkhTraceResponse | P2msTraceResponse;
 
 export type P2pkhSignatureVerificationResponse = Omit<P2pkhTraceResponse, 'trace'>;
 export type P2wpkhSignatureVerificationResponse = Omit<P2wpkhTraceResponse, 'trace'>;
 export type EcdsaSignatureVerificationResponse =
   P2pkhSignatureVerificationResponse | P2wpkhSignatureVerificationResponse;
-export type SignatureWalkthroughResult = SpendTraceResponse | EcdsaSignatureVerificationResponse;
+export type SignatureWalkthroughResult =
+  P2pkhTraceResponse | P2wpkhTraceResponse | EcdsaSignatureVerificationResponse;
 
 export interface TraceScripts {
   readonly unlocking: string;
@@ -143,6 +167,7 @@ export interface PreviousOutputContext {
   readonly spend_type:
     | 'P2PK'
     | 'P2PKH'
+    | 'P2MS'
     | 'P2SH'
     | 'P2SH-P2WPKH'
     | 'P2SH-P2WSH'

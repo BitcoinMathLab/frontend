@@ -166,10 +166,6 @@ export class TransactionExplorer implements OnInit, OnDestroy {
     this.replaceInput(example?.txid ?? DEFAULT_TXID, example ?? null);
   }
 
-  protected selectExample(example: TransactionExample): void {
-    this.replaceInput(example.txid, example);
-  }
-
   protected inputChanged(txid: string): void {
     const normalizedTxid = txid.trim().toLowerCase();
     this.requestSubscription?.unsubscribe();

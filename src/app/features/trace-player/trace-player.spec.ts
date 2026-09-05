@@ -1,13 +1,21 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 
-import { TRACE_FIXTURE, TRACE_RESPONSE_FIXTURE } from '../../testing/trace.fixture';
+import {
+  P2WPKH_TRACE_RESPONSE_FIXTURE,
+  TRACE_FIXTURE,
+  TRACE_RESPONSE_FIXTURE,
+} from '../../testing/trace.fixture';
 import { TracePlayer } from './trace-player';
 
 describe('TracePlayer', () => {
   let fixture: ComponentFixture<TracePlayer>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [TracePlayer] }).compileComponents();
+    await TestBed.configureTestingModule({
+      imports: [TracePlayer],
+      providers: [provideRouter([])],
+    }).compileComponents();
     fixture = TestBed.createComponent(TracePlayer);
     fixture.componentRef.setInput('trace', {
       ...TRACE_FIXTURE,
@@ -22,6 +30,12 @@ describe('TracePlayer', () => {
     });
     fixture.componentRef.setInput('scripts', TRACE_RESPONSE_FIXTURE.scripts);
     fixture.componentRef.setInput('sources', TRACE_RESPONSE_FIXTURE.sources);
+    fixture.componentRef.setInput('inputSequence', '4294967294 · relative locktime disabled');
+    fixture.componentRef.setInput('spentOutputAmountSats', 82_974_043_165);
+    fixture.componentRef.setInput(
+      'spentOutputScriptPubKey',
+      TRACE_RESPONSE_FIXTURE.scripts.locking,
+    );
     fixture.detectChanges();
   });
 
@@ -37,47 +51,105 @@ describe('TracePlayer', () => {
 
   function prepareExecution(): void {
     const findOutput = [...fixture.nativeElement.querySelectorAll('button')].find(
-      (button: HTMLButtonElement) => button.textContent?.includes('Find previous output'),
+      (button: HTMLButtonElement) => button.textContent?.includes('Find spent output'),
     ) as HTMLButtonElement;
     findOutput.click();
     fixture.detectChanges();
     const assemble = [...fixture.nativeElement.querySelectorAll('button')].find(
-      (button: HTMLButtonElement) => button.textContent?.includes('Assemble execution script'),
+      (button: HTMLButtonElement) => button.textContent?.includes('Assemble execution'),
     ) as HTMLButtonElement;
     assemble.click();
     fixture.detectChanges();
   }
 
-  it('starts before step one with empty stacks and backward controls disabled', () => {
+  it('locates the spent TxOut before assembling the execution context', async () => {
     const compiled = fixture.nativeElement as HTMLElement;
 
-    expect(compiled.textContent).toContain('Read this input’s outpoint');
-    expect(compiled.textContent).toContain('Use the outpoint above');
+    expect(compiled.textContent).not.toContain('Selected TxIn');
+    expect(compiled.textContent).not.toContain('Referenced TxOut');
+    expect(compiled.textContent).not.toContain('TxIn 0');
+    expect(compiled.textContent).not.toContain('TxOut 1');
+    expect(compiled.textContent).toContain('Reference');
+    expect(compiled.textContent).toContain('Contains the outpoint and unlocking data');
+    expect(compiled.textContent).toContain('Not located yet');
+    expect(compiled.textContent).toContain('Use its outpoint to find the output being spent.');
+    expect(compiled.textContent).toContain('Step 1 of 2');
+    expect(compiled.textContent).toContain('Prepared execution');
+    expect(compiled.textContent).toContain('Waiting for Assemble');
+    expect(compiled.textContent).toContain('Main stack');
+    expect(compiled.textContent).toContain('Empty');
     expect(compiled.textContent).not.toContain(
       `scriptPubKey ${TRACE_RESPONSE_FIXTURE.scripts.locking}`,
     );
     expect(compiled.textContent).not.toContain('Stack flow');
-    expect(control('Next step').disabled).toBe(true);
+    expect(compiled.querySelector('[aria-label="Next step"]')).toBeNull();
+    expect(compiled.textContent).not.toContain('Signature type');
+    expect(compiled.textContent).not.toContain('Step 0 of 6');
+
+    const inputReference = compiled.querySelector<HTMLButtonElement>(
+      '[aria-label="Open selected input 0 in the spending transaction"]',
+    )!;
+    inputReference.click();
+    fixture.detectChanges();
+    expect(compiled.querySelector('[role="dialog"]')?.textContent).toContain('TxIn quick view');
+    expect(compiled.querySelector('[role="dialog"]')?.textContent).toContain('Previous txid');
+    compiled.querySelector<HTMLButtonElement>('[aria-label="Close object display"]')!.click();
+    fixture.detectChanges();
 
     const findOutput = [...compiled.querySelectorAll('button')].find((button: HTMLButtonElement) =>
-      button.textContent?.includes('Find previous output'),
+      button.textContent?.includes('Find spent output'),
     ) as HTMLButtonElement;
     findOutput.click();
     fixture.detectChanges();
-    expect(compiled.textContent).toContain(
-      `scriptPubKey ${TRACE_RESPONSE_FIXTURE.scripts.locking}`,
-    );
-    expect(compiled.textContent).toContain('Assemble execution script');
+    await new Promise((resolve) => setTimeout(resolve));
+    const outputReference = compiled.querySelector<HTMLButtonElement>(
+      '[aria-label="Open referenced output 1 in the previous transaction"]',
+    )!;
+    expect(outputReference).toBe(document.activeElement);
+    expect(compiled.textContent).toContain('Found');
+    expect(compiled.textContent).toContain('Step 2 of 2');
+    expect(compiled.textContent).toContain('Contains the amount and locking condition');
+    expect(compiled.textContent).toContain('Assemble execution');
     expect(compiled.textContent).not.toContain('Stack flow');
 
+    outputReference.click();
+    fixture.detectChanges();
+    const outputDialog = compiled.querySelector('[role="dialog"]')!;
+    expect(outputDialog.textContent).toContain('TxOut quick view');
+    expect(outputDialog.textContent).toContain('82,974,043,165 sats · 829.74043165 BTC');
+    expect(outputDialog.textContent).toContain('scriptPubKey size');
+    expect(outputDialog.textContent).toContain(TRACE_RESPONSE_FIXTURE.scripts.locking);
+    compiled.querySelector<HTMLButtonElement>('[aria-label="Close object display"]')!.click();
+    fixture.detectChanges();
+
     const assemble = [...compiled.querySelectorAll('button')].find((button: HTMLButtonElement) =>
-      button.textContent?.includes('Assemble execution script'),
+      button.textContent?.includes('Assemble execution'),
     ) as HTMLButtonElement;
     assemble.click();
     fixture.detectChanges();
+    expect(compiled.textContent).not.toContain('Prepare this input for execution');
+    expect(
+      compiled.querySelector('[aria-label="Transaction relationship for script execution"]'),
+    ).not.toBeNull();
+    expect(compiled.textContent).toContain('Spending transaction');
+    expect(compiled.textContent).toContain('Selected TxIn 0');
+    expect(compiled.textContent).toContain('spends');
+    expect(compiled.textContent).toContain('Previous transaction');
+    expect(compiled.textContent).toContain('Referenced TxOut 1');
+    expect(compiled.textContent).toContain(
+      'This TxIn’s scriptSig unlocks the referenced TxOut’s scriptPubKey.',
+    );
+    expect(compiled.textContent).toContain(
+      TRACE_RESPONSE_FIXTURE.sources.script_sig.transaction_txid,
+    );
+    expect(compiled.textContent).toContain(
+      TRACE_RESPONSE_FIXTURE.sources.script_pubkey.transaction_txid,
+    );
+    expect(compiled.textContent).toContain(TRACE_RESPONSE_FIXTURE.scripts.locking);
     expect(compiled.textContent).toContain('Stack flow');
     expect(compiled.textContent).toContain('scriptSig');
     expect(compiled.textContent).toContain('scriptPubKey');
+    expect(compiled.textContent).not.toContain('source:');
     expect(compiled.textContent).toContain('OP_1');
     expect(compiled.textContent).toContain('DATA (Signature)');
     expect(compiled.textContent).toContain('Original hex');
@@ -128,6 +200,71 @@ describe('TracePlayer', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Step 0 of 6');
     expect(fixture.nativeElement.textContent).toContain('Ready');
+  });
+
+  it('shows witness and derived scriptCode as the SegWit execution context', () => {
+    fixture.componentRef.setInput('trace', P2WPKH_TRACE_RESPONSE_FIXTURE.trace);
+    fixture.componentRef.setInput('scripts', {
+      unlocking: '',
+      locking: P2WPKH_TRACE_RESPONSE_FIXTURE.scripts.script_code,
+      combined: P2WPKH_TRACE_RESPONSE_FIXTURE.scripts.script_code,
+    });
+    fixture.componentRef.setInput('sources', {
+      script_sig: P2WPKH_TRACE_RESPONSE_FIXTURE.sources.witness,
+      script_pubkey: P2WPKH_TRACE_RESPONSE_FIXTURE.sources.script_pubkey,
+    });
+    fixture.componentRef.setInput('scriptType', 'P2WPKH');
+    fixture.componentRef.setInput('witnessItems', P2WPKH_TRACE_RESPONSE_FIXTURE.scripts.witness);
+    fixture.componentRef.setInput('inputSequence', '4294967295');
+    fixture.componentRef.setInput('spentOutputAmountSats', 42);
+    fixture.componentRef.setInput(
+      'spentOutputScriptPubKey',
+      P2WPKH_TRACE_RESPONSE_FIXTURE.scripts.locking,
+    );
+    fixture.detectChanges();
+
+    const findOutput = [...fixture.nativeElement.querySelectorAll('button')].find(
+      (button: HTMLButtonElement) => button.textContent?.includes('Find spent output'),
+    ) as HTMLButtonElement;
+    findOutput.click();
+    fixture.detectChanges();
+
+    const inputReference = fixture.nativeElement.querySelector(
+      '[aria-label="Open selected input 0 in the spending transaction"]',
+    ) as HTMLButtonElement;
+    inputReference.click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[role="dialog"]')?.textContent).toContain(
+      'Witness stack',
+    );
+    fixture.nativeElement.querySelector('[aria-label="Close object display"]').click();
+    fixture.detectChanges();
+
+    const outputReference = fixture.nativeElement.querySelector(
+      '[aria-label="Open referenced output 2 in the previous transaction"]',
+    ) as HTMLButtonElement;
+    outputReference.click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[role="dialog"]')?.textContent).toContain(
+      P2WPKH_TRACE_RESPONSE_FIXTURE.scripts.locking,
+    );
+    fixture.nativeElement.querySelector('[aria-label="Close object display"]').click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).not.toContain('final');
+
+    const assemble = [...fixture.nativeElement.querySelectorAll('button')].find(
+      (button: HTMLButtonElement) => button.textContent?.includes('Assemble execution'),
+    ) as HTMLButtonElement;
+    assemble.click();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('witness');
+    expect(fixture.nativeElement.textContent).toContain('initializes stack');
+    expect(fixture.nativeElement.textContent).toContain('P2PKH scriptCode');
+    expect(fixture.nativeElement.textContent).not.toContain('scriptSig runs first');
+    expect(fixture.nativeElement.textContent).toContain(
+      'This TxIn’s witness satisfies the locking condition committed by the referenced TxOut’s scriptPubKey.',
+    );
   });
 
   it('plays to the final step and pauses automatically', () => {
@@ -182,13 +319,27 @@ describe('TracePlayer', () => {
     control('Go to result').click();
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).toContain('Execution');
-    expect(fixture.nativeElement.textContent).toContain('Stack state');
-    expect(fixture.nativeElement.textContent).toContain('after OP_ADD');
-    expect(fixture.nativeElement.textContent).toContain('Main stack');
-    expect(fixture.nativeElement.textContent).not.toContain('Alt stack');
-    expect(fixture.nativeElement.textContent).toContain('Now running STACK VALIDATION');
-    expect(fixture.nativeElement.textContent).not.toContain('Consumed');
+    const compiled = fixture.nativeElement as HTMLElement;
+    const execution = compiled.querySelector<HTMLElement>('.execution-pane')!;
+    const stack = compiled.querySelector<HTMLElement>('app-stack-workbench')!;
+    expect(
+      execution.compareDocumentPosition(stack) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(execution.querySelector('[aria-label="Stack movement"]')).not.toBeNull();
+    expect(stack.querySelector('[aria-label="Stack movement"]')).toBeNull();
+    expect(compiled.textContent).toContain('Execution');
+    expect(compiled.textContent).toContain('Stack state');
+    expect(compiled.textContent).toContain('after OP_ADD');
+    expect(compiled.textContent).toContain('Main stack');
+    expect(compiled.textContent).not.toContain('Alt stack');
+    expect(compiled.textContent).toContain('Now running STACK VALIDATION');
+    expect(execution.textContent).toContain('Consumednone');
+    expect(execution.textContent).toContain('Producednone');
+
+    control('Previous step').click();
+    fixture.detectChanges();
+    expect(execution.querySelectorAll('.movement-pill--out')).toHaveLength(2);
+    expect(execution.querySelectorAll('.movement-pill--in')).toHaveLength(1);
   });
 
   it('opens the signature workspace from OP_CHECKSIG', () => {

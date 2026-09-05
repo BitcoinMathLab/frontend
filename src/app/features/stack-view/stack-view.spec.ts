@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { StackView } from './stack-view';
 
 describe('StackView', () => {
-  it('renders stack values in top-first order', async () => {
+  it('renders stack values top-first so additions extend the stack downward', async () => {
     await TestBed.configureTestingModule({ imports: [StackView] }).compileComponents();
     const fixture = TestBed.createComponent(StackView);
     fixture.componentRef.setInput('label', 'Main stack after');

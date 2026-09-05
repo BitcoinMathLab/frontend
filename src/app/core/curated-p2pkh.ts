@@ -1,5 +1,8 @@
 import { P2pkhTraceRequest } from './trace-api.models';
 
+export const CURATED_P2PKH_TXID =
+  '40e331b67c0fe7750bb3b1943b378bf702dce86124dc12fa5980f975db7ec930';
+
 export const CURATED_P2PKH_REQUEST: P2pkhTraceRequest = Object.freeze({
   transaction_hex:
     '0100000001a4e61ed60e66af9f7ca4f2eb25234f6e32e0cb8f6099db21a2462c42de61640b010000006b' +

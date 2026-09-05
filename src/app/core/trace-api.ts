@@ -8,6 +8,7 @@ import {
   EcdsaSignatureVerificationResponse,
   P2pkhTraceRequest,
   P2pkhTraceResponse,
+  P2msTraceResponse,
   P2wpkhTraceResponse,
   TransactionContextResponse,
   TransactionExamplesResponse,
@@ -24,6 +25,10 @@ export class TraceApi {
 
   loadP2wpkhTrace(request: P2pkhTraceRequest): Observable<P2wpkhTraceResponse> {
     return this.http.post<P2wpkhTraceResponse>(`${this.apiBaseUrl}/api/v1/traces/p2wpkh`, request);
+  }
+
+  loadP2msTrace(request: P2pkhTraceRequest): Observable<P2msTraceResponse> {
+    return this.http.post<P2msTraceResponse>(`${this.apiBaseUrl}/api/v1/traces/p2ms`, request);
   }
 
   verifyEcdsaSignature(

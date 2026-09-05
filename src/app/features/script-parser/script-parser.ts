@@ -30,7 +30,7 @@ export class ScriptParser {
   readonly trace = input.required<ExecutionTrace>();
   readonly scripts = input.required<TraceScripts>();
   readonly sources = input.required<TraceSources>();
-  readonly scriptType = input<'P2PKH' | 'P2WPKH'>('P2PKH');
+  readonly scriptType = input<'P2PKH' | 'P2WPKH' | 'P2MS'>('P2PKH');
   readonly witnessItems = input<readonly string[]>([]);
   readonly currentIndex = input.required<number>();
   readonly currentPhase = input<'opcode' | 'stack-push' | 'stack-validation' | null>(null);
@@ -41,14 +41,23 @@ export class ScriptParser {
   protected readonly operations = computed<readonly ParsedOperation[]>(() => {
     const unlockingLength = this.scripts().unlocking.length / 2;
     let unlockingPush = 0;
+    let lockingPush = 0;
     return this.trace().steps.map((step) => {
       const phase = step.opcode.byte_offset < unlockingLength ? 'scriptSig' : 'scriptPubKey';
       let dataLabel: string | null = null;
-      if (step.opcode.is_push && phase === 'scriptSig') {
-        dataLabel = unlockingPush === 0 ? 'Signature' : 'Public key';
+      if (this.scriptType() === 'P2MS' && phase === 'scriptSig' && step.opcode.name === 'OP_0') {
+        dataLabel = 'CHECKMULTISIG dummy';
+      } else if (step.opcode.is_push && phase === 'scriptSig') {
+        dataLabel =
+          this.scriptType() === 'P2MS'
+            ? `Signature ${unlockingPush + 1}`
+            : unlockingPush === 0
+              ? 'Signature'
+              : 'Public key';
         unlockingPush += 1;
       } else if (step.opcode.is_push) {
-        dataLabel = 'Expected public-key hash';
+        dataLabel =
+          this.scriptType() === 'P2MS' ? `Public key ${++lockingPush}` : 'Expected public-key hash';
       }
       return { step, phase, dataLabel };
     });

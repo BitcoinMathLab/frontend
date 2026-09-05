@@ -4,159 +4,146 @@
   (keydown)="handleKeydown($event)"
   aria-label="Script trace player"
 >
-  <div class="controls-bar">
-    <label class="example-selector">
-      <span>Signature type</span>
-      <span class="signature-family" [title]="signatureTypeTitle()">
-        <abbr [title]="signatureTypeTitle()">{{ scriptType() }}</abbr>
-      </span>
-    </label>
-    <div class="vcr" role="group" aria-label="Playback controls">
-      <button
-        type="button"
-        (click)="reset()"
-        [disabled]="!preparationComplete() || atStart()"
-        aria-label="Restart trace"
-        aria-keyshortcuts="Home"
-        title="Restart"
-      >
-        <span aria-hidden="true">&lt;&lt;</span>
-      </button>
-      <button
-        type="button"
-        (click)="previous()"
-        [disabled]="!preparationComplete() || atStart()"
-        aria-label="Previous step"
-        aria-keyshortcuts="ArrowLeft"
-        title="Previous step"
-      >
-        <span aria-hidden="true">◀</span>
-      </button>
-      <button
-        class="vcr__primary"
-        [class.vcr__primary--running]="playing()"
-        type="button"
-        (click)="togglePlay()"
-        [disabled]="!preparationComplete()"
-        aria-keyshortcuts="Space"
-      >
-        <span aria-hidden="true">{{ playing() ? 'Ⅱ' : '▶' }}</span>
-        <small>{{ playing() ? 'Pause' : 'Play' }}</small>
-      </button>
-      <button
-        type="button"
-        (click)="next()"
-        [disabled]="!preparationComplete() || atEnd()"
-        aria-label="Next step"
-        aria-keyshortcuts="ArrowRight"
-        title="Next step"
-      >
-        <span aria-hidden="true">▶</span>
-      </button>
-      <button
-        type="button"
-        (click)="finish()"
-        [disabled]="!preparationComplete() || atEnd()"
-        aria-label="Go to result"
-        aria-keyshortcuts="End"
-        title="Jump to result"
-      >
-        <span aria-hidden="true">&gt;&gt;</span>
-      </button>
-    </div>
+  @if (!preparationComplete()) {
+    <app-script-preparation
+      [stage]="preparationStage() === 0 ? 0 : 1"
+      [scripts]="scripts()"
+      [sources]="sources()"
+      [scriptType]="scriptType()"
+      [witnessItems]="witnessItems()"
+      [inputSequence]="inputSequence()"
+      [spentOutputAmountSats]="spentOutputAmountSats()"
+      [spentOutputScriptPubKey]="spentOutputScriptPubKey()"
+      (outputRequested)="findPreviousOutput()"
+      (assemblyRequested)="prepareExecution($event)"
+    />
+  } @else {
+    <section
+      class="execution-context"
+      role="region"
+      aria-label="Transaction relationship for script execution"
+    >
+      <div class="transaction-relationship">
+        <a
+          class="transaction-context transaction-context--spending"
+          [href]="'/display/transaction/' + sources().script_sig.transaction_txid"
+          target="_blank"
+          rel="noopener"
+          [attr.aria-label]="
+            'Open spending transaction containing selected input ' + sources().script_sig.index
+          "
+        >
+          <span>Spending transaction <small>(newer)</small></span>
+          <code>{{ sources().script_sig.transaction_txid }}</code>
+          <strong>Contains selected TxIn {{ sources().script_sig.index }}</strong>
+          <em>Open display <span aria-hidden="true">↗</span></em>
+        </a>
 
-    <div class="execution-status" aria-label="Execution status">
-      <span class="step-label" aria-live="polite">{{ stepLabel() }}</span>
-      <span
-        class="outcome"
-        role="status"
-        [class.outcome--active]="!atStart() && !atEnd()"
-        [class.outcome--valid]="atEnd() && trace().success"
-        [class.outcome--invalid]="atEnd() && !trace().success"
-      >
-        {{ outcomeLabel() }}
-      </span>
-    </div>
-  </div>
-  <section
-    class="script-preparation"
-    [class.script-preparation--complete]="preparationComplete()"
-    aria-labelledby="script-preparation-heading"
-  >
-    <header>
-      <div>
-        <span>Script preparation</span>
-        <h2 id="script-preparation-heading">Locate the UTXO, then assemble execution.</h2>
+        <div class="transaction-connector">
+          <span>spends</span>
+          <strong aria-hidden="true">→</strong>
+        </div>
+
+        <a
+          class="transaction-context transaction-context--previous"
+          [href]="'/display/transaction/' + sources().script_pubkey.transaction_txid"
+          target="_blank"
+          rel="noopener"
+          [attr.aria-label]="
+            'Open previous transaction containing referenced output ' +
+            sources().script_pubkey.index
+          "
+        >
+          <span>Previous transaction <small>(older)</small></span>
+          <code>{{ sources().script_pubkey.transaction_txid }}</code>
+          <strong>Contains referenced TxOut {{ sources().script_pubkey.index }}</strong>
+          <em>Open display <span aria-hidden="true">↗</span></em>
+        </a>
       </div>
-      <code
-        >{{ sources().script_pubkey.transaction_txid }}:{{ sources().script_pubkey.index }}</code
-      >
-    </header>
-    <ol aria-live="polite">
-      <li class="preparation-step preparation-step--complete">
-        <span>1</span>
-        <div>
-          <strong>Read this input’s outpoint</strong
-          ><code
-            >{{ sources().script_pubkey.transaction_txid }}:vout
-            {{ sources().script_pubkey.index }}</code
-          >
-        </div>
-      </li>
-      <li
-        class="preparation-step"
-        [class.preparation-step--active]="preparationStage() === 0"
-        [class.preparation-step--complete]="preparationStage() > 0"
-        [attr.aria-current]="preparationStage() === 0 ? 'step' : null"
-      >
-        <span>2</span>
-        <div>
-          <strong>Find that previous output</strong>
-          @if (preparationStage() > 0) {
-            <code
-              >{{ sources().script_pubkey.transaction_txid }}:vout
-              {{ sources().script_pubkey.index }} → scriptPubKey {{ scripts().locking }}</code
-            >
-          } @else {
-            <small>Use the outpoint above to look up the exact output it spends.</small>
-          }
-        </div>
-      </li>
-      <li
-        class="preparation-step"
-        [class.preparation-step--active]="preparationStage() === 1"
-        [class.preparation-step--complete]="preparationComplete()"
-        [attr.aria-current]="preparationStage() === 1 ? 'step' : null"
-      >
-        <span>3</span>
-        <div>
-          <strong>Prepare the script path</strong>
-          @if (preparationStage() > 0) {
-            <code>{{
-              scriptType() === 'P2WPKH'
-                ? 'witness initializes the stack → derived P2PKH scriptCode executes'
-                : 'scriptSig runs first → previous output scriptPubKey runs second'
-            }}</code>
-          } @else {
-            <small>The execution path is revealed after the previous output is found.</small>
-          }
-        </div>
-      </li>
-    </ol>
-    @if (preparationStage() === 0) {
-      <button type="button" class="prepare-button" (click)="findPreviousOutput()">
-        Find previous output
-      </button>
-    } @else if (preparationStage() === 1) {
-      <button type="button" class="prepare-button" (click)="prepareExecution()">
-        Assemble execution script
-      </button>
-    } @else {
-      <p class="preparation-ready" role="status">
-        <span aria-hidden="true">✓</span> Verified transaction context is ready to execute.
+      <p>
+        @if (scriptType() === 'P2WPKH') {
+          This TxIn’s witness satisfies the locking condition committed by the referenced TxOut’s
+          scriptPubKey.
+        } @else {
+          This TxIn’s scriptSig unlocks the referenced TxOut’s scriptPubKey.
+        }
       </p>
-    }
-  </section>
+    </section>
+
+    <div class="controls-bar">
+      <div class="example-selector">
+        <span>Signature type</span>
+        <span class="signature-family" [title]="signatureTypeTitle()">
+          <abbr [title]="signatureTypeTitle()">{{ scriptType() }}</abbr>
+        </span>
+      </div>
+      <div class="vcr" role="group" aria-label="Playback controls">
+        <button
+          type="button"
+          (click)="reset()"
+          [disabled]="atStart()"
+          aria-label="Restart trace"
+          aria-keyshortcuts="Home"
+          title="Restart"
+        >
+          <span aria-hidden="true">&lt;&lt;</span>
+        </button>
+        <button
+          type="button"
+          (click)="previous()"
+          [disabled]="atStart()"
+          aria-label="Previous step"
+          aria-keyshortcuts="ArrowLeft"
+          title="Previous step"
+        >
+          <span aria-hidden="true">◀</span>
+        </button>
+        <button
+          class="vcr__primary"
+          [class.vcr__primary--running]="playing()"
+          type="button"
+          (click)="togglePlay()"
+          aria-keyshortcuts="Space"
+        >
+          <span aria-hidden="true">{{ playing() ? 'Ⅱ' : '▶' }}</span>
+          <small>{{ playing() ? 'Pause' : 'Play' }}</small>
+        </button>
+        <button
+          type="button"
+          (click)="next()"
+          [disabled]="atEnd()"
+          aria-label="Next step"
+          aria-keyshortcuts="ArrowRight"
+          title="Next step"
+        >
+          <span aria-hidden="true">▶</span>
+        </button>
+        <button
+          type="button"
+          (click)="finish()"
+          [disabled]="atEnd()"
+          aria-label="Go to result"
+          aria-keyshortcuts="End"
+          title="Jump to result"
+        >
+          <span aria-hidden="true">&gt;&gt;</span>
+        </button>
+      </div>
+
+      <div class="execution-status" aria-label="Execution status">
+        <span class="step-label" aria-live="polite">{{ stepLabel() }}</span>
+        <span
+          class="outcome"
+          role="status"
+          [class.outcome--active]="!atStart() && !atEnd()"
+          [class.outcome--valid]="atEnd() && trace().success"
+          [class.outcome--invalid]="atEnd() && !trace().success"
+        >
+          {{ outcomeLabel() }}
+        </span>
+      </div>
+    </div>
+  }
   @if (preparationComplete()) {
     <div
       class="progress-track"
@@ -189,17 +176,6 @@
       </section>
 
       <div class="right-workspace" role="region" aria-label="Execution and stack">
-        <app-stack-workbench
-          [step]="currentStep() ?? null"
-          [showBefore]="
-            currentPlayback()?.phase === 'opcode' && currentStep()?.opcode?.is_push === true
-          "
-          [showMovement]="
-            currentPlayback()?.phase !== 'stack-validation' &&
-            (currentPlayback()?.phase !== 'opcode' || currentStep()?.opcode?.is_push !== true)
-          "
-          (inspectItem)="inspectStackItem($event)"
-        />
         <section class="visual-pane execution-pane" aria-labelledby="execution-pane-heading">
           <header class="pane-header">
             <h2 id="execution-pane-heading">Execution</h2>
@@ -223,7 +199,11 @@
 
             @if (isSignatureCheck()) {
               <button type="button" class="signature-link" (click)="openSignatureDetail()">
-                Open signature walkthrough
+                {{
+                  scriptType() === 'P2MS'
+                    ? 'Open signature workspace'
+                    : 'Open signature walkthrough'
+                }}
               </button>
             }
 
@@ -247,7 +227,17 @@
               </p>
             </article>
           }
+
+          <app-stack-movement [movement]="stackMovement()" />
         </section>
+
+        <app-stack-workbench
+          [step]="currentStep() ?? null"
+          [showBefore]="
+            currentPlayback()?.phase === 'opcode' && currentStep()?.opcode?.is_push === true
+          "
+          (inspectItem)="inspectStackItem($event)"
+        />
       </div>
     </div>
   }

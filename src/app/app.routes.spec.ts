@@ -1,11 +1,16 @@
 import { routes } from './app.routes';
 
 describe('application routes', () => {
-  it('defines five public pages, legacy redirects, and a fallback route', () => {
+  it('defines public pages, object display routes, legacy redirects, and a fallback route', () => {
     expect(routes.map((route) => route.path)).toEqual([
       '',
       'visualizer',
       'explorer',
+      'display/block/:hash',
+      'display/transaction/:txid/input/:index',
+      'display/transaction/:txid/output/:index',
+      'display/transaction/:txid',
+      'display',
       'about',
       'labs/script-visualizer',
       'labs/transaction-explorer',

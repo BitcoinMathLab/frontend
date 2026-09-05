@@ -1,0 +1,158 @@
+<section class="display-workspace" aria-label="Bitcoin object display">
+  <h1>Object Display</h1>
+
+  <div class="tabs" role="tablist" aria-label="Bitcoin object type">
+    @for (item of kinds; track item.kind) {
+      <button
+        type="button"
+        role="tab"
+        [id]="'display-tab-' + item.kind"
+        [attr.aria-selected]="activeKind() === item.kind"
+        [attr.aria-controls]="'display-panel-' + item.kind"
+        [tabIndex]="activeKind() === item.kind ? 0 : -1"
+        (click)="selectKind(item.kind)"
+        (keydown)="handleTabKeydown($event, $index)"
+      >
+        {{ item.label }}
+      </button>
+    }
+  </div>
+
+  <form class="object-selector" (ngSubmit)="displaySelection()" novalidate>
+    <fieldset class="object-selector__fields">
+      <legend>Bitcoin object location</legend>
+      <div class="object-selector__bar">
+        <div
+          class="object-selector__locator"
+          [class.object-selector__locator--indexed]="selectorUsesIndex()"
+        >
+          <label class="object-selector__id-label" [for]="selectorInputId()">
+            {{ selectorIdLabel() }}
+          </label>
+          @if (selectorUsesIndex()) {
+            <label class="object-selector__index-label" for="object-index">
+              {{ selectorIndexLabel() }}
+            </label>
+          }
+          <div
+            class="object-selector__compound"
+            [class.object-selector__compound--indexed]="selectorUsesIndex()"
+          >
+            <input
+              class="object-selector__id-input"
+              [id]="selectorInputId()"
+              name="object-id"
+              type="text"
+              maxlength="64"
+              autocomplete="off"
+              spellcheck="false"
+              [placeholder]="'Enter a ' + selectorIdLabel()"
+              [ngModel]="selectorId"
+              (ngModelChange)="selectorIdChanged($event)"
+              [attr.aria-invalid]="selectorInvalidField() === 'id' ? 'true' : null"
+              [attr.aria-describedby]="
+                selectorInvalidField() === 'id' ? 'object-selector-error' : null
+              "
+            />
+            @if (selectorUsesIndex()) {
+              <input
+                class="object-selector__index-input"
+                id="object-index"
+                name="object-index"
+                type="text"
+                inputmode="numeric"
+                autocomplete="off"
+                placeholder="0"
+                [attr.aria-label]="selectorIndexLabel()"
+                [ngModel]="selectorIndex"
+                (ngModelChange)="selectorIndexChanged($event)"
+                [attr.aria-invalid]="selectorInvalidField() === 'index' ? 'true' : null"
+                [attr.aria-describedby]="
+                  selectorInvalidField() === 'index' ? 'object-selector-error' : null
+                "
+              />
+            }
+          </div>
+        </div>
+        <button
+          type="button"
+          class="object-selector__button"
+          [attr.title]="selectorIdCopied() ? 'Copied' : 'Copy ' + selectorIdLabel()"
+          [attr.aria-label]="
+            selectorIdCopied() ? 'Copied ' + selectorIdLabel() : 'Copy ' + selectorIdLabel()
+          "
+          (click)="copySelectorId()"
+        >
+          @if (selectorIdCopied()) {
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg>
+          } @else {
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="9" y="9" width="11" height="11" rx="2" />
+              <path d="M15 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h3" />
+            </svg>
+          }
+        </button>
+        <button
+          type="button"
+          class="object-selector__button"
+          [attr.title]="'Paste ' + selectorIdLabel()"
+          [attr.aria-label]="'Paste ' + selectorIdLabel()"
+          (click)="pasteSelectorId()"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="5" y="5" width="14" height="16" rx="2" />
+            <path d="M9 5V3h6v2M9 11h6m-6 4h6" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          class="object-selector__button"
+          [attr.title]="'Use random ' + selectorObjectLabel()"
+          [attr.aria-label]="'Use random ' + selectorObjectLabel()"
+          (click)="randomSelection()"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M3 7h3c4 0 6 10 10 10h5m-3-3 3 3-3 3M3 17h3c1.6 0 2.8-1.6 4-3.5M14 7h2.5H21m-3-3 3 3-3 3"
+            />
+          </svg>
+        </button>
+      </div>
+    </fieldset>
+    <div class="object-selector__actions">
+      <button type="submit">Display</button>
+      <button type="button" (click)="clearSelector()">Clear</button>
+    </div>
+    @if (selectorError()) {
+      <p id="object-selector-error" role="alert">{{ selectorError() }}</p>
+    }
+  </form>
+
+  @if (routeUnavailable()) {
+    <div class="route-state" role="status">
+      <strong>Object not found</strong>
+      <span>This Stage 1 route can display only the included example for this object type.</span>
+    </div>
+  }
+
+  <section
+    class="tab-panel"
+    role="tabpanel"
+    [id]="'display-panel-' + activeKind()"
+    [attr.aria-labelledby]="'display-tab-' + activeKind()"
+    tabindex="0"
+  >
+    <app-bitcoin-object-display
+      [fixture]="activeFixture()"
+      (referenceOpened)="openReference($event)"
+    />
+  </section>
+</section>
+
+@if (modalFixture(); as fixture) {
+  <app-bitcoin-object-modal
+    [fixture]="fixture"
+    (closed)="closeModal()"
+    (referenceOpened)="openReference($event)"
+  />
+}

@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-test('keeps the public navigation focused on the five MVP destinations', async ({ page }) => {
+test('keeps the public navigation focused on the primary destinations', async ({ page }) => {
   await page.goto('/');
 
   const navigation = page.getByRole('navigation', { name: 'Primary navigation' });
@@ -8,6 +8,7 @@ test('keeps the public navigation focused on the five MVP destinations', async (
     'Home',
     'Visualizer',
     'Explorer',
+    'Display',
     'About',
     'Contact',
   ]);

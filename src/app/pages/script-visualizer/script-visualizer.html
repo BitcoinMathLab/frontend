@@ -4,33 +4,81 @@
 </section>
 
 <section class="lab" aria-label="Bitcoin spend verification">
-  @if (activeWorkspace() === 'execution') {
-    <form class="transaction-source" (ngSubmit)="loadSelectedInput()" novalidate>
-      <label>
-        <span>Transaction ID</span>
-        <input
-          name="visualizer-transaction-id"
-          type="text"
-          maxlength="64"
-          autocomplete="off"
-          spellcheck="false"
-          placeholder="64 hexadecimal characters"
-          [(ngModel)]="transactionId"
+  <form class="transaction-source" (ngSubmit)="loadSelectedInput()" novalidate>
+    <label>
+      <span>Transaction ID</span>
+      <input
+        name="visualizer-transaction-id"
+        type="text"
+        maxlength="64"
+        autocomplete="off"
+        spellcheck="false"
+        placeholder="64 hexadecimal characters"
+        [ngModel]="transactionId"
+        (ngModelChange)="transactionIdChanged($event)"
+      />
+    </label>
+    <label class="input-index-field">
+      <span>Input</span>
+      <input
+        name="visualizer-input-index"
+        type="number"
+        min="0"
+        step="1"
+        [(ngModel)]="inputIndex"
+      />
+    </label>
+    <button
+      type="button"
+      class="source-icon-button"
+      [attr.title]="transactionIdCopied() ? 'Copied' : 'Copy transaction ID'"
+      [attr.aria-label]="transactionIdCopied() ? 'Copied transaction ID' : 'Copy transaction ID'"
+      (click)="copyTransactionId()"
+    >
+      @if (transactionIdCopied()) {
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg>
+      } @else {
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="9" y="9" width="11" height="11" rx="2" />
+          <path d="M15 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h3" />
+        </svg>
+      }
+    </button>
+    <button
+      type="button"
+      class="source-icon-button"
+      title="Paste transaction ID"
+      aria-label="Paste transaction ID"
+      (click)="pasteTransactionId()"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="5" y="5" width="14" height="16" rx="2" />
+        <path d="M9 5V3h6v2M9 11h6m-6 4h6" />
+      </svg>
+    </button>
+    <button
+      type="button"
+      class="source-icon-button"
+      title="Use random transaction input"
+      aria-label="Use random transaction input"
+      (click)="loadRandomExample()"
+      [disabled]="loading()"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path
+          d="M3 7h3c4 0 6 10 10 10h5m-3-3 3 3-3 3M3 17h3c1.6 0 2.8-1.6 4-3.5M14 7h2.5H21m-3-3 3 3-3 3"
         />
-      </label>
-      <label class="input-index-field">
-        <span>Input</span>
-        <input
-          name="visualizer-input-index"
-          type="number"
-          min="0"
-          step="1"
-          [(ngModel)]="inputIndex"
-        />
-      </label>
-      <button type="submit" [disabled]="loading()">Trace input</button>
-    </form>
-  }
+      </svg>
+    </button>
+    <div class="transaction-source__actions">
+      <button type="submit" class="trace-button" [disabled]="loading()">
+        {{ loading() ? 'Tracing…' : 'Trace input' }}
+      </button>
+      <button type="button" class="source-action source-action--clear" (click)="clear()">
+        Clear
+      </button>
+    </div>
+  </form>
 
   @if (loading()) {
     <div class="state-card" role="status">
@@ -45,40 +93,42 @@
       <button type="button" (click)="retry()">Try again</button>
     </div>
   } @else if (response(); as result) {
-    <div
-      class="workspace-tabs"
-      role="tablist"
-      aria-label="Visualizer workspace"
-      (keydown)="handleWorkspaceKeydown($event)"
-    >
-      <button
-        id="execution-tab"
-        type="button"
-        role="tab"
-        aria-controls="execution-panel"
-        [attr.aria-selected]="activeWorkspace() === 'execution'"
-        [attr.tabindex]="activeWorkspace() === 'execution' ? 0 : -1"
-        (click)="showWorkspace('execution')"
+    @if (executionAssembled()) {
+      <div
+        class="workspace-tabs"
+        role="tablist"
+        aria-label="Visualizer workspace"
+        (keydown)="handleWorkspaceKeydown($event)"
       >
-        Execution
-      </button>
-      <button
-        id="signature-tab"
-        type="button"
-        role="tab"
-        aria-controls="signature-panel"
-        [attr.aria-selected]="activeWorkspace() === 'signature'"
-        [attr.tabindex]="activeWorkspace() === 'signature' ? 0 : -1"
-        (click)="showWorkspace('signature')"
-      >
-        Signature
-      </button>
-    </div>
+        <button
+          id="execution-tab"
+          type="button"
+          role="tab"
+          aria-controls="execution-panel"
+          [attr.aria-selected]="activeWorkspace() === 'execution'"
+          [attr.tabindex]="activeWorkspace() === 'execution' ? 0 : -1"
+          (click)="showWorkspace('execution')"
+        >
+          Execution
+        </button>
+        <button
+          id="signature-tab"
+          type="button"
+          role="tab"
+          aria-controls="signature-panel"
+          [attr.aria-selected]="activeWorkspace() === 'signature'"
+          [attr.tabindex]="activeWorkspace() === 'signature' ? 0 : -1"
+          (click)="showWorkspace('signature')"
+        >
+          Signature
+        </button>
+      </div>
+    }
     <div
       id="execution-panel"
-      role="tabpanel"
-      aria-labelledby="execution-tab"
-      [hidden]="activeWorkspace() !== 'execution'"
+      [attr.role]="executionAssembled() ? 'tabpanel' : null"
+      [attr.aria-labelledby]="executionAssembled() ? 'execution-tab' : null"
+      [hidden]="executionAssembled() && activeWorkspace() !== 'execution'"
     >
       <app-trace-player
         [trace]="result.trace"
@@ -86,69 +136,122 @@
         [sources]="displaySources(result)"
         [scriptType]="result.script_type"
         [witnessItems]="witnessItems(result)"
+        [inputSequence]="selectedInputSequence()"
+        [spentOutputAmountSats]="selectedSpentOutputAmountSats()"
+        [spentOutputScriptPubKey]="result.scripts.locking"
+        (executionAssembled)="markExecutionAssembled()"
         (openSignatureWorkspace)="showWorkspace('signature')"
       />
     </div>
-    <div
-      id="signature-panel"
-      role="tabpanel"
-      aria-labelledby="signature-tab"
-      [hidden]="activeWorkspace() !== 'signature'"
-    >
-      <form class="signature-verifier" (ngSubmit)="verifySignature()" novalidate>
-        <header>
-          <div>
-            <span>Standalone verifier</span>
-            <h2>Verify a DER signature</h2>
-          </div>
-          <p>The transaction supplies the public key, hash type, and exact signing message.</p>
-        </header>
-        <div class="signature-verifier__fields">
-          <label>
-            <span>Transaction ID</span>
-            <input
-              name="signature-transaction-id"
-              type="text"
-              maxlength="64"
-              autocomplete="off"
-              spellcheck="false"
-              [(ngModel)]="verifierTransactionId"
-            />
-          </label>
-          <label class="input-index-field">
-            <span>Input</span>
-            <input
-              name="signature-input-index"
-              type="number"
-              min="0"
-              step="1"
-              [(ngModel)]="verifierInputIndex"
-            />
-          </label>
-          <label class="der-field">
-            <span>DER signature</span>
-            <textarea
-              name="der-signature"
-              rows="2"
-              maxlength="144"
-              autocomplete="off"
-              spellcheck="false"
-              [(ngModel)]="derSignature"
-            ></textarea>
-          </label>
-          <button type="submit" [disabled]="verifying()">
-            {{ verifying() ? 'Verifying…' : 'Verify DER signature' }}
-          </button>
-        </div>
-        @if (verificationError(); as message) {
-          <p class="signature-verifier__error" role="alert">{{ message }}</p>
+    @if (executionAssembled()) {
+      <div
+        id="signature-panel"
+        role="tabpanel"
+        aria-labelledby="signature-tab"
+        [hidden]="activeWorkspace() !== 'signature'"
+      >
+        @if (result.script_type === 'P2MS') {
+          <section class="multisig-signature-pending" role="status">
+            <h2>P2MS signature walkthrough not yet available</h2>
+            <p>
+              The Execution workspace verifies the real bare multisig script and its ordered ECDSA
+              checks. A synchronized per-signature message walkthrough is the next engine boundary.
+            </p>
+            <dl>
+              <div>
+                <dt>Threshold</dt>
+                <dd>
+                  {{ result.multisig.required_signatures }} of
+                  {{ result.multisig.total_public_keys }}
+                </dd>
+              </div>
+              <div>
+                <dt>Historical dummy</dt>
+                <dd>
+                  {{ result.multisig.has_null_dummy ? 'Empty NULLDUMMY present' : 'Missing' }}
+                </dd>
+              </div>
+            </dl>
+            <div class="multisig-material">
+              <section>
+                <h3>Serialized signatures</h3>
+                <ol>
+                  @for (signature of result.multisig.signatures; track $index) {
+                    <li>
+                      <code>{{ signature }}</code>
+                    </li>
+                  }
+                </ol>
+              </section>
+              <section>
+                <h3>Committed public keys</h3>
+                <ol>
+                  @for (publicKey of result.multisig.public_keys; track $index) {
+                    <li>
+                      <code>{{ publicKey }}</code>
+                    </li>
+                  }
+                </ol>
+              </section>
+            </div>
+          </section>
+        } @else {
+          <form class="signature-verifier" (ngSubmit)="verifySignature()" novalidate>
+            <header>
+              <div>
+                <span>Standalone verifier</span>
+                <h2>Verify a DER signature</h2>
+              </div>
+              <p>The transaction supplies the public key, hash type, and exact signing message.</p>
+            </header>
+            <div class="signature-verifier__fields">
+              <label>
+                <span>Transaction ID</span>
+                <input
+                  name="signature-transaction-id"
+                  type="text"
+                  maxlength="64"
+                  autocomplete="off"
+                  spellcheck="false"
+                  [(ngModel)]="verifierTransactionId"
+                />
+              </label>
+              <label class="input-index-field">
+                <span>Input</span>
+                <input
+                  name="signature-input-index"
+                  type="number"
+                  min="0"
+                  step="1"
+                  [(ngModel)]="verifierInputIndex"
+                />
+              </label>
+              <label class="der-field">
+                <span>DER signature</span>
+                <textarea
+                  name="der-signature"
+                  rows="2"
+                  maxlength="144"
+                  autocomplete="off"
+                  spellcheck="false"
+                  [(ngModel)]="derSignature"
+                ></textarea>
+              </label>
+              <button type="submit" [disabled]="verifying()">
+                {{ verifying() ? 'Verifying…' : 'Verify DER signature' }}
+              </button>
+            </div>
+            @if (verificationError(); as message) {
+              <p class="signature-verifier__error" role="alert">{{ message }}</p>
+            }
+          </form>
+          <app-signature-player
+            [result]="signatureResult(result)"
+            [transactionHex]="signatureTransaction(transactionHex())"
+          />
         }
-      </form>
-      <app-signature-player
-        [result]="signatureResult(result)"
-        [transactionHex]="signatureTransaction(transactionHex())"
-      />
-    </div>
+      </div>
+    }
   } @else if (contextSpend(); as spend) {
     <div
       class="workspace-tabs"

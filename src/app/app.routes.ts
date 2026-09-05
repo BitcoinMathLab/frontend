@@ -21,6 +21,35 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'display/block/:hash',
+    title: 'Block Display — Bitcoin Math Lab',
+    data: { objectKind: 'block' },
+    loadComponent: () => import('./pages/display/display').then((page) => page.Display),
+  },
+  {
+    path: 'display/transaction/:txid/input/:index',
+    title: 'Transaction Input Display — Bitcoin Math Lab',
+    data: { objectKind: 'tx-input' },
+    loadComponent: () => import('./pages/display/display').then((page) => page.Display),
+  },
+  {
+    path: 'display/transaction/:txid/output/:index',
+    title: 'Transaction Output Display — Bitcoin Math Lab',
+    data: { objectKind: 'tx-output' },
+    loadComponent: () => import('./pages/display/display').then((page) => page.Display),
+  },
+  {
+    path: 'display/transaction/:txid',
+    title: 'Transaction Display — Bitcoin Math Lab',
+    data: { objectKind: 'transaction' },
+    loadComponent: () => import('./pages/display/display').then((page) => page.Display),
+  },
+  {
+    path: 'display',
+    title: 'Bitcoin Object Display — Bitcoin Math Lab',
+    loadComponent: () => import('./pages/display/display').then((page) => page.Display),
+  },
+  {
     path: 'about',
     title: 'About — Bitcoin Math Lab',
     loadComponent: () => import('./pages/about/about').then((page) => page.About),

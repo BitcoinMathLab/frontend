@@ -17,7 +17,6 @@ h1 {
 }
 
 .explorer-hero > div > p:last-child,
-.explorer__heading > p,
 .field-help,
 .state-card p,
 .empty-state {
@@ -48,9 +47,7 @@ dd {
   padding-bottom: clamp(5rem, 10vw, 8rem);
 }
 
-.explorer__heading,
 .result__heading,
-.examples__heading,
 .inputs__heading,
 .output-title {
   display: flex;
@@ -59,30 +56,13 @@ dd {
   gap: 2rem;
 }
 
-.explorer__heading {
-  margin-bottom: 1.4rem;
-}
-
-.examples {
-  margin-top: 1.25rem;
-}
-
-.explorer__heading h2,
 .result__heading h2 {
   margin: 0.45rem 0 0;
   font-size: clamp(2rem, 5vw, 3.25rem);
   letter-spacing: -0.04em;
 }
 
-.explorer__heading > p {
-  max-width: 25rem;
-  margin: 0;
-  font-size: 0.82rem;
-  text-align: right;
-}
-
 form,
-.examples,
 .result {
   border: 1px solid var(--color-graphite);
   border-radius: 1.1rem;
@@ -298,15 +278,10 @@ li code {
 }
 
 @media (max-width: 46rem) {
-  .explorer__heading,
   .result__heading {
     align-items: flex-start;
     flex-direction: column;
     gap: 0.75rem;
-  }
-
-  .explorer__heading > p {
-    text-align: left;
   }
 
   .summary {

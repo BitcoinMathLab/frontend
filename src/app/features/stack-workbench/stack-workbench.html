@@ -12,29 +12,4 @@
       (inspectItem)="inspectItem.emit($event)"
     />
   </div>
-
-  @if (step() && showMovement()) {
-    <div class="movement-grid" aria-label="Stack movement">
-      <section>
-        <h4>Consumed</h4>
-        @for (item of movement().consumed; track $index) {
-          <span class="movement-pill movement-pill--out" [title]="item.value">
-            − {{ item.label }}
-          </span>
-        } @empty {
-          <span class="movement-empty">none</span>
-        }
-      </section>
-      <section>
-        <h4>Produced</h4>
-        @for (item of movement().produced; track $index) {
-          <span class="movement-pill movement-pill--in" [title]="item.value">
-            + {{ item.label }}
-          </span>
-        } @empty {
-          <span class="movement-empty">none</span>
-        }
-      </section>
-    </div>
-  }
 </section>

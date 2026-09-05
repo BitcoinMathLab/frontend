@@ -152,14 +152,6 @@ describe('TransactionExplorer', () => {
     fixture.detectChanges();
 
     const form = fixture.nativeElement.querySelector('form') as HTMLFormElement;
-    expect(form.nextElementSibling).toBe(fixture.nativeElement.querySelector('.examples'));
-    const example = [...fixture.nativeElement.querySelectorAll('.example-card')].find(
-      (button: HTMLButtonElement) => button.textContent?.includes('Legacy P2PKH spend'),
-    ) as HTMLButtonElement;
-    example.click();
-    await fixture.whenStable();
-    fixture.detectChanges();
-
     form.dispatchEvent(new Event('submit'));
     fixture.detectChanges();
 
@@ -235,7 +227,7 @@ describe('TransactionExplorer', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('.byte-detail').textContent).toContain('Version');
     expect(document.activeElement).toBe(fixture.nativeElement.querySelector('.byte-field'));
-    expect(fixture.nativeElement.textContent).toContain('Fixture verified');
+    expect(fixture.nativeElement.textContent).not.toContain('Choose a transaction concept');
 
     const clear = fixture.nativeElement.querySelector('.clear-button') as HTMLButtonElement;
     clear.click();
@@ -299,7 +291,7 @@ describe('TransactionExplorer', () => {
     expect(longHex).not.toContain('ab'.repeat(50));
   });
 
-  it('copies, pastes, and selects a curated transaction example', async () => {
+  it('copies, pastes, and selects a random curated transaction example', async () => {
     const loadTransactionContext = vi.fn();
     const writeText = vi.fn().mockResolvedValue(undefined);
     const pastedTxid = 'a'.repeat(64);
@@ -316,24 +308,14 @@ describe('TransactionExplorer', () => {
     const fixture = TestBed.createComponent(TransactionExplorer);
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).toContain('Genesis coinbase');
-    expect(fixture.nativeElement.textContent).toContain('0 input(s) · 1 output(s)');
-    const genesis = [...fixture.nativeElement.querySelectorAll('.example-card')].find(
-      (button: HTMLButtonElement) => button.textContent?.includes('Genesis coinbase'),
-    ) as HTMLButtonElement;
-    genesis.click();
-    await fixture.whenStable();
-    fixture.detectChanges();
-    expect((fixture.nativeElement.querySelector('input') as HTMLInputElement).value).toBe(
-      GENESIS_TXID,
-    );
+    expect(fixture.nativeElement.textContent).not.toContain('Choose a transaction concept');
 
     const copy = fixture.nativeElement.querySelector(
       '[aria-label="Copy transaction ID"]',
     ) as HTMLButtonElement;
     copy.click();
     await fixture.whenStable();
-    expect(writeText).toHaveBeenCalledWith(GENESIS_TXID);
+    expect(writeText).toHaveBeenCalledWith(TXID);
 
     const paste = fixture.nativeElement.querySelector(
       '[aria-label="Paste transaction ID"]',

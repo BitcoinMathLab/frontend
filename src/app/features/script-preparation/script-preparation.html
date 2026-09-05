@@ -1,0 +1,137 @@
+<section class="script-preparation" aria-labelledby="script-preparation-heading">
+  <header class="preparation-header">
+    <div>
+      <h2 id="script-preparation-heading">Prepare this input for execution</h2>
+      <p>
+        {{
+          stage() === 0
+            ? 'Use its outpoint to find the output being spent.'
+            : 'Use both objects to build the execution context.'
+        }}
+      </p>
+    </div>
+    <span class="preparation-progress" aria-current="step"> Step {{ stage() + 1 }} of 2 </span>
+  </header>
+
+  <div class="lookup-flow">
+    <button
+      type="button"
+      class="reference-card reference-card--input"
+      [attr.aria-label]="
+        'Open selected input ' + sources().script_sig.index + ' in the spending transaction'
+      "
+      (click)="openInputReference()"
+    >
+      <span>Reference</span>
+      <code>{{ outpointLabel() }}</code>
+      <p>Contains the outpoint and unlocking data</p>
+      <strong>Quick view <span aria-hidden="true">↗</span></strong>
+    </button>
+
+    <div
+      class="lookup-connector"
+      [class.lookup-connector--found]="stage() > 0"
+      [attr.aria-label]="
+        'Outpoint ' +
+        sources().script_pubkey.transaction_txid +
+        ' output ' +
+        sources().script_pubkey.index
+      "
+    >
+      <span>{{ stage() > 0 ? 'Found' : 'Use outpoint to locate' }}</span>
+      <strong aria-hidden="true">{{ stage() > 0 ? '✓' : '→' }}</strong>
+    </div>
+
+    @if (stage() > 0) {
+      <button
+        #referencedOutputReference
+        type="button"
+        class="reference-card reference-card--output"
+        [attr.aria-label]="
+          'Open referenced output ' + sources().script_pubkey.index + ' in the previous transaction'
+        "
+        (click)="openOutputReference()"
+      >
+        <span>Reference</span>
+        <code>{{ outpointLabel() }}</code>
+        <p>Contains the amount and locking condition</p>
+        <strong>Quick view <span aria-hidden="true">↗</span></strong>
+      </button>
+    } @else {
+      <article
+        class="reference-card reference-card--pending"
+        aria-label="Referenced output pending"
+      >
+        <span>Reference</span>
+        <strong>Not located yet</strong>
+        <p>The outpoint identifies one output in the previous transaction.</p>
+      </article>
+    }
+  </div>
+
+  <p class="preparation-status" aria-live="polite">
+    {{ stage() > 0 ? 'Referenced output ' + sources().script_pubkey.index + ' found.' : '' }}
+  </p>
+
+  @if (stage() === 0) {
+    <button type="button" class="prepare-button" (click)="findSpentOutput()">
+      Find spent output
+    </button>
+  } @else {
+    <button type="button" class="prepare-button" (click)="assemblyRequested.emit($event)">
+      Assemble execution
+    </button>
+  }
+
+  <section class="pending-workspace" aria-label="Execution workspace awaiting assembly">
+    <section class="pending-pane pending-pane--flow">
+      <h3>Stack flow</h3>
+      <div class="pending-pane__empty">
+        <strong>{{ stage() === 0 ? 'Not assembled' : 'Ready to assemble' }}</strong>
+        <span>
+          {{
+            stage() === 0
+              ? 'Locate the spent output, then assemble the execution sources.'
+              : 'The unlocking and locking sources are available.'
+          }}
+        </span>
+      </div>
+    </section>
+    <div class="pending-workspace__right">
+      <section class="pending-pane pending-pane--execution">
+        <h3>Execution</h3>
+        <div class="pending-pane__empty">
+          <strong>Waiting for assembly</strong>
+          <span>
+            {{
+              stage() === 0
+                ? 'Execution begins after the script path is assembled.'
+                : 'Choose Assemble execution to prepare the first instruction.'
+            }}
+          </span>
+        </div>
+      </section>
+      <section class="pending-pane pending-pane--stack">
+        <header>
+          <h3>Stack state</h3>
+          <span>— items</span>
+        </header>
+        <div class="pending-stack">
+          <strong>Main stack</strong>
+          <div class="pending-pane__empty">
+            <strong>No execution state yet</strong>
+            <span>Stack values appear as instructions run.</span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </section>
+</section>
+
+@if (modalFixture(); as fixture) {
+  <app-bitcoin-object-modal
+    [fixture]="fixture"
+    (closed)="closeModal()"
+    (referenceOpened)="openRelatedReference($event)"
+  />
+}

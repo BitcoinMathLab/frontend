@@ -84,10 +84,6 @@
       </button>
       <span>{{ scriptType() === 'P2WPKH' ? 'runs with witness stack' : 'runs second' }}</span>
     </header>
-    <code class="script-reference"
-      >source: {{ sources().script_pubkey.transaction_txid }}:vout
-      {{ sources().script_pubkey.index }}</code
-    >
     <div class="operation-list">
       @for (operation of lockingOperations(); track operation.step.index) {
         <div class="operation-entry">

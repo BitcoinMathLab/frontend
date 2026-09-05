@@ -33,6 +33,12 @@ const STATIC_METADATA: Readonly<Record<string, PageMetadata>> = Object.freeze({
       'Load a Bitcoin transaction and inspect its inputs, outputs, classifications, values, size metrics, and decoded byte ranges.',
     type: 'website',
   },
+  '/display': {
+    title: 'Bitcoin Object Display — Bitcoin Math Lab',
+    description:
+      'Inspect curated blocks, transactions, inputs, and outputs as decoded fields synchronized with their serialized bytes.',
+    type: 'website',
+  },
   '/about': {
     title: 'About — Bitcoin Math Lab',
     description:
@@ -56,6 +62,8 @@ const NOT_FOUND_METADATA: PageMetadata = {
 export function metadataForPath(path: string): PageMetadata {
   const staticMetadata = STATIC_METADATA[path];
   if (staticMetadata) return staticMetadata;
+
+  if (path.startsWith('/display/')) return STATIC_METADATA['/display'];
 
   return NOT_FOUND_METADATA;
 }

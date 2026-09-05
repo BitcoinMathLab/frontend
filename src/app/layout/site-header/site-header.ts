@@ -13,6 +13,7 @@ export class SiteHeader {
     { label: 'Home', path: '/', exact: true },
     { label: 'Visualizer', path: '/visualizer', exact: false },
     { label: 'Explorer', path: '/explorer', exact: false },
+    { label: 'Display', path: '/display', exact: false },
     { label: 'About', path: '/about', exact: false },
     { label: 'Contact', path: '/contact', exact: false },
   ];

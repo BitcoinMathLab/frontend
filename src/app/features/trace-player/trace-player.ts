@@ -10,9 +10,11 @@ import {
 
 import { ExecutionTrace, TraceScripts, TraceSources, TraceStep } from '../../core/trace-api.models';
 import { OperationDetail } from '../operation-detail/operation-detail';
+import { ScriptPreparation } from '../script-preparation/script-preparation';
 import { ScriptParser } from '../script-parser/script-parser';
 import { SignatureDetail } from '../signature-detail/signature-detail';
 import { StackItemDetail, StackItemDetailContent } from '../stack-item-detail/stack-item-detail';
+import { StackMovement, StackMovementItem } from '../stack-movement/stack-movement';
 import { StackWorkbench } from '../stack-workbench/stack-workbench';
 
 type PlaybackPhase = 'opcode' | 'stack-push' | 'stack-validation';
@@ -25,7 +27,15 @@ interface PlaybackStep {
 
 @Component({
   selector: 'app-trace-player',
-  imports: [OperationDetail, ScriptParser, SignatureDetail, StackItemDetail, StackWorkbench],
+  imports: [
+    OperationDetail,
+    ScriptPreparation,
+    ScriptParser,
+    SignatureDetail,
+    StackItemDetail,
+    StackMovement,
+    StackWorkbench,
+  ],
   templateUrl: './trace-player.html',
   styleUrl: './trace-player.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -34,8 +44,12 @@ export class TracePlayer implements OnDestroy {
   readonly trace = input.required<ExecutionTrace>();
   readonly scripts = input.required<TraceScripts>();
   readonly sources = input.required<TraceSources>();
-  readonly scriptType = input<'P2PKH' | 'P2WPKH'>('P2PKH');
+  readonly scriptType = input<'P2PKH' | 'P2WPKH' | 'P2MS'>('P2PKH');
   readonly witnessItems = input<readonly string[]>([]);
+  readonly inputSequence = input.required<string>();
+  readonly spentOutputAmountSats = input.required<number | null>();
+  readonly spentOutputScriptPubKey = input.required<string>();
+  readonly executionAssembled = output<void>();
   readonly openSignatureWorkspace = output<void>();
 
   protected readonly currentIndex = signal(-1);
@@ -88,17 +102,29 @@ export class TracePlayer implements OnDestroy {
     const playback = this.currentPlayback();
     if (!playback) return 'No operation selected.';
     if (playback.phase === 'stack-push') {
-      return `Push DATA (${pushedDataLabel(playback.step, this.trace(), this.scripts().unlocking)}) onto the main stack.`;
+      return `Push DATA (${pushedDataLabel(playback.step, this.trace(), this.scripts().unlocking, this.scriptType())}) onto the main stack.`;
     }
     if (playback.phase === 'stack-validation') {
       return 'Check the stack conditions at the end of script execution. A spend is valid only when the final stack value is true.';
     }
     return describeStackEffect(playback.step, false);
   });
+  protected readonly stackMovement = computed(() => {
+    const playback = this.currentPlayback();
+    if (
+      !playback ||
+      playback.phase === 'stack-validation' ||
+      (playback.phase === 'opcode' && playback.step.opcode.is_push)
+    ) {
+      return { consumed: [], produced: [] };
+    }
+    return describeStackMovement(playback.step);
+  });
   protected readonly isSignatureCheck = computed(
     () =>
       this.currentPlayback()?.phase === 'opcode' &&
-      this.currentStep()?.opcode.name.includes('CHECKSIG'),
+      (this.currentStep()?.opcode.name.includes('CHECKSIG') ||
+        this.currentStep()?.opcode.name.includes('CHECKMULTISIG')),
   );
   protected readonly signature = computed(
     () => this.currentStep()?.stacks.before.main.items[1] ?? 'Unavailable in this trace',
@@ -108,7 +134,8 @@ export class TracePlayer implements OnDestroy {
   );
   protected readonly operationDetail = computed(() => {
     const data = this.selectedData();
-    if (data) return describePushedData(data, this.trace(), this.scripts().unlocking);
+    if (data)
+      return describePushedData(data, this.trace(), this.scripts().unlocking, this.scriptType());
     const step = this.selectedOperation();
     if (!step) return null;
     return {
@@ -121,6 +148,7 @@ export class TracePlayer implements OnDestroy {
   });
 
   private timer: ReturnType<typeof setInterval> | undefined;
+  private focusTimer: ReturnType<typeof setTimeout> | undefined;
   private returnFocus: HTMLElement | null = null;
 
   protected previous(): void {
@@ -146,14 +174,23 @@ export class TracePlayer implements OnDestroy {
     this.preparationStage.set(1);
   }
 
-  protected prepareExecution(): void {
+  protected prepareExecution(event: Event): void {
+    const player = (event.currentTarget as HTMLElement).closest<HTMLElement>('.player');
     this.preparationStage.set(2);
+    this.executionAssembled.emit();
+    clearTimeout(this.focusTimer);
+    this.focusTimer = setTimeout(() => {
+      this.focusTimer = undefined;
+      player?.querySelector<HTMLButtonElement>('.vcr__primary')?.focus();
+    });
   }
 
   protected signatureTypeTitle(): string {
     return this.scriptType() === 'P2WPKH'
       ? 'Pay to Witness Public Key Hash'
-      : 'Pay to Public Key Hash';
+      : this.scriptType() === 'P2MS'
+        ? 'Pay to Multisig'
+        : 'Pay to Public Key Hash';
   }
 
   protected finish(): void {
@@ -267,6 +304,7 @@ export class TracePlayer implements OnDestroy {
 
   ngOnDestroy(): void {
     this.pause();
+    if (this.focusTimer !== undefined) clearTimeout(this.focusTimer);
   }
 
   private advance(): void {
@@ -307,6 +345,7 @@ function describePushedData(
   step: TraceStep,
   trace: ExecutionTrace,
   unlockingScript: string,
+  scriptType: 'P2PKH' | 'P2WPKH' | 'P2MS',
 ): {
   readonly kind: string;
   readonly name: string;
@@ -322,6 +361,40 @@ function describePushedData(
   const unlockingPosition = unlockingPushes.findIndex(
     (candidate) => candidate.index === step.index,
   );
+
+  if (scriptType === 'P2MS' && isUnlockingData && step.opcode.name === 'OP_0') {
+    return {
+      kind: 'DATA',
+      name: 'CHECKMULTISIG dummy',
+      hex: '',
+      summary:
+        'An empty historical compatibility item consumed by OP_CHECKMULTISIG before it checks the signatures.',
+      requirement: 'The scriptSig must place this empty NULLDUMMY item beneath its signatures.',
+    };
+  }
+  if (scriptType === 'P2MS' && isUnlockingData) {
+    return {
+      kind: 'DATA',
+      name: `Signature ${unlockingPosition + 1}`,
+      hex: step.opcode.push_data ?? step.opcode.raw,
+      summary:
+        'A DER-encoded ECDSA signature plus its hash-type byte, checked in order against the committed public keys.',
+      requirement: 'The scriptSig places this signature above the historical dummy item.',
+    };
+  }
+  if (scriptType === 'P2MS') {
+    const lockingPushes = trace.steps.filter(
+      (candidate) => candidate.opcode.is_push && candidate.opcode.byte_offset >= unlockingLength,
+    );
+    const lockingPosition = lockingPushes.findIndex((candidate) => candidate.index === step.index);
+    return {
+      kind: 'DATA',
+      name: `Public key ${lockingPosition + 1}`,
+      hex: step.opcode.push_data ?? step.opcode.raw,
+      summary: 'A SEC-encoded public key committed directly by the bare multisig locking script.',
+      requirement: 'OP_CHECKMULTISIG tests the ordered signatures against this ordered key list.',
+    };
+  }
 
   if (isUnlockingData && unlockingPosition === 0) {
     return {
@@ -369,6 +442,8 @@ function describeStackEffect(step: TraceStep | undefined, includePush = true): s
       return 'Pop both hashes. Continue only when they are byte-for-byte equal.';
     case 'OP_CHECKSIG':
       return 'Pop the public key and signature, verify ECDSA, and push true or false.';
+    case 'OP_CHECKMULTISIG':
+      return 'Consume the threshold, ordered public keys, signatures, and historical dummy; then push true when enough signatures match in order.';
     default: {
       const before = step.stacks.before.main.depth;
       const after = step.stacks.after.main.depth;
@@ -377,6 +452,46 @@ function describeStackEffect(step: TraceStep | undefined, includePush = true): s
       return 'Transform the current stack without changing its depth.';
     }
   }
+}
+
+function describeStackMovement(step: TraceStep): {
+  consumed: StackMovementItem[];
+  produced: StackMovementItem[];
+} {
+  const before = [...step.stacks.before.main.items];
+  const after = [...step.stacks.after.main.items];
+  const remainingAfter = [...after];
+  const consumed = before.filter((value) => !removeFirst(remainingAfter, value));
+
+  const remainingBefore = [...before];
+  const produced = after.filter((value) => !removeFirst(remainingBefore, value));
+
+  return {
+    consumed: consumed.map((value) => movementItem(value)),
+    produced: produced.map((value) => movementItem(value)),
+  };
+}
+
+function removeFirst(values: string[], target: string): boolean {
+  const index = values.indexOf(target);
+  if (index < 0) return false;
+  values.splice(index, 1);
+  return true;
+}
+
+function movementItem(value: string): StackMovementItem {
+  if (value === '' || value === '00') return { label: 'false', value: value || '00' };
+  if (value === '01') return { label: 'true', value };
+  const byteLength = value.length / 2;
+  if (byteLength === 20) return { label: 'hash', value };
+  if (
+    (byteLength === 33 && /^(02|03)/.test(value)) ||
+    (byteLength === 65 && value.startsWith('04'))
+  ) {
+    return { label: 'public key', value };
+  }
+  if (value.startsWith('30') && byteLength >= 8) return { label: 'signature', value };
+  return { label: 'data', value };
 }
 
 function playbackStepsFor(trace: ExecutionTrace): readonly PlaybackStep[] {
@@ -394,13 +509,26 @@ function playbackStepsFor(trace: ExecutionTrace): readonly PlaybackStep[] {
     : executionSteps;
 }
 
-function pushedDataLabel(step: TraceStep, trace: ExecutionTrace, unlockingScript: string): string {
+function pushedDataLabel(
+  step: TraceStep,
+  trace: ExecutionTrace,
+  unlockingScript: string,
+  scriptType: 'P2PKH' | 'P2WPKH' | 'P2MS',
+): string {
   const unlockingLength = unlockingScript.length / 2;
   const isUnlockingData = step.opcode.byte_offset < unlockingLength;
   const unlockingPushes = trace.steps.filter(
     (candidate) => candidate.opcode.is_push && candidate.opcode.byte_offset < unlockingLength,
   );
   const position = unlockingPushes.findIndex((candidate) => candidate.index === step.index);
+  if (scriptType === 'P2MS' && isUnlockingData) return `Signature ${position + 1}`;
+  if (scriptType === 'P2MS') {
+    const lockingPushes = trace.steps.filter(
+      (candidate) => candidate.opcode.is_push && candidate.opcode.byte_offset >= unlockingLength,
+    );
+    const lockingPosition = lockingPushes.findIndex((candidate) => candidate.index === step.index);
+    return `Public key ${lockingPosition + 1}`;
+  }
   if (isUnlockingData && position === 0) return 'Signature';
   if (isUnlockingData && position === 1) return 'Public key';
   return 'Expected public-key hash';

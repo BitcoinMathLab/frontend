@@ -47,6 +47,20 @@ describe('TraceApi', () => {
     request.flush({});
   });
 
+  it('posts bare multisig context to the P2MS trace endpoint', () => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const service = TestBed.inject(TraceApi);
+
+    service.loadP2msTrace(CURATED_P2PKH_REQUEST).subscribe();
+
+    const request = TestBed.inject(HttpTestingController).expectOne('/api/v1/traces/p2ms');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual(CURATED_P2PKH_REQUEST);
+    request.flush({});
+  });
+
   it('posts a candidate DER signature with complete spend context', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
